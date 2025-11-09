@@ -21,6 +21,12 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<Amenity> Amenities { get; set; }
 
+    public virtual DbSet<Blog> Blogs { get; set; }
+
+    public virtual DbSet<BlogCategory> BlogCategories { get; set; }
+
+    public virtual DbSet<BlogComment> BlogComments { get; set; }
+
     public virtual DbSet<Booking> Bookings { get; set; }
 
     public virtual DbSet<City> Cities { get; set; }
@@ -75,6 +81,10 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("data source= NGOENDCUONG\\SQLEXPRESS; initial catalog=HomeLengo; integrated security=True; TrustServerCertificate=True;");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AdminAudit>(entity =>
@@ -113,6 +123,60 @@ public partial class HomeLengoContext : DbContext
             entity.HasIndex(e => e.Name, "UQ__Amenitie__737584F6BDD15996").IsUnique();
 
             entity.Property(e => e.Name).HasMaxLength(200);
+        });
+
+        modelBuilder.Entity<Blog>(entity =>
+        {
+            entity.HasKey(e => e.BlogId).HasName("PK__Blogs__54379E30871B5B5B");
+
+            entity.HasIndex(e => e.CategoryId, "IDX_Blogs_Category");
+
+            entity.HasIndex(e => e.PublishedAt, "IDX_Blogs_PublishedAt");
+
+            entity.HasIndex(e => e.Slug, "IDX_Blogs_Slug");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.IsPublished).HasDefaultValue(false);
+            entity.Property(e => e.Slug).HasMaxLength(350);
+            entity.Property(e => e.Tags).HasMaxLength(500);
+            entity.Property(e => e.Thumbnail).HasMaxLength(1000);
+            entity.Property(e => e.Title).HasMaxLength(300);
+            entity.Property(e => e.ViewCount).HasDefaultValue(0);
+
+            entity.HasOne(d => d.Author).WithMany(p => p.Blogs)
+                .HasForeignKey(d => d.AuthorId)
+                .HasConstraintName("FK_Blogs_Author");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Blogs)
+                .HasForeignKey(d => d.CategoryId)
+                .HasConstraintName("FK_Blogs_Category");
+        });
+
+        modelBuilder.Entity<BlogCategory>(entity =>
+        {
+            entity.HasKey(e => e.CategoryId).HasName("PK__BlogCate__19093A0B56D09700");
+
+            entity.HasIndex(e => e.Name, "UQ__BlogCate__737584F615D308EF").IsUnique();
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.Name).HasMaxLength(200);
+            entity.Property(e => e.Slug).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<BlogComment>(entity =>
+        {
+            entity.HasKey(e => e.CommentId).HasName("PK__BlogComm__C3B4DFCA31DE97F9");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.IsApproved).HasDefaultValue(false);
+
+            entity.HasOne(d => d.Blog).WithMany(p => p.BlogComments)
+                .HasForeignKey(d => d.BlogId)
+                .HasConstraintName("FK_BlogComments_Blog");
+
+            entity.HasOne(d => d.User).WithMany(p => p.BlogComments)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_BlogComments_User");
         });
 
         modelBuilder.Entity<Booking>(entity =>

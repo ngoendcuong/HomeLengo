@@ -2710,62 +2710,12 @@
 <section class="flat-section">
     <div class="container">
         <div class="box-title text-center wow fadeInUp">
-            <div class="text-subtitle text-primary">Latest New</div>
-            <h3 class="title mt-4">From Our Blog</h3>
+            <div class="text-subtitle text-primary">MỚI NHẤT</div>
+            <h3 class="title mt-4">Đến từ Blog của chúng tôi</h3>
         </div>
         <div dir="ltr" class="swiper tf-sw-latest" data-preview="3" data-tablet="2" data-mobile-sm="2" data-mobile="1" data-space-lg="30" data-space-md="15" data-space="15">
             <div class="swiper-wrapper wow fadeInUp" data-wow-delay=".2s">
-                <div class="swiper-slide">
-                    <a href="blog-detail.html" class="flat-blog-item hover-img">
-                        <div class="img-style">
-                            <img class="lazyload" data-src="~/assets/images/blog/blog-5.jpg" src="~/assets/images/blog/blog-5.jpg" alt="img-blog">
-                            <span class="date-post">January 28, 2024</span>
-                        </div>
-                        <div class="content-box">
-                            <div class="post-author">
-                                <span class="fw-6">Jerome Bell</span>
-                                <span>Furniture</span>
-                            </div>
-                            <h5 class="title link">Building gains into housing stocks and how to trade the sector</h5>
-                            <p class="description">The average contract interest rate for 30-year fixed-rate mortgages with conforming loan balances...</p>
-                        </div>
-
-                    </a>
-                </div>
-                <div class="swiper-slide">
-                    <a href="blog-detail.html" class="flat-blog-item hover-img">
-                        <div class="img-style">
-                            <img class="lazyload" data-src="~/assets/images/blog/blog-7.jpg" src="~/assets/images/blog/blog-7.jpg" alt="img-blog">
-                            <span class="date-post">January 28, 2024</span>
-                        </div>
-                        <div class="content-box">
-                            <div class="post-author">
-                                <span class="fw-6">Jerome Bell</span>
-                                <span>Furniture</span>
-                            </div>
-                            <h5 class="title link">Building gains into housing stocks and how to trade the sector</h5>
-                            <p class="description">The average contract interest rate for 30-year fixed-rate mortgages with conforming loan balances...</p>
-                        </div>
-
-                    </a>
-                </div>
-                <div class="swiper-slide">
-                    <a href="blog-detail.html" class="flat-blog-item hover-img">
-                        <div class="img-style">
-                            <img class="lazyload" data-src="~/assets/images/blog/blog-9.jpg" src="~/assets/images/blog/blog-9.jpg" alt="img-blog">
-                            <span class="date-post">January 28, 2024</span>
-                        </div>
-                        <div class="content-box">
-                            <div class="post-author">
-                                <span class="fw-6">Jerome Bell</span>
-                                <span>Furniture</span>
-                            </div>
-                            <h5 class="title link">Building gains into housing stocks and how to trade the sector</h5>
-                            <p class="description">The average contract interest rate for 30-year fixed-rate mortgages with conforming loan balances...</p>
-                        </div>
-
-                    </a>
-                </div>
+              @await Component.InvokeAsync("Blog")
             </div>
             <div class="sw-pagination sw-pagination-latest text-center"></div>
         </div>

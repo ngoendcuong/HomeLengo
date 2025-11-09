@@ -29,6 +29,10 @@ public partial class User
 
     public virtual ICollection<Agent> Agents { get; set; } = new List<Agent>();
 
+    public virtual ICollection<BlogComment> BlogComments { get; set; } = new List<BlogComment>();
+
+    public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
+
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
     public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
