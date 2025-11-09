@@ -457,6 +457,7 @@ public partial class HomeLengoContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ__Property__737584F6E12411DE").IsUnique();
 
+            entity.Property(e => e.IconClass).HasMaxLength(100);
             entity.Property(e => e.Name).HasMaxLength(100);
         });
 

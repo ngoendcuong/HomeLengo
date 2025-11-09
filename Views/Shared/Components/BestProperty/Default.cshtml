@@ -1,0 +1,94 @@
+﻿@model IEnumerable<HomeLengo.Models.Property>
+
+@foreach (var item in Model.Take(4))
+{
+    var primaryPhoto = item.PropertyPhotos?
+    .FirstOrDefault(p => p.AltText != null && p.AltText.Contains("Hình 1"))
+    ?? item.PropertyPhotos?.FirstOrDefault();
+
+ <div class="swiper-slide">
+    <div class="homelengo-box list-style-1 wow fadeInUp" data-wow-delay=".1s">
+        <div class="archive-top">
+                <a href="/Property/Details/@item.PropertyId" class="images-group">
+                <div class="images-style">
+                        <img class="lazyload" data-src="~/assets/images/home/@primaryPhoto?.FilePath"
+                             src="~/assets/images/home/@primaryPhoto?.FilePath"
+                             alt="@item.Title">
+                </div>
+                <div class="top">
+                    <ul class="d-flex gap-6 flex-wrap">
+                        
+                            <li class="flag-tag style-1" 
+                            @* style="display:inline-block; margin-right:6px; margin-bottom:6px;" *@
+                            >
+                                @item.Status?.Name
+                            </li>
+                            @foreach (var feature in item.PropertyFeatures)
+                            {
+                                <li class="flag-tag primary" style="display:inline-block; margin-right:6px; margin-bottom:6px;">
+                                    @feature.Value
+                                </li>
+                            }
+                    </ul>
+                </div>
+            </a>
+        </div>
+        <div class="archive-bottom">
+            <div class="content-top">
+                    <h6 class="text-capitalize"><a href="/Property/Details/@item.PropertyId" class="link text-line-clamp-1">@item.Title</a></h6>
+                <ul class="meta-list">
+                    <li class="item">
+                        <i class="icon icon-bed"></i>
+                        <span class="text-variant-1">Phòng ngủ:</span>
+                            <span class="fw-6">@item.Bedrooms</span>
+                    </li>
+                    <li class="item">
+                        <i class="icon icon-bath"></i>
+                        <span class="text-variant-1">Phòng tắm:</span>
+                            <span class="fw-6">@item.Bathrooms</span>
+                    </li>
+                    <li class="item">
+                        <i class="icon icon-sqft"></i>
+                        <span class="text-variant-1">Diện tích:</span>
+                            <span class="fw-6">@item.Area m²</span>
+                    </li>
+                </ul>
+                <div class="location">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 7C10 7.53043 9.78929 8.03914 9.41421 8.41421C9.03914 8.78929 8.53043 9 8 9C7.46957 9 6.96086 8.78929 6.58579 8.41421C6.21071 8.03914 6 7.53043 6 7C6 6.46957 6.21071 5.96086 6.58579 5.58579C6.96086 5.21071 7.46957 5 8 5C8.53043 5 9.03914 5.21071 9.41421 5.58579C9.78929 5.96086 10 6.46957 10 7Z" stroke="#A3ABB0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M13 7C13 11.7613 8 14.5 8 14.5C8 14.5 3 11.7613 3 7C3 5.67392 3.52678 4.40215 4.46447 3.46447C5.40215 2.52678 6.67392 2 8 2C9.32608 2 10.5979 2.52678 11.5355 3.46447C12.4732 4.40215 13 5.67392 13 7Z" stroke="#A3ABB0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                        <div class="bottom" style="display: flex; flex-direction: column; align-items: flex-start;">
+                            <div>@item.Address</div>
+                            <div>@item.Neighborhood?.Name</div>
+                            <div>Huyện: @item.District?.Name</div>
+                            <div>Thành phố: @item.City?.Name</div>
+                        </div>
+                </div>
+            </div>
+
+            <div class="content-bottom">
+                <div class="d-flex gap-8 align-items-center">
+                    <div class="avatar avt-40 round">
+                            @{
+                                var avatarFileName = item.Agent?.User?.Avatar;
+                                var avatarPath = string.IsNullOrEmpty(avatarFileName)
+                                ? "~/assets/images/avatar/default-avatar.gif"
+                                : $"~/assets/images/avatar/{avatarFileName}";
+                            }
+                            <img class="lazyload"
+                                 data-src="@Url.Content(avatarPath)"
+                                 src="@Url.Content(avatarPath)"
+                                 alt="@item.Agent?.AgencyName" />
+                    </div>
+                        <span>@item.Agent?.AgencyName</span>
+                </div>
+                    <h6 class="price">@string.Format("{0:N0} {1}", item.Price, item.Currency)</h6>
+            </div>
+        </div>
+
+    </div>
+</div>   
+}
+
+

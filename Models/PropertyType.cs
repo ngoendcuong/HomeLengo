@@ -9,5 +9,7 @@ public partial class PropertyType
 
     public string Name { get; set; } = null!;
 
+    public string? IconClass { get; set; }
+
     public virtual ICollection<Property> Properties { get; set; } = new List<Property>();
 }
