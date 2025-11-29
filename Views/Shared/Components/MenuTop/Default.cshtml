@@ -1,0 +1,29 @@
+﻿@model IEnumerable<HomeLengo.Models.Menu>
+
+<nav class="main-menu show navbar-expand-md">
+    <div class="navbar-collapse collapse clearfix" id="navbarSupportedContent">
+        <ul class="navigation clearfix">
+
+            @foreach (var parent in Model.Where(m => m.ParentId == null).OrderBy(m => m.SortOrder))
+            {
+                var childs = Model.Where(m => m.ParentId == parent.MenuId)
+                .OrderBy(m => m.SortOrder)
+                .ToList();
+
+                <li class="@(childs.Any() ? "dropdown2" : "")">
+                    <a href="@parent.Url">@parent.Title</a>
+
+                    @if (childs.Any())
+                    {
+                        <ul>
+                            @foreach (var child in childs)
+                            {
+                                <li><a href="@child.Url">@child.Title</a></li>
+                            }
+                        </ul>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+</nav>

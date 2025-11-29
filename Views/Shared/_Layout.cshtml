@@ -58,69 +58,7 @@
                                     </div>
                                     <div class="nav-outer flex align-center">
                                         <!-- Main Menu -->
-                                        <nav class="main-menu show navbar-expand-md">
-                                            <div class="navbar-collapse collapse clearfix" id="navbarSupportedContent">
-                                                <ul class="navigation clearfix">
-                                                    <li class="home current">
-                                                        <a href="home-02.html">Trang chủ</a>
-                                                    </li>
-                                                    <li class="dropdown2">
-                                                        <a href="home-02.html#">Listing</a>
-                                                        <ul>
-                                                            <li><a href="property-halfmap-grid.html">Property Half Map Grid</a></li>
-                                                            <li><a href="property-halfmap-list.html">Property Half Map List</a></li>
-                                                            <li><a href="topmap-grid.html">Find Topmap Grid</a></li>
-                                                            <li><a href="topmap-list.html">Find Topmap List</a></li>
-                                                            <li><a href="sidebar-grid.html">Find Sidebar Grid</a></li>
-                                                            <li><a href="sidebar-list.html">Find Sidebar List</a></li>
-
-                                                        </ul>
-                                                    </li>
-                                                    <li class="dropdown2">
-                                                        <a href="home-02.html#">Properties</a>
-                                                        <ul>
-                                                            <li><a href="property-details-v1.html">Property Details 1</a></li>
-                                                            <li><a href="property-details-v2.html">Property Details 2</a></li>
-                                                            <li><a href="property-details-v3.html">Property Details 3</a></li>
-                                                            <li><a href="property-details-v4.html">Property Details 4</a></li>
-                                                        </ul>
-                                                    </li>
-                                                    <li class="dropdown2">
-                                                        <a href="home-02.html#">Pages</a>
-                                                        <ul>
-                                                            <li><a href="about-us.html">About Us</a></li>
-                                                            <li><a href="our-service.html">Our Services</a></li>
-                                                            <li><a href="pricing.html">Pricing</a></li>
-                                                            <li><a href="contact.html">Contact Us</a></li>
-                                                            <li><a href="faq.html">FAQs</a></li>
-                                                            <li><a href="privacy-policy.html">Privacy Policy</a></li>
-
-                                                        </ul>
-                                                    </li>
-                                                    <li class="dropdown2">
-                                                        <a href="home-02.html#">Blog</a>
-                                                        <ul>
-                                                            <li><a href="blog.html">Blog Default</a></li>
-                                                            <li><a href="blog-grid.html">Blog Grid</a></li>
-                                                            <li><a href="blog-detail.html">Blog Post Details</a></li>
-                                                        </ul>
-                                                    </li>
-
-                                                    <li class="dropdown2">
-                                                        <a href="home-02.html#">Dashboard</a>
-                                                        <ul>
-                                                            <li><a href="dashboard.html">Dashboard</a></li>
-                                                            <li><a href="my-property.html">My Properties</a></li>
-                                                            <li><a href="message.html">Message</a></li>
-                                                            <li><a href="my-favorites.html">My Favorites</a></li>
-                                                            <li><a href="reviews.html">Reviews</a></li>
-                                                            <li><a href="my-profile.html">My Profile</a></li>
-                                                            <li><a href="add-property.html">Add Property</a></li>
-                                                        </ul>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </nav>
+                                        @await Component.InvokeAsync("MenuTop")
                                         <!-- Main Menu End-->
                                     </div>
                                 </div>
@@ -498,7 +436,153 @@
     <script type="text/javascript" src="@Url.Content("~/assets/js/shortcodes.js")"></script>
     <script type="text/javascript" src="@Url.Content("~/assets/js/lazysizes.min.js")"></script>
     <script type="text/javascript" src="@Url.Content("~/assets/js/main.js")"></script>
+    <button class="open-chat-btn" onclick="toggleChat()">💬 Hỗ trợ</button>
+    <!--HTML ChatBot-->
+    <div class="chat-popup" id="chatPopup">
+        <div class="chat-header">
+            <h4>Trợ lý AI</h4>
+            <button onclick="toggleChat()">X</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="msgInput" placeholder="Hỏi về sản phẩm..." onkeypress="handleEnter(event)">
+            <button onclick="sendMessage()">Gửi</button>
+        </div>
+    </div>
+    <!--CSS ChatBot-->
+    <style>
+        .open-chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 9999;
+        }
 
+        .chat-popup {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 300px;
+            border: 1px solid #ccc;
+            background: white;
+            z-index: 9999;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chat-body {
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-footer {
+            display: flex;
+            border-top: 1px solid #eee;
+        }
+
+            .chat-footer input {
+                flex: 1;
+                padding: 10px;
+                border: none;
+                outline: none;
+            }
+
+            .chat-footer button {
+                padding: 10px;
+                background: #007bff;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+
+        /* Style tin nhắn */
+        .msg {
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            font-size: 14px;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: #e9ecef;
+            color: black;
+        }
+
+        .msg-bot {
+            align-self: flex-start;
+            background: #007bff;
+            color: white;
+        }
+    </style>
+    <!--JS ChatBot-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+
+    <script>
+        // 1. Tạo kết nối
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        // 2. Nhận tin nhắn từ Server
+        connection.on("ReceiveMessage", (user, message) => {
+            const chatBody = document.getElementById("chatBody");
+            const div = document.createElement("div");
+
+            // Style khác nhau cho Bot và User
+            div.className = user === "Bạn" ? "msg msg-user" : "msg msg-bot";
+
+            // Nếu là bot, render text (có thể xử lý markdown nếu cần)
+            div.innerText = message;
+
+            chatBody.appendChild(div);
+            chatBody.scrollTop = chatBody.scrollHeight; // Tự cuộn xuống cuối
+        });
+
+        // 3. Bắt đầu kết nối
+        connection.start().catch(err => console.error(err));
+
+        // 4. Gửi tin nhắn
+        function sendMessage() {
+            const input = document.getElementById("msgInput");
+            const text = input.value;
+            if (!text) return;
+
+            // Gọi hàm SendMessageToBot bên Backend
+            connection.invoke("SendMessageToBot", text).catch(err => console.error(err));
+            input.value = "";
+        }
+
+        function toggleChat() {
+            const popup = document.getElementById("chatPopup");
+            popup.style.display = popup.style.display === "none" || popup.style.display === "" ? "block" : "none";
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+    </script>
 </body>
 
 </html>

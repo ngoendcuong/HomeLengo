@@ -12,9 +12,10 @@ namespace HomeLengo.ViewComponents
         {
             _context = context;
         }
-        public async Task<IViewComponentResult> InvokeAsync()
+
+        public async Task<IViewComponentResult> InvokeAsync(int? propertyTypeId = null)
         {
-            var items = _context.Properties
+            var query = _context.Properties
                                 .Include(m => m.PropertyType)
                                 .Include(m => m.Status)
                                 .Include(m => m.City)
@@ -24,14 +25,19 @@ namespace HomeLengo.ViewComponents
                                 .Include(m => m.PropertyFeatures)
                                 .Include(p => p.Agent)
                                     .ThenInclude(a => a.User)
-                                .Where(m => m.PropertyTypeId == 1)
-                                .OrderByDescending(m => m.IsFeatured == true)
-                                ;
-                                
+                                .AsQueryable();
 
-            return await Task.FromResult<IViewComponentResult>(
-                View(items.OrderByDescending(m => m.PropertyId).ToList())
-            );
+            // Nếu có propertyTypeId thì lọc, không thì hiển thị tất cả
+            if (propertyTypeId.HasValue && propertyTypeId.Value > 0)
+            {
+                query = query.Where(m => m.PropertyTypeId == propertyTypeId.Value);
+            }
+
+            var items = query.OrderByDescending(m => m.IsFeatured == true)
+                            .ThenByDescending(m => m.PropertyId)
+                            .ToList();
+
+            return await Task.FromResult<IViewComponentResult>(View(items));
         }
     }
 }

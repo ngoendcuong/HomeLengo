@@ -39,6 +39,8 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<Inquiry> Inquiries { get; set; }
 
+    public virtual DbSet<Menu> Menus { get; set; }
+
     public virtual DbSet<Message> Messages { get; set; }
 
     public virtual DbSet<Neighborhood> Neighborhoods { get; set; }
@@ -268,6 +270,22 @@ public partial class HomeLengoContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Inquiries)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Inquiries_User");
+        });
+
+        modelBuilder.Entity<Menu>(entity =>
+        {
+            entity.HasKey(e => e.MenuId).HasName("PK__Menus__C99ED230E9E0BEE0");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.IconClass).HasMaxLength(100);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.SortOrder).HasDefaultValue(0);
+            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.Property(e => e.Url).HasMaxLength(500);
+
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("FK_Menus_Parent");
         });
 
         modelBuilder.Entity<Message>(entity =>

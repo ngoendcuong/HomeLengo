@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<HomeLengo.Models.Property>
 
-@foreach (var item in Model)
+@foreach (var item in Model.Take(6))    
 {
     var primaryPhoto = item.PropertyPhotos?
     .FirstOrDefault(p => p.AltText != null && p.AltText.Contains("Hình 1"))
