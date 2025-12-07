@@ -71,11 +71,15 @@ public partial class Property
 
     public virtual ICollection<PropertyFeature> PropertyFeatures { get; set; } = new List<PropertyFeature>();
 
+    public virtual ICollection<PropertyFloorPlan> PropertyFloorPlans { get; set; } = new List<PropertyFloorPlan>();
+
     public virtual ICollection<PropertyPhoto> PropertyPhotos { get; set; } = new List<PropertyPhoto>();
 
     public virtual ICollection<PropertyTag> PropertyTags { get; set; } = new List<PropertyTag>();
 
     public virtual PropertyType PropertyType { get; set; } = null!;
+
+    public virtual ICollection<PropertyVideo> PropertyVideos { get; set; } = new List<PropertyVideo>();
 
     public virtual ICollection<PropertyVisit> PropertyVisits { get; set; } = new List<PropertyVisit>();
 

@@ -1,0 +1,1188 @@
+@model IEnumerable<HomeLengo.Models.Property>
+@{
+    ViewData["Title"] = "Danh Sách Bất Động Sản";
+    var propertyTypes = ViewBag.PropertyTypes as IEnumerable<HomeLengo.Models.PropertyType>;
+    var amenities = ViewBag.Amenities as IEnumerable<HomeLengo.Models.Amenity>;
+    var selectedPropertyTypeId = ViewBag.SelectedPropertyTypeId as int?;
+    var selectedPropertyTypeName = ViewBag.SelectedPropertyTypeName as string ?? "Loại bất động sản";
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var latestProperties = ViewBag.LatestProperties as IEnumerable<HomeLengo.Models.Property> ?? new List<HomeLengo.Models.Property>();
+    var keyword = ViewBag.Keyword as string ?? "";
+    var location = ViewBag.Location as string ?? "";
+    var bedrooms = ViewBag.Bedrooms as int?;
+    var bathrooms = ViewBag.Bathrooms as int?;
+    var minPrice = ViewBag.MinPrice as decimal?;
+    var maxPrice = ViewBag.MaxPrice as decimal?;
+    var minSize = ViewBag.MinSize as decimal?;
+    var maxSize = ViewBag.MaxSize as decimal?;
+    var selectedAmenities = ViewBag.SelectedAmenities as int[] ?? Array.Empty<int>();
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+    var sortBy = ViewBag.SortBy as string ?? "default";
+    var statusId = ViewBag.StatusId as int?;
+}
+
+<section class="flat-section flat-recommended flat-sidebar">
+    <div class="container">
+        <div class="box-title-listing">
+            <div class="box-left">
+                <h3 class="fw-8">Danh Sách Bất Động Sản</h3>
+                <p class="text">Hiện có @totalCount bất động sản.</p>
+            </div>
+            <div class="box-filter-tab">
+                <ul class="nav-tab-filter" role="tablist">
+                    <li class="nav-tab-item" role="presentation">   
+                        <a href="#gridLayout" class="nav-link-item active" data-bs-toggle="tab">
+                            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4.54883 5.90508C4.54883 5.1222 5.17272 4.5 5.91981 4.5C6.66686 4.5 7.2908 5.12221 7.2908 5.90508C7.2908 6.68801 6.66722 7.3101 5.91981 7.3101C5.17241 7.3101 4.54883 6.68801 4.54883 5.90508Z" stroke="#A3ABB0"/>
+                                <path d="M10.6045 5.90508C10.6045 5.12221 11.2284 4.5 11.9755 4.5C12.7229 4.5 13.3466 5.1222 13.3466 5.90508C13.3466 6.68789 12.7227 7.3101 11.9755 7.3101C11.2284 7.3101 10.6045 6.68794 10.6045 5.90508Z" stroke="#A3ABB0"/>
+                                <path d="M19.4998 5.90514C19.4998 6.68797 18.8757 7.31016 18.1288 7.31016C17.3818 7.31016 16.7578 6.68794 16.7578 5.90508C16.7578 5.12211 17.3813 4.5 18.1288 4.5C18.8763 4.5 19.4998 5.12215 19.4998 5.90514Z" stroke="#A3ABB0"/>
+                                <path d="M7.24249 12.0098C7.24249 12.7927 6.61849 13.4148 5.87133 13.4148C5.12411 13.4148 4.5 12.7926 4.5 12.0098C4.5 11.2268 5.12419 10.6045 5.87133 10.6045C6.61842 10.6045 7.24249 11.2267 7.24249 12.0098Z" stroke="#A3ABB0"/>
+                                <path d="M13.2976 12.0098C13.2976 12.7927 12.6736 13.4148 11.9266 13.4148C11.1795 13.4148 10.5557 12.7928 10.5557 12.0098C10.5557 11.2266 11.1793 10.6045 11.9266 10.6045C12.6741 10.6045 13.2976 11.2265 13.2976 12.0098Z" stroke="#A3ABB0"/>
+                                <path d="M19.4516 12.0098C19.4516 12.7928 18.828 13.4148 18.0807 13.4148C17.3329 13.4148 16.709 12.7926 16.709 12.0098C16.709 11.2268 17.3332 10.6045 18.0807 10.6045C18.8279 10.6045 19.4516 11.2266 19.4516 12.0098Z" stroke="#A3ABB0"/>
+                                <path d="M4.54297 18.0945C4.54297 17.3116 5.16709 16.6895 5.9143 16.6895C6.66137 16.6895 7.28523 17.3114 7.28523 18.0945C7.28523 18.8776 6.66139 19.4996 5.9143 19.4996C5.16714 19.4996 4.54297 18.8771 4.54297 18.0945Z" stroke="#A3ABB0"/>
+                                <path d="M10.5986 18.0945C10.5986 17.3116 11.2227 16.6895 11.97 16.6895C12.7169 16.6895 13.3409 17.3115 13.3409 18.0945C13.3409 18.8776 12.7169 19.4996 11.97 19.4996C11.2225 19.4996 10.5986 18.8772 10.5986 18.0945Z" stroke="#A3ABB0"/>
+                                <path d="M16.752 18.0945C16.752 17.3115 17.376 16.6895 18.1229 16.6895C18.8699 16.6895 19.4939 17.3115 19.4939 18.0945C19.4939 18.8776 18.8702 19.4996 18.1229 19.4996C17.376 19.4996 16.752 18.8772 16.752 18.0945Z" stroke="#A3ABB0"/>
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
+                @{
+                    // Build query string for sorting and page size
+                    var filterQueryParams = new System.Text.StringBuilder();
+                    if (!string.IsNullOrEmpty(keyword)) filterQueryParams.Append($"&keyword={Uri.EscapeDataString(keyword)}");
+                    if (!string.IsNullOrEmpty(location)) filterQueryParams.Append($"&location={Uri.EscapeDataString(location)}");
+                    if (statusId.HasValue) filterQueryParams.Append($"&statusId={statusId.Value}");
+                    if (selectedPropertyTypeId.HasValue) filterQueryParams.Append($"&propertyTypeId={selectedPropertyTypeId.Value}");
+                    if (bedrooms.HasValue) filterQueryParams.Append($"&bedrooms={bedrooms.Value}");
+                    if (bathrooms.HasValue) filterQueryParams.Append($"&bathrooms={bathrooms.Value}");
+                    if (minPrice.HasValue) filterQueryParams.Append($"&minPrice={minPrice.Value}");
+                    if (maxPrice.HasValue) filterQueryParams.Append($"&maxPrice={maxPrice.Value}");
+                    if (minSize.HasValue) filterQueryParams.Append($"&minSize={minSize.Value}");
+                    if (maxSize.HasValue) filterQueryParams.Append($"&maxSize={maxSize.Value}");
+                    if (selectedAmenities != null && selectedAmenities.Length > 0)
+                    {
+                        foreach (var amenityId in selectedAmenities)
+                        {
+                            filterQueryParams.Append($"&amenities={amenityId}");
+                        }
+                    }
+                    var filterQueryString = filterQueryParams.ToString();
+                }
+                <div class="nice-select select-filter list-page" tabindex="0">
+                    <span class="current">Hiển thị: @pageSize</span>
+                    <ul class="list">  
+                        <li data-value="10" class="option @(pageSize == 10 ? "selected" : "")">
+                            <a href="?pageSize=10&sortBy=@sortBy@filterQueryString" style="text-decoration: none; color: inherit;">Hiển thị: 10</a>
+                        </li>
+                        <li data-value="30" class="option @(pageSize == 30 ? "selected" : "")">
+                            <a href="?pageSize=30&sortBy=@sortBy@filterQueryString" style="text-decoration: none; color: inherit;">Hiển thị: 30</a>
+                        </li>
+                        <li data-value="50" class="option @(pageSize == 50 ? "selected" : "")">
+                            <a href="?pageSize=50&sortBy=@sortBy@filterQueryString" style="text-decoration: none; color: inherit;">Hiển thị: 50</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="nice-select select-filter list-sort" tabindex="0">
+                    <span class="current">@(sortBy == "default" ? "Sắp xếp (Mặc định)" : sortBy == "newest" ? "Mới nhất" : sortBy == "oldest" ? "Cũ nhất" : sortBy == "price-low" ? "Giá thấp đến cao" : "Giá cao đến thấp")</span>
+                    <ul class="list">  
+                        <li data-value="default" class="option @(sortBy == "default" ? "selected" : "")">
+                            <a href="?sortBy=default&pageSize=@pageSize@filterQueryString" style="text-decoration: none; color: inherit;">Sắp xếp (Mặc định)</a>
+                        </li>
+                        <li data-value="newest" class="option @(sortBy == "newest" ? "selected" : "")">
+                            <a href="?sortBy=newest&pageSize=@pageSize@filterQueryString" style="text-decoration: none; color: inherit;">Mới nhất</a>
+                        </li>
+                        <li data-value="oldest" class="option @(sortBy == "oldest" ? "selected" : "")">
+                            <a href="?sortBy=oldest&pageSize=@pageSize@filterQueryString" style="text-decoration: none; color: inherit;">Cũ nhất</a>
+                        </li>
+                        <li data-value="price-low" class="option @(sortBy == "price-low" ? "selected" : "")">
+                            <a href="?sortBy=price-low&pageSize=@pageSize@filterQueryString" style="text-decoration: none; color: inherit;">Giá thấp đến cao</a>
+                        </li>
+                        <li data-value="price-high" class="option @(sortBy == "price-high" ? "selected" : "")">
+                            <a href="?sortBy=price-high&pageSize=@pageSize@filterQueryString" style="text-decoration: none; color: inherit;">Giá cao đến thấp</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-4 col-lg-5">
+                <div class="widget-sidebar fixed-sidebar">
+                    <div class="flat-tab flat-tab-form widget-filter-search widget-box">
+                        <ul class="nav-tab-form" role="tablist">
+                            <li class="nav-tab-item" role="presentation">   
+                                <a href="#forRent" class="nav-link-item @(statusId == 1 || !statusId.HasValue ? "active" : "")" data-bs-toggle="tab" data-status-id="1">Cho Thuê</a>
+                            </li>
+                            <li class="nav-tab-item" role="presentation">
+                                <a href="#forSale" class="nav-link-item @(statusId == 2 ? "active" : "")" data-bs-toggle="tab" data-status-id="2">Bán</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade @(statusId == 1 || !statusId.HasValue ? "active show" : "")" id="forRent" role="tabpanel">
+                                <div class="form-sl">
+                                    <form method="get" action="/Property" id="filterFormRent">
+                                        <input type="hidden" name="page" value="1" />
+                                        <input type="hidden" name="statusId" id="statusIdRent" value="1" />
+                                        <div class="wd-filter-select">
+                                            <div class="inner-group">
+                                                <div class="box">
+                                                    <div class="form-style">
+                                                        <input type="text" class="form-control" placeholder="Nhập từ khóa..." name="keyword" value="@keyword">
+                                                    </div>
+                                                    <div class="form-style">
+                                                        <div class="group-ip ip-icon">
+                                                            <input type="text" class="form-control" placeholder="Địa điểm" name="location" value="@location">
+                                                            <a href="#" class="icon-right icon-location"></a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-style box-select">
+                                                        <select name="propertyTypeId" class="form-control">
+                                                            <option value="">@selectedPropertyTypeName</option>
+                                                            @if (propertyTypes != null)
+                                                            {
+                                                                @foreach (var pt in propertyTypes)
+                                                                {
+                                                                    @if (selectedPropertyTypeId == pt.PropertyTypeId)
+                                                                    {
+                                                                        <option value="@pt.PropertyTypeId" selected>@pt.Name</option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="@pt.PropertyTypeId">@pt.Name</option>
+                                                                    }
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-style box-select">
+                                                        <select name="bedrooms" class="form-control">
+                                                            <option value="">Phòng ngủ</option>
+                                                            @if (bedrooms == 1)
+                                                            {
+                                                                <option value="1" selected>1</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="1">1</option>
+                                                            }
+                                                            @if (bedrooms == 2)
+                                                            {
+                                                                <option value="2" selected>2</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="2">2</option>
+                                                            }
+                                                            @if (bedrooms == 3)
+                                                            {
+                                                                <option value="3" selected>3</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="3">3</option>
+                                                            }
+                                                            @if (bedrooms == 4)
+                                                            {
+                                                                <option value="4" selected>4</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="4">4</option>
+                                                            }
+                                                            @if (bedrooms == 5)
+                                                            {
+                                                                <option value="5" selected>5+</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="5">5+</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-style box-select">
+                                                        <select name="bathrooms" class="form-control">
+                                                            <option value="">Phòng tắm</option>
+                                                            @if (bathrooms == 1)
+                                                            {
+                                                                <option value="1" selected>1</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="1">1</option>
+                                                            }
+                                                            @if (bathrooms == 2)
+                                                            {
+                                                                <option value="2" selected>2</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="2">2</option>
+                                                            }
+                                                            @if (bathrooms == 3)
+                                                            {
+                                                                <option value="3" selected>3</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="3">3</option>
+                                                            }
+                                                            @if (bathrooms == 4)
+                                                            {
+                                                                <option value="4" selected>4</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="4">4</option>
+                                                            }
+                                                            @if (bathrooms == 5)
+                                                            {
+                                                                <option value="5" selected>5+</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="5">5+</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="box">
+                                                    <div class="form-style widget-price">
+                                                        <div class="box-title-price">
+                                                            <span class="title-price fw-6">Giá:</span>
+                                                            <div class="caption-price">
+                                                                <span id="slider-range-value1" class="fw-6">@((minPrice ?? 1000000000).ToString("N0"))</span>
+                                                                <span class="fw-6"> VND</span>
+                                                                <span class="fw-6"> - </span>
+                                                                <span id="slider-range-value2" class="fw-6">@((maxPrice ?? 50000000000).ToString("N0"))</span>
+                                                                <span class="fw-6"> VND</span>
+                                                            </div>
+                                                        </div>
+                                                        <div id="slider-range"></div>
+                                                        <div class="slider-labels">
+                                                            <input type="hidden" name="minPrice" id="minPrice" value="@(minPrice ?? 1000000000)">
+                                                            <input type="hidden" name="maxPrice" id="maxPrice" value="@(maxPrice ?? 50000000000)">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-style widget-price wd-price-2">
+                                                        <div class="box-title-price">
+                                                            <span class="title-price fw-6">Diện tích:</span>
+                                                            <div class="caption-price">
+                                                                <span id="slider-range-value01" class="fw-6">@((minSize ?? 0).ToString("N0"))</span>
+                                                                <span class="fw-6"> m²</span>
+                                                                <span class="fw-6"> đến </span>
+                                                                <span id="slider-range-value02" class="fw-6">@((maxSize ?? 1000).ToString("N0"))</span>
+                                                                <span class="fw-6"> m²</span>
+                                                            </div>
+                                                        </div>
+                                                        <div id="slider-range2"></div>
+                                                        <div class="slider-labels">
+                                                            <input type="hidden" name="minSize" id="minSize" value="@(minSize ?? 0)">
+                                                            <input type="hidden" name="maxSize" id="maxSize" value="@(maxSize ?? 1000)">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="box">
+                                                    <div class="form-style wd-amenities">
+                                                        <div class="group-checkbox">
+                                                            <h6 class="title text-black-2">Tiện ích:</h6>
+                                                            <div class="group-amenities">
+                                                                @if (amenities != null)
+                                                                {
+                                                                    @foreach (var amenity in amenities)
+                                                                    {
+                                                                        var isChecked = selectedAmenities.Contains(amenity.AmenityId);
+                                                                        <fieldset class="amenities-item">
+                                                                            <input type="checkbox" class="tf-checkbox style-1" id="amenity_@amenity.AmenityId" name="amenities" value="@amenity.AmenityId" @(isChecked ? "checked" : "")> 
+                                                                            <label for="amenity_@amenity.AmenityId" class="text-cb-amenities">@amenity.Name</label>
+                                                                        </fieldset>
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-style">
+                                                <button type="submit" class="tf-btn btn-view primary hover-btn-view">Tìm Kiếm <span class="icon icon-arrow-right2"></span></button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade @(statusId == 2 ? "active show" : "")" id="forSale" role="tabpanel">
+                                <div class="form-sl">
+                                    <form method="get" action="/Property" id="filterFormSale">
+                                        <input type="hidden" name="page" value="1" />
+                                        <input type="hidden" name="statusId" id="statusIdSale" value="2" />
+                                        <div class="wd-filter-select">
+                                            <div class="inner-group">
+                                                <div class="box">
+                                                    <div class="form-style">
+                                                        <input type="text" class="form-control" placeholder="Nhập từ khóa..." name="keyword" value="@keyword">
+                                                    </div>
+                                                    <div class="form-style">
+                                                        <div class="group-ip ip-icon">
+                                                            <input type="text" class="form-control" placeholder="Địa điểm" name="location" value="@location">
+                                                            <a href="#" class="icon-right icon-location"></a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-style box-select">
+                                                        <select name="propertyTypeId" class="form-control">
+                                                            <option value="">@selectedPropertyTypeName</option>
+                                                            @if (propertyTypes != null)
+                                                            {
+                                                                @foreach (var pt in propertyTypes)
+                                                                {
+                                                                    @if (selectedPropertyTypeId == pt.PropertyTypeId)
+                                                                    {
+                                                                        <option value="@pt.PropertyTypeId" selected>@pt.Name</option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="@pt.PropertyTypeId">@pt.Name</option>
+                                                                    }
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-style box-select">
+                                                        <select name="bedrooms" class="form-control">
+                                                            <option value="">Phòng ngủ</option>
+                                                            @if (bedrooms == 1)
+                                                            {
+                                                                <option value="1" selected>1</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="1">1</option>
+                                                            }
+                                                            @if (bedrooms == 2)
+                                                            {
+                                                                <option value="2" selected>2</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="2">2</option>
+                                                            }
+                                                            @if (bedrooms == 3)
+                                                            {
+                                                                <option value="3" selected>3</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="3">3</option>
+                                                            }
+                                                            @if (bedrooms == 4)
+                                                            {
+                                                                <option value="4" selected>4</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="4">4</option>
+                                                            }
+                                                            @if (bedrooms == 5)
+                                                            {
+                                                                <option value="5" selected>5+</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="5">5+</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-style box-select">
+                                                        <select name="bathrooms" class="form-control">
+                                                            <option value="">Phòng tắm</option>
+                                                            @if (bathrooms == 1)
+                                                            {
+                                                                <option value="1" selected>1</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="1">1</option>
+                                                            }
+                                                            @if (bathrooms == 2)
+                                                            {
+                                                                <option value="2" selected>2</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="2">2</option>
+                                                            }
+                                                            @if (bathrooms == 3)
+                                                            {
+                                                                <option value="3" selected>3</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="3">3</option>
+                                                            }
+                                                            @if (bathrooms == 4)
+                                                            {
+                                                                <option value="4" selected>4</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="4">4</option>
+                                                            }
+                                                            @if (bathrooms == 5)
+                                                            {
+                                                                <option value="5" selected>5+</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="5">5+</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="box">
+                                                    <div class="form-style widget-price">
+                                                        <div class="box-title-price">
+                                                            <span class="title-price fw-6">Giá:</span>
+                                                            <div class="caption-price">
+                                                                <span id="slider-range-value1-sale" class="fw-6">@((minPrice ?? 1000000000).ToString("N0"))</span>
+                                                                <span class="fw-6"> VND</span>
+                                                                <span class="fw-6"> - </span>
+                                                                <span id="slider-range-value2-sale" class="fw-6">@((maxPrice ?? 50000000000).ToString("N0"))</span>
+                                                                <span class="fw-6"> VND</span>
+                                                            </div>
+                                                        </div>
+                                                        <div id="slider-range-sale"></div>
+                                                        <div class="slider-labels">
+                                                            <input type="hidden" name="minPrice" id="minPriceSale" value="@(minPrice ?? 1000000000)">
+                                                            <input type="hidden" name="maxPrice" id="maxPriceSale" value="@(maxPrice ?? 50000000000)">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-style widget-price wd-price-2">
+                                                        <div class="box-title-price">
+                                                            <span class="title-price fw-6">Diện tích:</span>
+                                                            <div class="caption-price">
+                                                                <span id="slider-range-value01-sale" class="fw-6">@((minSize ?? 0).ToString("N0"))</span>
+                                                                <span class="fw-6"> m²</span>
+                                                                <span class="fw-6"> đến </span>
+                                                                <span id="slider-range-value02-sale" class="fw-6">@((maxSize ?? 1000).ToString("N0"))</span>
+                                                                <span class="fw-6"> m²</span>
+                                                            </div>
+                                                        </div>
+                                                        <div id="slider-range2-sale"></div>
+                                                        <div class="slider-labels">
+                                                            <input type="hidden" name="minSize" id="minSizeSale" value="@(minSize ?? 0)">
+                                                            <input type="hidden" name="maxSize" id="maxSizeSale" value="@(maxSize ?? 1000)">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="box">
+                                                    <div class="form-style wd-amenities">
+                                                        <div class="group-checkbox">
+                                                            <h6 class="title text-black-2">Tiện ích:</h6>
+                                                            <div class="group-amenities">
+                                                                @if (amenities != null)
+                                                                {
+                                                                    @foreach (var amenity in amenities)
+                                                                    {
+                                                                        var isChecked = selectedAmenities.Contains(amenity.AmenityId);
+                                                                        <fieldset class="amenities-item">
+                                                                            <input type="checkbox" class="tf-checkbox style-1" id="amenity_sale_@amenity.AmenityId" name="amenities" value="@amenity.AmenityId" @(isChecked ? "checked" : "")> 
+                                                                            <label for="amenity_sale_@amenity.AmenityId" class="text-cb-amenities">@amenity.Name</label>
+                                                                        </fieldset>
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-style">
+                                                <button type="submit" class="tf-btn btn-view primary hover-btn-view">Tìm Kiếm <span class="icon icon-arrow-right2"></span></button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="widget-box box-latest-property">
+                        <h5 class="fw-6 title">Bất Động Sản Mới Nhất</h5>
+                        <ul>
+                            @foreach (var latest in latestProperties)
+                            {
+                                var latestPhoto = latest.PropertyPhotos?.OrderByDescending(p => p.IsPrimary == true).ThenBy(p => p.SortOrder ?? 0).FirstOrDefault();
+                                <li class="latest-property-item">
+                                    <a href="/Property/Details/@latest.PropertyId" class="images-style">
+                                        @if (latestPhoto != null)
+                                        {
+                                            var photoPath = latestPhoto.FilePath?.StartsWith("~/") == true 
+                                                ? latestPhoto.FilePath 
+                                                : $"~/assets/images/home/{latestPhoto.FilePath}";
+                                            <img src="@Url.Content(photoPath)" alt="@latest.Title">
+                                        }
+                                        else
+                                        {
+                                            <img src="@Url.Content("~/assets/images/home/default.jpg")" alt="@latest.Title">
+                                        }
+                                    </a>
+                                    <div class="content">
+                                        <div class="text-capitalize text-btn">
+                                            <a href="/Property/Details/@latest.PropertyId" class="link">@latest.Title</a>
+                                        </div>
+                                        <ul class="meta-list mt-6">
+                                            @if (latest.Bedrooms.HasValue)
+                                            {
+                                                <li class="item">
+                                                    <i class="icon icon-bed"></i>
+                                                    <span class="text-variant-1">Phòng ngủ:</span>
+                                                    <span class="fw-6">@latest.Bedrooms</span>
+                                                </li>
+                                            }
+                                            @if (latest.Bathrooms.HasValue)
+                                            {
+                                                <li class="item">
+                                                    <i class="icon icon-bath"></i>
+                                                    <span class="text-variant-1">Phòng tắm:</span>
+                                                    <span class="fw-6">@latest.Bathrooms</span>
+                                                </li>
+                                            }
+                                            @if (latest.Area.HasValue)
+                                            {
+                                                <li class="item">
+                                                    <i class="icon icon-sqft"></i>
+                                                    <span class="text-variant-1">Diện tích:</span>
+                                                    <span class="fw-6">@latest.Area m²</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                        <div class="mt-10 text-btn">@string.Format("{0:N0} {1}", latest.Price, latest.Currency ?? "VND")</div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-8 col-lg-7 flat-animate-tab">
+                <div class="tab-content">
+                    <div class="tab-pane active show" id="gridLayout" role="tabpanel">
+                        <div class="row">
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var item in Model)
+                                {
+                                    var primaryPhoto = item.PropertyPhotos?
+                                        .OrderByDescending(p => p.IsPrimary == true)
+                                        .ThenBy(p => p.SortOrder ?? 0)
+                                        .FirstOrDefault();
+
+                                    <div class="col-md-6">
+                                        <div class="homelengo-box">
+                                            <div class="archive-top">
+                                                <a href="/Property/Details/@item.PropertyId" class="images-group">
+                                                    <div class="images-style">
+                                                        @if (primaryPhoto != null)
+                                                        {
+                                                            var photoPath = primaryPhoto.FilePath?.StartsWith("~/") == true 
+                                                                ? primaryPhoto.FilePath 
+                                                                : $"~/assets/images/home/{primaryPhoto.FilePath}";
+                                                            <img class="lazyload"
+                                                                 data-src="@Url.Content(photoPath)"
+                                                                 src="@Url.Content(photoPath)"
+                                                                 alt="@item.Title" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <img class="lazyload"
+                                                                 data-src="@Url.Content("~/assets/images/home/default.jpg")"
+                                                                 src="@Url.Content("~/assets/images/home/default.jpg")"
+                                                                 alt="@item.Title" />
+                                                        }
+                                                    </div>
+                                                    <div class="top">
+                                                        <ul class="d-flex gap-6">
+                                                            @if (item.IsFeatured == true)
+                                                            {
+                                                                <li class="flag-tag primary">Nổi bật</li>
+                                                            }
+                                                            <li class="flag-tag style-1">@item.Status?.Name</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="bottom">
+                                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M10 7C10 7.53043 9.78929 8.03914 9.41421 8.41421C9.03914 8.78929 8.53043 9 8 9C7.46957 9 6.96086 8.78929 6.58579 8.41421C6.21071 8.03914 6 7.53043 6 7C6 6.46957 6.21071 5.96086 6.58579 5.58579C6.96086 5.21071 7.46957 5 8 5C8.53043 5 9.03914 5.21071 9.41421 5.58579C9.78929 5.96086 10 6.46957 10 7Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                            <path d="M13 7C13 11.7613 8 14.5 8 14.5C8 14.5 3 11.7613 3 7C3 5.67392 3.52678 4.40215 4.46447 3.46447C5.40215 2.52678 6.67392 2 8 2C9.32608 2 10.5979 2.52678 11.5355 3.46447C12.4732 4.40215 13 5.67392 13 7Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
+                                                        @item.Address
+                                                        @if (!string.IsNullOrEmpty(item.Neighborhood?.Name))
+                                                        {
+                                                            <span>, @item.Neighborhood.Name</span>
+                                                        }
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="archive-bottom">
+                                                <div class="content-top">
+                                                    <h6 class="text-capitalize">
+                                                        <a href="/Property/Details/@item.PropertyId" class="link">@item.Title</a>
+                                                    </h6>
+                                                    <ul class="meta-list">
+                                                        @if (item.Bedrooms.HasValue)
+                                                        {
+                                                            <li class="item">
+                                                                <i class="icon icon-bed"></i>
+                                                                <span class="text-variant-1">Phòng ngủ:</span>
+                                                                <span class="fw-6">@item.Bedrooms</span>
+                                                            </li>
+                                                        }
+                                                        @if (item.Bathrooms.HasValue)
+                                                        {
+                                                            <li class="item">
+                                                                <i class="icon icon-bath"></i>
+                                                                <span class="text-variant-1">Phòng tắm:</span>
+                                                                <span class="fw-6">@item.Bathrooms</span>
+                                                            </li>
+                                                        }
+                                                        @if (item.Area.HasValue)
+                                                        {
+                                                            <li class="item">
+                                                                <i class="icon icon-sqft"></i>
+                                                                <span class="text-variant-1">Diện tích:</span>
+                                                                <span class="fw-6">@item.Area m²</span>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                                <div class="content-bottom">
+                                                    <div class="d-flex gap-8 align-items-center">
+                                                        <div class="avatar avt-40 round">
+                                                            @{
+                                                                var avatarFileName = item.Agent?.User?.Avatar;
+                                                                var avatarPath = string.IsNullOrEmpty(avatarFileName)
+                                                                    ? "~/assets/images/avatar/default-avatar.gif"
+                                                                    : $"~/assets/images/avatar/{avatarFileName}";
+                                                            }
+                                                            <img class="lazyload"
+                                                                 data-src="@Url.Content(avatarPath)"
+                                                                 src="@Url.Content(avatarPath)"
+                                                                 alt="@item.Agent?.AgencyName" />
+                                                        </div>
+                                                        <span>@(item.Agent?.AgencyName ?? "Chưa có thông tin")</span>
+                                                    </div>
+                                                    <h6 class="price">
+                                                        @string.Format("{0:N0} {1}", item.Price, item.Currency ?? "VND")
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12">
+                                    <div class="text-center py-5">
+                                        <p class="text-muted">Không tìm thấy bất động sản nào.</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        @{
+                            // Build query string for pagination
+                            var queryParams = new System.Text.StringBuilder();
+                            if (!string.IsNullOrEmpty(keyword)) queryParams.Append($"&keyword={Uri.EscapeDataString(keyword)}");
+                            if (!string.IsNullOrEmpty(location)) queryParams.Append($"&location={Uri.EscapeDataString(location)}");
+                            if (statusId.HasValue) queryParams.Append($"&statusId={statusId.Value}");
+                            if (selectedPropertyTypeId.HasValue) queryParams.Append($"&propertyTypeId={selectedPropertyTypeId.Value}");
+                            if (bedrooms.HasValue) queryParams.Append($"&bedrooms={bedrooms.Value}");
+                            if (bathrooms.HasValue) queryParams.Append($"&bathrooms={bathrooms.Value}");
+                            if (minPrice.HasValue) queryParams.Append($"&minPrice={minPrice.Value}");
+                            if (maxPrice.HasValue) queryParams.Append($"&maxPrice={maxPrice.Value}");
+                            if (minSize.HasValue) queryParams.Append($"&minSize={minSize.Value}");
+                            if (maxSize.HasValue) queryParams.Append($"&maxSize={maxSize.Value}");
+                            if (selectedAmenities != null && selectedAmenities.Length > 0)
+                            {
+                                foreach (var amenityId in selectedAmenities)
+                                {
+                                    queryParams.Append($"&amenities={amenityId}");
+                                }
+                            }
+                            var queryString = queryParams.ToString();
+                        }
+                        @if (totalPages > 1)
+                        {
+                            <div class="pagination-wrapper mt-4">
+                                <nav aria-label="Phân trang">
+                                    <ul class="pagination justify-content-center">
+                                        @if (currentPage > 1)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=@(currentPage - 1)&pageSize=@pageSize&sortBy=@sortBy@queryString">Trước</a>
+                                            </li>
+                                        }
+                                        @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                        {
+                                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                                <a class="page-link" href="?page=@i&pageSize=@pageSize&sortBy=@sortBy@queryString">@i</a>
+                                            </li>
+                                        }
+                                        @if (currentPage < totalPages)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=@(currentPage + 1)&pageSize=@pageSize&sortBy=@sortBy@queryString">Sau</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Initialize sliders if noUiSlider is available
+        $(document).ready(function() {
+            // Ngăn form submit tự động khi thay đổi các trường
+            // Chỉ cho phép submit khi nhấn nút "Tìm Kiếm"
+            $('#filterFormRent select, #filterFormRent input[type="text"], #filterFormRent input[type="checkbox"]').on('change', function(e) {
+                // Không làm gì cả, chỉ cập nhật giá trị
+            });
+
+            $('#filterFormSale select, #filterFormSale input[type="text"], #filterFormSale input[type="checkbox"]').on('change', function(e) {
+                // Không làm gì cả, chỉ cập nhật giá trị
+            });
+
+            // Hàm helper để parse giá trị từ input
+            function parseValue(value, defaultValue) {
+                if (value === null || value === undefined || value === '') return defaultValue;
+                // Chuyển sang string và loại bỏ tất cả ký tự không phải số
+                var cleaned = String(value).replace(/[^\d]/g, '');
+                if (cleaned === '') return defaultValue;
+                var parsed = parseFloat(cleaned);
+                return isNaN(parsed) ? defaultValue : parsed;
+            }
+
+            // Hàm helper để format số
+            function formatNumber(value) {
+                if (isNaN(value) || value === null || value === undefined) return '0';
+                return Math.round(value).toLocaleString('vi-VN');
+            }
+
+            // Hàm khởi tạo slider cho tab Cho Thuê
+            function initRentSliders() {
+                if (typeof noUiSlider === 'undefined') return;
+
+                // Price range slider for Rent tab (Cho Thuê)
+                var priceSlider = document.getElementById("slider-range");
+                if (priceSlider) {
+                    // Xóa slider cũ nếu đã tồn tại
+                    if (priceSlider.noUiSlider) {
+                        priceSlider.noUiSlider.destroy();
+                    }
+
+                    var minPriceInput = document.getElementById("minPrice");
+                    var maxPriceInput = document.getElementById("maxPrice");
+                    
+                    // Lấy giá trị từ input, nếu không có hoặc = 0 thì dùng giá trị mặc định
+                    var minPriceVal = 1000000000; // Mặc định 1 tỷ
+                    var maxPriceVal = 50000000000; // Mặc định 50 tỷ
+                    
+                    if (minPriceInput && minPriceInput.value) {
+                        var parsedMin = parseValue(minPriceInput.value, null);
+                        if (parsedMin !== null && parsedMin > 0) {
+                            minPriceVal = parsedMin;
+                        }
+                    }
+                    
+                    if (maxPriceInput && maxPriceInput.value) {
+                        var parsedMax = parseValue(maxPriceInput.value, null);
+                        if (parsedMax !== null && parsedMax > 0) {
+                            maxPriceVal = parsedMax;
+                        }
+                    }
+                    
+                    // Đảm bảo giá trị trong khoảng hợp lệ (1 tỷ - 50 tỷ)
+                    minPriceVal = Math.max(1000000000, Math.min(50000000000, Math.round(minPriceVal)));
+                    maxPriceVal = Math.max(1000000000, Math.min(50000000000, Math.round(maxPriceVal)));
+                    if (minPriceVal >= maxPriceVal) {
+                        minPriceVal = 1000000000;
+                        maxPriceVal = 50000000000;
+                    }
+                    
+                    // Cập nhật giá trị input hidden để đảm bảo đúng
+                    if (minPriceInput) minPriceInput.value = minPriceVal;
+                    if (maxPriceInput) maxPriceInput.value = maxPriceVal;
+                    
+                    noUiSlider.create(priceSlider, {
+                        start: [minPriceVal, maxPriceVal],
+                        connect: true,
+                        range: {
+                            'min': 1000000000,
+                            'max': 50000000000
+                        },
+                        step: 100000000, // Bước nhảy 100 triệu
+                        format: {
+                            to: function(value) {
+                                return formatNumber(value);
+                            },
+                            from: function(value) {
+                                return parseValue(value, 1000000000);
+                            }
+                        }
+                    });
+                    
+                    priceSlider.noUiSlider.on('update', function(values, handle) {
+                        var numericValue = Math.round(parseFloat(values[handle]));
+                        var formattedValue = formatNumber(numericValue);
+                        if (handle === 0) {
+                            document.getElementById("slider-range-value1").innerHTML = formattedValue;
+                            document.getElementById("minPrice").value = numericValue;
+                        } else {
+                            document.getElementById("slider-range-value2").innerHTML = formattedValue;
+                            document.getElementById("maxPrice").value = numericValue;
+                        }
+                    });
+                    
+                    // Cập nhật giá trị hiển thị ban đầu
+                    setTimeout(function() {
+                        if (priceSlider.noUiSlider) {
+                            var initialValues = priceSlider.noUiSlider.get();
+                            var val1El = document.getElementById("slider-range-value1");
+                            var val2El = document.getElementById("slider-range-value2");
+                            if (val1El) val1El.innerHTML = formatNumber(Math.round(initialValues[0]));
+                            if (val2El) val2El.innerHTML = formatNumber(Math.round(initialValues[1]));
+                        }
+                    }, 50);
+                }
+                
+                // Size range slider for Rent tab (Cho Thuê)
+                var sizeSlider = document.getElementById("slider-range2");
+                if (sizeSlider) {
+                    // Xóa slider cũ nếu đã tồn tại
+                    if (sizeSlider.noUiSlider) {
+                        sizeSlider.noUiSlider.destroy();
+                    }
+
+                    var minSizeInput = document.getElementById("minSize");
+                    var maxSizeInput = document.getElementById("maxSize");
+                    
+                    // Lấy giá trị từ input, nếu không có thì dùng giá trị mặc định
+                    var minSizeVal = 0; // Mặc định 0
+                    var maxSizeVal = 1000; // Mặc định 1000
+                    
+                    if (minSizeInput && minSizeInput.value !== null && minSizeInput.value !== '') {
+                        var parsedMin = parseValue(minSizeInput.value, null);
+                        if (parsedMin !== null) {
+                            minSizeVal = parsedMin;
+                        }
+                    }
+                    
+                    if (maxSizeInput && maxSizeInput.value !== null && maxSizeInput.value !== '') {
+                        var parsedMax = parseValue(maxSizeInput.value, null);
+                        if (parsedMax !== null && parsedMax > 0) {
+                            maxSizeVal = parsedMax;
+                        }
+                    }
+                    
+                    // Đảm bảo giá trị trong khoảng hợp lệ (0 - 1000)
+                    minSizeVal = Math.max(0, Math.min(1000, Math.round(minSizeVal)));
+                    maxSizeVal = Math.max(0, Math.min(1000, Math.round(maxSizeVal)));
+                    if (minSizeVal >= maxSizeVal) {
+                        minSizeVal = 0;
+                        maxSizeVal = 1000;
+                    }
+                    
+                    // Cập nhật giá trị input hidden để đảm bảo đúng
+                    if (minSizeInput) minSizeInput.value = minSizeVal;
+                    if (maxSizeInput) maxSizeInput.value = maxSizeVal;
+                    
+                    noUiSlider.create(sizeSlider, {
+                        start: [minSizeVal, maxSizeVal],
+                        connect: true,
+                        range: {
+                            'min': 0,
+                            'max': 1000
+                        },
+                        step: 1,
+                        format: {
+                            to: function(value) {
+                                return formatNumber(value);
+                            },
+                            from: function(value) {
+                                return parseValue(value, 0);
+                            }
+                        }
+                    });
+                    
+                    sizeSlider.noUiSlider.on('update', function(values, handle) {
+                        var numericValue = Math.round(parseFloat(values[handle]));
+                        var formattedValue = formatNumber(numericValue);
+                        if (handle === 0) {
+                            document.getElementById("slider-range-value01").innerHTML = formattedValue;
+                            document.getElementById("minSize").value = numericValue;
+                        } else {
+                            document.getElementById("slider-range-value02").innerHTML = formattedValue;
+                            document.getElementById("maxSize").value = numericValue;
+                        }
+                    });
+                    
+                    // Cập nhật giá trị hiển thị ban đầu
+                    setTimeout(function() {
+                        if (sizeSlider.noUiSlider) {
+                            var initialSizeValues = sizeSlider.noUiSlider.get();
+                            var val01El = document.getElementById("slider-range-value01");
+                            var val02El = document.getElementById("slider-range-value02");
+                            if (val01El) val01El.innerHTML = formatNumber(Math.round(initialSizeValues[0]));
+                            if (val02El) val02El.innerHTML = formatNumber(Math.round(initialSizeValues[1]));
+                        }
+                    }, 50);
+                }
+            }
+
+            // Hàm khởi tạo slider cho tab Bán
+            function initSaleSliders() {
+                if (typeof noUiSlider === 'undefined') return;
+
+                // Price range slider for Sale tab (Bán)
+                var priceSliderSale = document.getElementById("slider-range-sale");
+                if (priceSliderSale) {
+                    // Xóa slider cũ nếu đã tồn tại
+                    if (priceSliderSale.noUiSlider) {
+                        priceSliderSale.noUiSlider.destroy();
+                    }
+
+                    var minPriceInputSale = document.getElementById("minPriceSale");
+                    var maxPriceInputSale = document.getElementById("maxPriceSale");
+                    
+                    // Lấy giá trị từ input, nếu không có hoặc = 0 thì dùng giá trị mặc định
+                    var minPriceValSale = 1000000000; // Mặc định 1 tỷ
+                    var maxPriceValSale = 50000000000; // Mặc định 50 tỷ
+                    
+                    if (minPriceInputSale && minPriceInputSale.value) {
+                        var parsedMin = parseValue(minPriceInputSale.value, null);
+                        if (parsedMin !== null && parsedMin > 0) {
+                            minPriceValSale = parsedMin;
+                        }
+                    }
+                    
+                    if (maxPriceInputSale && maxPriceInputSale.value) {
+                        var parsedMax = parseValue(maxPriceInputSale.value, null);
+                        if (parsedMax !== null && parsedMax > 0) {
+                            maxPriceValSale = parsedMax;
+                        }
+                    }
+                    
+                    // Đảm bảo giá trị trong khoảng hợp lệ (1 tỷ - 50 tỷ)
+                    minPriceValSale = Math.max(1000000000, Math.min(50000000000, Math.round(minPriceValSale)));
+                    maxPriceValSale = Math.max(1000000000, Math.min(50000000000, Math.round(maxPriceValSale)));
+                    if (minPriceValSale >= maxPriceValSale) {
+                        minPriceValSale = 1000000000;
+                        maxPriceValSale = 50000000000;
+                    }
+                    
+                    // Cập nhật giá trị input hidden để đảm bảo đúng
+                    if (minPriceInputSale) minPriceInputSale.value = minPriceValSale;
+                    if (maxPriceInputSale) maxPriceInputSale.value = maxPriceValSale;
+                    
+                    noUiSlider.create(priceSliderSale, {
+                        start: [minPriceValSale, maxPriceValSale],
+                        connect: true,
+                        range: {
+                            'min': 1000000000,
+                            'max': 50000000000
+                        },
+                        step: 100000000, // Bước nhảy 100 triệu
+                        format: {
+                            to: function(value) {
+                                return formatNumber(value);
+                            },
+                            from: function(value) {
+                                return parseValue(value, 1000000000);
+                            }
+                        }
+                    });
+                    
+                    priceSliderSale.noUiSlider.on('update', function(values, handle) {
+                        var numericValue = Math.round(parseFloat(values[handle]));
+                        var formattedValue = formatNumber(numericValue);
+                        if (handle === 0) {
+                            document.getElementById("slider-range-value1-sale").innerHTML = formattedValue;
+                            document.getElementById("minPriceSale").value = numericValue;
+                        } else {
+                            document.getElementById("slider-range-value2-sale").innerHTML = formattedValue;
+                            document.getElementById("maxPriceSale").value = numericValue;
+                        }
+                    });
+                    
+                    // Cập nhật giá trị hiển thị ban đầu
+                    setTimeout(function() {
+                        if (priceSliderSale.noUiSlider) {
+                            var initialSaleValues = priceSliderSale.noUiSlider.get();
+                            var val1SaleEl = document.getElementById("slider-range-value1-sale");
+                            var val2SaleEl = document.getElementById("slider-range-value2-sale");
+                            if (val1SaleEl) val1SaleEl.innerHTML = formatNumber(Math.round(initialSaleValues[0]));
+                            if (val2SaleEl) val2SaleEl.innerHTML = formatNumber(Math.round(initialSaleValues[1]));
+                        }
+                    }, 50);
+                }
+                
+                // Size range slider for Sale tab (Bán)
+                var sizeSliderSale = document.getElementById("slider-range2-sale");
+                if (sizeSliderSale) {
+                    // Xóa slider cũ nếu đã tồn tại
+                    if (sizeSliderSale.noUiSlider) {
+                        sizeSliderSale.noUiSlider.destroy();
+                    }
+
+                    var minSizeInputSale = document.getElementById("minSizeSale");
+                    var maxSizeInputSale = document.getElementById("maxSizeSale");
+                    
+                    // Lấy giá trị từ input, nếu không có thì dùng giá trị mặc định
+                    var minSizeValSale = 0; // Mặc định 0
+                    var maxSizeValSale = 1000; // Mặc định 1000
+                    
+                    if (minSizeInputSale && minSizeInputSale.value !== null && minSizeInputSale.value !== '') {
+                        var parsedMin = parseValue(minSizeInputSale.value, null);
+                        if (parsedMin !== null) {
+                            minSizeValSale = parsedMin;
+                        }
+                    }
+                    
+                    if (maxSizeInputSale && maxSizeInputSale.value !== null && maxSizeInputSale.value !== '') {
+                        var parsedMax = parseValue(maxSizeInputSale.value, null);
+                        if (parsedMax !== null && parsedMax > 0) {
+                            maxSizeValSale = parsedMax;
+                        }
+                    }
+                    
+                    // Đảm bảo giá trị trong khoảng hợp lệ (0 - 1000)
+                    minSizeValSale = Math.max(0, Math.min(1000, Math.round(minSizeValSale)));
+                    maxSizeValSale = Math.max(0, Math.min(1000, Math.round(maxSizeValSale)));
+                    if (minSizeValSale >= maxSizeValSale) {
+                        minSizeValSale = 0;
+                        maxSizeValSale = 1000;
+                    }
+                    
+                    // Cập nhật giá trị input hidden để đảm bảo đúng
+                    if (minSizeInputSale) minSizeInputSale.value = minSizeValSale;
+                    if (maxSizeInputSale) maxSizeInputSale.value = maxSizeValSale;
+                    
+                    noUiSlider.create(sizeSliderSale, {
+                        start: [minSizeValSale, maxSizeValSale],
+                        connect: true,
+                        range: {
+                            'min': 0,
+                            'max': 1000
+                        },
+                        step: 1,
+                        format: {
+                            to: function(value) {
+                                return formatNumber(value);
+                            },
+                            from: function(value) {
+                                return parseValue(value, 0);
+                            }
+                        }
+                    });
+                    
+                    sizeSliderSale.noUiSlider.on('update', function(values, handle) {
+                        var numericValue = Math.round(parseFloat(values[handle]));
+                        var formattedValue = formatNumber(numericValue);
+                        if (handle === 0) {
+                            document.getElementById("slider-range-value01-sale").innerHTML = formattedValue;
+                            document.getElementById("minSizeSale").value = numericValue;
+                        } else {
+                            document.getElementById("slider-range-value02-sale").innerHTML = formattedValue;
+                            document.getElementById("maxSizeSale").value = numericValue;
+                        }
+                    });
+                    
+                    // Cập nhật giá trị hiển thị ban đầu
+                    setTimeout(function() {
+                        if (sizeSliderSale.noUiSlider) {
+                            var initialSaleSizeValues = sizeSliderSale.noUiSlider.get();
+                            var val01SaleEl = document.getElementById("slider-range-value01-sale");
+                            var val02SaleEl = document.getElementById("slider-range-value02-sale");
+                            if (val01SaleEl) val01SaleEl.innerHTML = formatNumber(Math.round(initialSaleSizeValues[0]));
+                            if (val02SaleEl) val02SaleEl.innerHTML = formatNumber(Math.round(initialSaleSizeValues[1]));
+                        }
+                    }, 50);
+                }
+            }
+
+            // Handle tab switching
+            $('a[data-bs-toggle="tab"][data-status-id]').on('shown.bs.tab', function (e) {
+                var statusId = $(e.target).data('status-id');
+                // Update hidden fields in both forms
+                $('#statusIdRent').val(statusId === 1 ? 1 : '');
+                $('#statusIdSale').val(statusId === 2 ? 2 : '');
+                
+                // Khởi tạo lại slider khi chuyển tab
+                setTimeout(function() {
+                    if (statusId === 1) {
+                        // Tab Cho Thuê
+                        initRentSliders();
+                    } else if (statusId === 2) {
+                        // Tab Bán
+                        initSaleSliders();
+                    }
+                }, 100);
+            });
+
+            // Đảm bảo giá trị từ slider được cập nhật trước khi submit form
+            $('#filterFormRent').on('submit', function(e) {
+                var priceSlider = document.getElementById("slider-range");
+                var sizeSlider = document.getElementById("slider-range2");
+                
+                if (priceSlider && priceSlider.noUiSlider) {
+                    var priceValues = priceSlider.noUiSlider.get();
+                    $('#minPrice').val(Math.round(priceValues[0]));
+                    $('#maxPrice').val(Math.round(priceValues[1]));
+                }
+                
+                if (sizeSlider && sizeSlider.noUiSlider) {
+                    var sizeValues = sizeSlider.noUiSlider.get();
+                    $('#minSize').val(Math.round(sizeValues[0]));
+                    $('#maxSize').val(Math.round(sizeValues[1]));
+                }
+            });
+
+            $('#filterFormSale').on('submit', function(e) {
+                var priceSliderSale = document.getElementById("slider-range-sale");
+                var sizeSliderSale = document.getElementById("slider-range2-sale");
+                
+                if (priceSliderSale && priceSliderSale.noUiSlider) {
+                    var priceValues = priceSliderSale.noUiSlider.get();
+                    $('#minPriceSale').val(Math.round(priceValues[0]));
+                    $('#maxPriceSale').val(Math.round(priceValues[1]));
+                }
+                
+                if (sizeSliderSale && sizeSliderSale.noUiSlider) {
+                    var sizeValues = sizeSliderSale.noUiSlider.get();
+                    $('#minSizeSale').val(Math.round(sizeValues[0]));
+                    $('#maxSizeSale').val(Math.round(sizeValues[1]));
+                }
+            });
+
+            // Khởi tạo slider khi trang load
+            if (typeof noUiSlider !== 'undefined') {
+                // Kiểm tra tab nào đang active và khởi tạo slider tương ứng
+                var activeTab = $('.nav-link-item.active[data-status-id]');
+                if (activeTab.length > 0) {
+                    var statusId = activeTab.data('status-id');
+                    if (statusId === 1) {
+                        initRentSliders();
+                    } else if (statusId === 2) {
+                        initSaleSliders();
+                    }
+                } else {
+                    // Mặc định khởi tạo tab Cho Thuê
+                    initRentSliders();
+                }
+            }
+        });
+    </script>
+}

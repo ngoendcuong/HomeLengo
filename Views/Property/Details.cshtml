@@ -1,0 +1,1130 @@
+@model HomeLengo.Models.Property
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="flat-section-v4">
+    <div class="container">
+        <div class="header-property-detail">
+            <div class="content-top d-flex justify-content-between align-items-center">
+                <h3 class="title link fw-8">@Model.Title</h3>
+                <div class="box-price d-flex align-items-end">
+                    <h3 class="fw-8">@Model.Price.ToString("N0")</h3>
+                    <span class="body-1 text-variant-1">@(Model.Currency ?? "VND")</span>
+                </div>
+            </div>
+            <div class="content-bottom">
+                <div class="box-left">
+                    <div class="info-box">
+                        <div class="label">Tiện ích</div>
+                        <ul class="meta">
+                            @if (Model.Bedrooms.HasValue)
+                            {
+                                <li class="meta-item">
+                                    <i class="icon icon-bed"></i>
+                                    <span class="text-variant-1">Phòng ngủ:</span>
+                                    <span class="fw-6">@Model.Bedrooms</span>
+                                </li>
+                            }
+                            @if (Model.Bathrooms.HasValue)
+                            {
+                                <li class="meta-item">
+                                    <i class="icon icon-bath"></i>
+                                    <span class="text-variant-1">Phòng tắm:</span>
+                                    <span class="fw-6">@Model.Bathrooms</span>
+                                </li>
+                            }
+                            @if (Model.Area.HasValue)
+                            {
+                                <li class="meta-item">
+                                    <i class="icon icon-sqft"></i>
+                                    <span class="text-variant-1">Diện tích:</span>
+                                    <span class="fw-6">@Model.Area m²</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="info-box">
+                        <div class="label">Vị trí</div>
+                        <p class="meta-item">
+                            <span class="icon icon-mapPin"></span>
+                            <span class="text-variant-1">
+                                @if (!string.IsNullOrEmpty(Model.Address))
+                                {
+                                    @Model.Address
+                                }
+                                @if (Model.Neighborhood != null)
+                                {
+                                    <text>, @Model.Neighborhood.Name</text>
+                                }
+                                @if (Model.District != null)
+                                {
+                                    <text>, @Model.District.Name</text>
+                                }
+                                @if (Model.City != null)
+                                {
+                                    <text>, @Model.City.Name</text>
+                                }
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <ul class="icon-box">
+                    <li>
+                        <a href="#" class="item">
+                            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.75 6.1875C15.75 4.32375 14.1758 2.8125 12.234 2.8125C10.7828 2.8125 9.53625 3.657 9 4.86225C8.46375 3.657 7.21725 2.8125 5.76525 2.8125C3.825 2.8125 2.25 4.32375 2.25 6.1875C2.25 11.6025 9 15.1875 9 15.1875C9 15.1875 15.75 11.6025 15.75 6.1875Z" stroke="#A3ABB0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="item">
+                            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5.625 15.75L2.25 12.375M2.25 12.375L5.625 9M2.25 12.375H12.375M12.375 2.25L15.75 5.625M15.75 5.625L12.375 9M15.75 5.625H5.625" stroke="#A3ABB0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="item">
+                            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5.41251 8.18022C5.23091 7.85345 4.94594 7.59624 4.60234 7.44895C4.25874 7.30167 3.87596 7.27265 3.51408 7.36645C3.1522 7.46025 2.83171 7.67157 2.60293 7.96722C2.37414 8.26287 2.25 8.62613 2.25 8.99997C2.25 9.37381 2.37414 9.73706 2.60293 10.0327C2.83171 10.3284 3.1522 10.5397 3.51408 10.6335C3.87596 10.7273 4.25874 10.6983 4.60234 10.551C4.94594 10.4037 5.23091 10.1465 5.41251 9.81972M5.41251 8.18022C5.54751 8.42322 5.62476 8.70222 5.62476 8.99997C5.62476 9.29772 5.54751 9.57747 5.41251 9.81972M5.41251 8.18022L12.587 4.19472M5.41251 9.81972L12.587 13.8052M12.587 4.19472C12.6922 4.39282 12.8358 4.56797 13.0095 4.70991C13.1832 4.85186 13.3834 4.95776 13.5985 5.02143C13.8135 5.08509 14.0392 5.10523 14.2621 5.08069C14.4851 5.05614 14.7009 4.98739 14.897 4.87846C15.093 4.76953 15.2654 4.62261 15.404 4.44628C15.5427 4.26995 15.6448 4.06775 15.7043 3.85151C15.7639 3.63526 15.7798 3.40931 15.751 3.18686C15.7222 2.96442 15.6494 2.74994 15.5368 2.55597C15.3148 2.17372 14.9518 1.89382 14.5256 1.77643C14.0995 1.65904 13.6443 1.71352 13.2579 1.92818C12.8715 2.14284 12.5848 2.50053 12.4593 2.92436C12.3339 3.34819 12.3797 3.80433 12.587 4.19472ZM12.587 13.8052C12.4794 13.999 12.4109 14.2121 12.3856 14.4323C12.3603 14.6525 12.3787 14.8756 12.4396 15.0887C12.5005 15.3019 12.6028 15.5009 12.7406 15.6746C12.8784 15.8482 13.0491 15.9929 13.2429 16.1006C13.4367 16.2082 13.6498 16.2767 13.87 16.302C14.0902 16.3273 14.3133 16.3089 14.5264 16.248C14.7396 16.1871 14.9386 16.0848 15.1122 15.947C15.2858 15.8092 15.4306 15.6385 15.5383 15.4447C15.7557 15.0534 15.8087 14.5917 15.6857 14.1612C15.5627 13.7307 15.2737 13.3668 14.8824 13.1493C14.491 12.9319 14.0293 12.8789 13.5989 13.0019C13.1684 13.1249 12.8044 13.4139 12.587 13.8052Z" stroke="#A3ABB0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="item">
+                            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5.04 10.3718C4.86 10.3943 4.68 10.4183 4.5 10.4438M5.04 10.3718C7.66969 10.0418 10.3303 10.0418 12.96 10.3718M5.04 10.3718L4.755 13.5M12.96 10.3718C13.14 10.3943 13.32 10.4183 13.5 10.4438M12.96 10.3718L13.245 13.5L13.4167 15.3923C13.4274 15.509 13.4136 15.6267 13.3762 15.7378C13.3388 15.8489 13.2787 15.951 13.1996 16.0376C13.1206 16.1242 13.0244 16.1933 12.9172 16.2407C12.8099 16.288 12.694 16.3125 12.5767 16.3125H5.42325C4.92675 16.3125 4.53825 15.8865 4.58325 15.3923L4.755 13.5M4.755 13.5H3.9375C3.48995 13.5 3.06072 13.3222 2.74426 13.0057C2.42779 12.6893 2.25 12.2601 2.25 11.8125V7.092C2.25 6.28125 2.826 5.58075 3.62775 5.46075C4.10471 5.3894 4.58306 5.32764 5.0625 5.2755M13.2435 13.5H14.0618C14.2834 13.5001 14.5029 13.4565 14.7078 13.3718C14.9126 13.287 15.0987 13.1627 15.2555 13.006C15.4123 12.8493 15.5366 12.6632 15.6215 12.4585C15.7063 12.2537 15.75 12.0342 15.75 11.8125V7.092C15.75 6.28125 15.174 5.58075 14.3723 5.46075C13.8953 5.38941 13.4169 5.32764 12.9375 5.2755M12.9375 5.2755C10.3202 4.99073 7.67978 4.99073 5.0625 5.2755M12.9375 5.2755V2.53125C12.9375 2.0655 12.5595 1.6875 12.0938 1.6875H5.90625C5.4405 1.6875 5.0625 2.0655 5.0625 2.53125V5.2755M13.5 7.875H13.506V7.881H13.5V7.875ZM11.25 7.875H11.256V7.881H11.25V7.875Z" stroke="#A3ABB0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    var photos = Model.PropertyPhotos != null && Model.PropertyPhotos.Any() 
+        ? Model.PropertyPhotos
+            .OrderByDescending(p => p.IsPrimary == true)
+            .ThenBy(p => p.SortOrder ?? 0)
+            .ThenBy(p => p.PhotoId)
+            .ToList()
+        : new List<PropertyPhoto>();
+    
+    // Hàm helper để lấy đường dẫn ảnh đúng
+    string GetImagePath(string filePath)
+    {
+        if (string.IsNullOrEmpty(filePath))
+            return "~/assets/images/banner/banner-property-12.jpg";
+        
+        // Loại bỏ khoảng trắng
+        filePath = filePath.Trim();
+        
+        // Nếu FilePath đã bắt đầu bằng ~/ hoặc /, giữ nguyên
+        if (filePath.StartsWith("~/"))
+            return filePath;
+        
+        if (filePath.StartsWith("/"))
+            return "~" + filePath;
+        
+        // Nếu FilePath đã chứa "assets/", thêm ~/ vào đầu
+        if (filePath.Contains("assets/"))
+            return "~/" + filePath.TrimStart('/');
+        
+        // Nếu chỉ là tên file, thêm đường dẫn mặc định (giống như trong Property component)
+        return "~/assets/images/home/" + filePath.TrimStart('/');
+    }
+}
+
+<div>
+    <div class="container">
+        <div class="single-property-gallery">
+            <div class="position-relative">
+                @if (photos.Any())
+                {
+                    <div class="photo-count-badge" style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.7); color: white; padding: 8px 16px; border-radius: 20px; z-index: 10; font-size: 14px;">
+                        <i class="icon icon-camera"></i> @photos.Count ảnh
+                    </div>
+                }
+                <div dir="ltr" class="swiper sw-single">
+                    <div class="swiper-wrapper">
+                        @if (photos.Any())
+                        {
+                            @foreach (var photo in photos)
+                            {
+                                var imagePath = GetImagePath(photo.FilePath);
+                                <div class="swiper-slide">
+                                    <div class="image-sw-single" style="width: 100%; height: 600px; position: relative; overflow: hidden;">
+                                        <img src="@Url.Content(imagePath)" 
+                                             alt="@(photo.AltText ?? Model.Title)" 
+                                             style="width: 100%; height: 100%; object-fit: cover;"
+                                             onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/banner/banner-property-12.jpg")'">
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="swiper-slide">
+                                <div class="image-sw-single" style="width: 100%; height: 600px; position: relative; overflow: hidden;">
+                                    <img src="@Url.Content("~/assets/images/banner/banner-property-12.jpg")" 
+                                         alt="@Model.Title"
+                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                @if (photos.Any())
+                {
+                    <div class="box-navigation">
+                        <div class="navigation swiper-nav-next nav-next-single"><span class="icon icon-arr-l"></span></div>
+                        <div class="navigation swiper-nav-prev nav-prev-single"><span class="icon icon-arr-r"></span></div> 
+                    </div>
+                }
+            </div>
+            @if (photos.Count > 1)
+            {
+                <div dir="ltr" class="swiper thumbs-sw-pagi">
+                    <div class="swiper-wrapper">
+                        @foreach (var photo in photos)
+                        {
+                            var thumbPath = GetImagePath(photo.FilePath);
+                            <div class="swiper-slide">
+                                <div class="img-thumb-pagi">
+                                    <img src="@Url.Content(thumbPath)" 
+                                         alt="@(photo.AltText ?? Model.Title)" 
+                                         onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/banner/banner-property-12.jpg")'">
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<section class="flat-section-v3 flat-property-detail">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-8 col-lg-7">
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="single-property-element single-property-desc">
+                        <h5 class="fw-6 title">Mô tả</h5>
+                        <p class="text-variant-1">@Model.Description</p>
+                        <a href="#" class="btn-view"><span class="text">Xem thêm</span></a>
+                    </div>
+                }
+                
+                <div class="single-property-element single-property-overview">
+                    <h6 class="title fw-6">Tổng quan</h6>
+                    <ul class="info-box">
+                        <li class="item">
+                            <a href="#" class="box-icon w-52"><i class="icon icon-house-line"></i></a>
+                            <div class="content">
+                                <span class="label">Mã:</span>
+                                <span>#@Model.PropertyId</span>
+                            </div>
+                        </li>
+                        <li class="item">
+                            <a href="#" class="box-icon w-52"><i class="icon icon-sliders-horizontal"></i></a>
+                            <div class="content">
+                                <span class="label">Loại:</span>
+                                <span>@(Model.PropertyType?.Name ?? "N/A")</span>
+                            </div>
+                        </li>
+                        @if (Model.Bedrooms.HasValue)
+                        {
+                            <li class="item">
+                                <a href="#" class="box-icon w-52"><i class="icon icon-bed1"></i></a>
+                                <div class="content">
+                                    <span class="label">Phòng ngủ:</span>
+                                    <span>@Model.Bedrooms Phòng</span>
+                                </div>
+                            </li>
+                        }
+                        @if (Model.Bathrooms.HasValue)
+                        {
+                            <li class="item">
+                                <a href="#" class="box-icon w-52"><i class="icon icon-bathtub"></i></a>
+                                <div class="content">
+                                    <span class="label">Phòng tắm:</span>
+                                    <span>@Model.Bathrooms Phòng</span>
+                                </div>
+                            </li>
+                        }
+                        @if (Model.LotSize.HasValue)
+                        {
+                            <li class="item">
+                                <a href="#" class="box-icon w-52"><i class="icon icon-crop"></i></a>
+                                <div class="content">
+                                    <span class="label">Diện tích đất:</span>
+                                    <span>@Model.LotSize m²</span>
+                                </div>
+                            </li>
+                        }
+                        @if (Model.Area.HasValue)
+                        {
+                            <li class="item">
+                                <a href="#" class="box-icon w-52"><i class="icon icon-ruler"></i></a>
+                                <div class="content">
+                                    <span class="label">Diện tích:</span>
+                                    <span>@Model.Area m²</span>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                
+                <div class="single-property-element single-property-info">
+                    <h5 class="title fw-6">Chi tiết bất động sản</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="inner-box">
+                                <span class="label text-black-3">Mã:</span>
+                                <div class="content text-black-3">#@Model.PropertyId</div>
+                            </div>
+                        </div>
+                        @if (Model.Bedrooms.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <div class="inner-box">
+                                    <span class="label text-black-3">Phòng ngủ</span>
+                                    <div class="content text-black-3">@Model.Bedrooms</div>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-md-6">
+                            <div class="inner-box">
+                                <span class="label text-black-3">Giá</span>
+                                <div class="content text-black-3">@Model.Price.ToString("N0") @(Model.Currency ?? "VND")</div>
+                            </div>
+                        </div>
+                        @if (Model.Area.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <div class="inner-box">
+                                    <span class="label text-black-3">Diện tích</span>
+                                    <div class="content text-black-3">@Model.Area m²</div>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-md-6">
+                            <div class="inner-box">
+                                <span class="label text-black-3">Loại</span>
+                                <div class="content text-black-3">@(Model.PropertyType?.Name ?? "N/A")</div>
+                            </div>
+                        </div>
+                        @if (Model.Bathrooms.HasValue)
+                        {
+                            <div class="col-md-6">
+                                <div class="inner-box">
+                                    <span class="label text-black-3">Phòng tắm</span>
+                                    <div class="content text-black-3">@Model.Bathrooms</div>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-md-6">
+                            <div class="inner-box">
+                                <span class="label text-black-3">Trạng thái</span>
+                                <div class="content text-black-3">@(Model.Status?.Name ?? "N/A")</div>
+                            </div>
+                        </div>
+                        @if (Model.City != null)
+                        {
+                            <div class="col-md-6">
+                                <div class="inner-box">
+                                    <span class="label text-black-3">Thành phố</span>
+                                    <div class="content text-black-3">@Model.City.Name</div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.District != null)
+                        {
+                            <div class="col-md-6">
+                                <div class="inner-box">
+                                    <span class="label text-black-3">Quận/Huyện</span>
+                                    <div class="content text-black-3">@Model.District.Name</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                
+                @* Video Section *@
+                @if (Model.PropertyVideos != null && Model.PropertyVideos.Any())
+                {
+                    var primaryVideo = Model.PropertyVideos.OrderByDescending(v => v.IsPrimary == true).ThenBy(v => v.SortOrder ?? 0).FirstOrDefault();
+                    if (primaryVideo != null)
+                    {
+                        <div class="single-property-element single-property-video">
+                            <h5 class="title fw-6">Video</h5>
+                            <div class="img-video">
+                                @if (!string.IsNullOrEmpty(primaryVideo.ThumbnailUrl))
+                                {
+                                    <img src="@Url.Content(primaryVideo.ThumbnailUrl)" alt="@(primaryVideo.Title ?? Model.Title)">
+                                }
+                                else
+                                {
+                                    <img src="@Url.Content("~/assets/images/banner/banner-property-12.jpg")" alt="@(primaryVideo.Title ?? Model.Title)">
+                                }
+                                <a href="@primaryVideo.VideoUrl" data-fancybox="gallery2" class="btn-video">
+                                    <span class="icon icon-play"></span>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+                
+                @if (Model.PropertyAmenities != null && Model.PropertyAmenities.Any())
+                {
+                    <div class="single-property-element single-property-feature">
+                        <h5 class="title fw-6">Tiện ích và tính năng</h5>
+                        <div class="wrap-feature">
+                            @{
+                                var amenities = Model.PropertyAmenities.Select(pa => pa.Amenity).Where(a => a != null).ToList();
+                                var thirdCount = (int)Math.Ceiling(amenities.Count / 3.0);
+                            }
+                            <div class="box-feature">
+                                <ul>
+                                    @foreach (var amenity in amenities.Take(thirdCount))
+                                    {
+                                        <li class="feature-item">@amenity.Name</li>
+                                    }
+                                </ul>
+                            </div>
+                            @if (amenities.Count > thirdCount)
+                            {
+                                <div class="box-feature">
+                                    <ul>
+                                        @foreach (var amenity in amenities.Skip(thirdCount).Take(thirdCount))
+                                        {
+                                            <li class="feature-item">@amenity.Name</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            @if (amenities.Count > thirdCount * 2)
+                            {
+                                <div class="box-feature">
+                                    <ul>
+                                        @foreach (var amenity in amenities.Skip(thirdCount * 2))
+                                        {
+                                            <li class="feature-item">@amenity.Name</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                
+                @* Map Location Section - Moved to main content *@
+                <div class="single-property-element single-property-map">
+                    <h5 class="title fw-6">Vị trí trên bản đồ</h5>
+                    @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                    {
+                        <iframe class="map" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d135905.11693909427!2d@(Model.Longitude.Value)!3d@(Model.Latitude.Value)!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2s!4v1727094281524!5m2!1sen!2s" height="478" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        <div class="info-map">
+                            <ul class="box-left">
+                                <li>
+                                    <span class="label fw-6">Địa chỉ</span>
+                                    <div class="text text-variant-1">@(Model.Address ?? "N/A")</div>
+                                </li>
+                                @if (Model.City != null)
+                                {
+                                    <li>
+                                        <span class="label fw-6">Thành phố</span>
+                                        <div class="text text-variant-1">@Model.City.Name</div>
+                                    </li>
+                                }
+                                @if (Model.District != null)
+                                {
+                                    <li>
+                                        <span class="label fw-6">Quận/Huyện</span>
+                                        <div class="text text-variant-1">@Model.District.Name</div>
+                                    </li>
+                                }
+                            </ul>
+                            <ul class="box-right">
+                                @if (Model.Area.HasValue)
+                                {
+                                    <li>
+                                        <span class="label fw-6">Diện tích</span>
+                                        <div class="text text-variant-1">@Model.Area m²</div>
+                                    </li>
+                                }
+                                <li>
+                                    <span class="label fw-6">Giá</span>
+                                    <div class="text text-variant-1">@Model.Price.ToString("N0") @(Model.Currency ?? "VND")</div>
+                                </li>
+                                <li>
+                                    <span class="label fw-6">Mã</span>
+                                    <div class="text text-variant-1">#@Model.PropertyId</div>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-variant-2">Thông tin vị trí không có sẵn</p>
+                    }
+                </div>
+                
+                @* Floor Plans Section *@
+                @if (Model.PropertyFloorPlans != null && Model.PropertyFloorPlans.Any())
+                {
+                    var floorPlans = Model.PropertyFloorPlans.OrderBy(f => f.SortOrder ?? 0).ToList();
+                    <div class="single-property-element single-property-floor">
+                        <h5 class="title fw-6">Sơ đồ tầng</h5>
+                        <ul class="box-floor" id="parent-floor">
+                            @for (int i = 0; i < floorPlans.Count; i++)
+                            {
+                                var floor = floorPlans[i];
+                                var floorId = $"floor-{i}";
+                                var isFirst = i == 0;
+                                <li class="floor-item">
+                                    <div class="floor-header @(isFirst ? "" : "collapsed")" data-bs-target="#@floorId" data-bs-toggle="collapse" aria-expanded="@isFirst.ToString().ToLower()" aria-controls="@floorId" role="button">
+                                        <div class="inner-left">
+                                            <i class="icon icon-arr-r"></i>
+                                            <span class="text-btn">@floor.FloorName</span>
+                                        </div>
+                                        <ul class="inner-right">
+                                            @if (floor.Bedrooms.HasValue)
+                                            {
+                                                <li class="d-flex align-items-center gap-8">
+                                                    <i class="icon icon-bed"></i>
+                                                    @floor.Bedrooms Phòng ngủ
+                                                </li>
+                                            }
+                                            @if (floor.Bathrooms.HasValue)
+                                            {
+                                                <li class="d-flex align-items-center gap-8">
+                                                    <i class="icon icon-bath"></i>
+                                                    @floor.Bathrooms Phòng tắm
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div id="@floorId" class="collapse @(isFirst ? "show" : "")" data-bs-parent="#parent-floor">
+                                        <div class="faq-body">
+                                            <div class="box-img">
+                                                <img src="@Url.Content(floor.ImagePath)" alt="@floor.FloorName">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+                
+                @* File Attachments Section *@
+                <div class="single-property-element single-property-attachments">
+                    <h6 class="title fw-6">Tệp đính kèm</h6>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <a href="#" target="_blank" class="attachments-item">
+                                <div class="box-icon w-60">
+                                    <img src="@Url.Content("~/assets/images/home/file-1.png")" alt="file">
+                                </div>
+                                <span>Tài liệu bất động sản.pdf</span>
+                                <i class="icon icon-download"></i>
+                            </a>
+                        </div>
+                        <div class="col-sm-6">
+                            <a href="#" target="_blank" class="attachments-item">
+                                <div class="box-icon w-60">
+                                    <img src="@Url.Content("~/assets/images/home/file-2.png")" alt="file">
+                                </div>
+                                <span>Tài liệu bất động sản.pdf</span>
+                                <i class="icon icon-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                @* Explore Property (360 View) Section *@
+                <div class="single-property-element single-property-explore">
+                    <h5 class="title fw-6">Khám phá bất động sản</h5>
+                    <div class="box-img">
+                        @if (photos.Any())
+                        {
+                            var exploreImage = GetImagePath(photos.First().FilePath);
+                            <img src="@Url.Content(exploreImage)" alt="@Model.Title">
+                        }
+                        else
+                        {
+                            <img src="@Url.Content("~/assets/images/banner/banner-property-12.jpg")" alt="@Model.Title">
+                        }
+                        <div class="box-icon">
+                            <span class="icon icon-360"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                @* Loan Calculator - Moved to main content *@
+                <div class="single-property-element single-property-loan">
+                    <h5 class="title fw-6">Máy tính vay</h5>
+                    <form class="box-loan-calc" id="loanCalculatorForm">
+                        <div class="box-top">
+                            <div class="item-calc">
+                                <label for="loan1" class="label">Tổng số tiền:</label>
+                                <input type="number" id="loan1" placeholder="@Model.Price.ToString("N0")" class="form-control" value="@Model.Price.ToString("0")">
+                            </div>
+                            <div class="item-calc">
+                                <label for="loan2" class="label">Tiền đặt cọc:</label>
+                                <input type="number" id="loan2" placeholder="0" class="form-control" value="0">
+                            </div>
+                            <div class="item-calc">
+                                <label for="loan3" class="label">Thời hạn vay (tháng):</label>
+                                <input type="number" id="loan3" placeholder="240" class="form-control" value="240">
+                            </div>
+                            <div class="item-calc">
+                                <label for="loan4" class="label">Lãi suất (%):</label>
+                                <input type="number" id="loan4" placeholder="5" class="form-control" value="5" step="0.1">
+                            </div>
+                        </div>
+                            <div class="box-bottom">
+                                <button type="button" class="tf-btn primary" onclick="calculateLoan()">Tính toán</button>
+                                <div class="d-flex gap-4" id="loanResult" style="display: none;">
+                                    <span class="text-btn fw-6">Thanh toán hàng tháng:</span>
+                                    <span class="text-btn fw-6 text-primary" id="monthlyPayment"></span>
+                                </div>
+                            </div>
+                    </form>
+                </div>
+                
+                @* What's Nearby Section *@
+                <div class="single-property-element single-property-nearby">
+                    <h5 class="title fw-6">Xung quanh có gì?</h5>
+                    <p>Khám phá các tiện ích gần đây để xác định chính xác vị trí bất động sản của bạn và xác định các tiện ích xung quanh, cung cấp cái nhìn tổng quan về môi trường sống và sự tiện lợi của bất động sản.</p>
+                    <div class="row box-nearby">
+                        <div class="col-md-5">
+                            <ul class="box-left">
+                                <li class="item-nearby">
+                                    <span class="label">Trường học:</span>
+                                    <span class="fw-7">0.7 km</span>
+                                </li>
+                                <li class="item-nearby">
+                                    <span class="label">Đại học:</span>
+                                    <span class="fw-7">1.3 km</span>
+                                </li>
+                                <li class="item-nearby">
+                                    <span class="label">Trung tâm mua sắm:</span>
+                                    <span class="fw-7">0.6 km</span>
+                                </li>
+                                <li class="item-nearby">
+                                    <span class="label">Chợ:</span>
+                                    <span class="fw-7">1.1 km</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-5">
+                            <ul class="box-right">
+                                <li class="item-nearby">
+                                    <span class="label">Bệnh viện:</span>
+                                    <span class="fw-7">0.4 km</span>
+                                </li>
+                                <li class="item-nearby">
+                                    <span class="label">Trạm tàu điện ngầm:</span>
+                                    <span class="fw-7">1.8 km</span>
+                                </li>
+                                <li class="item-nearby">
+                                    <span class="label">Phòng tập, chăm sóc sức khỏe:</span>
+                                    <span class="fw-7">1.3 km</span>
+                                </li>
+                                <li class="item-nearby">
+                                    <span class="label">Sông:</span>
+                                    <span class="fw-7">2.1 km</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                @* Guest Reviews Section *@
+                <div class="single-property-element single-wrapper-review">
+                    <h5 class="title fw-6">Đánh giá của khách</h5>
+                    @{
+                        var approvedReviews = Model.Reviews?.Where(r => r.IsApproved == true).OrderByDescending(r => r.CreatedAt).ToList() ?? new List<Review>();
+                    }
+                    @if (approvedReviews.Any())
+                    {
+                        <form class="wrap-review">
+                            <ul class="box-review">
+                                @foreach (var review in approvedReviews.Take(3))
+                                {
+                                    <li class="list-review-item">
+                                        <div class="avatar avt-60">
+                                            <img src="@Url.Content($"~/assets/images/avatar/{(review.User?.Avatar ?? "avatarMacDinh.jpg")}")" alt="@(review.User?.FullName ?? "User")">
+                                        </div>
+                                        <div class="content">
+                                            <div class="box-head">
+                                                <div class="d-flex align-items-center flex-wrap justify-content-between gap-8">
+                                                    <h6>@(review.User?.FullName ?? "Ẩn danh")</h6>
+                                                    <ul class="list-star">
+                                                        @for (int i = 0; i < 5; i++)
+                                                        {
+                                                            <li class="icon icon-star @(i < review.Rating ? "" : "empty")"></li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                                <p class="mt-4 caption-2 text-variant-2">@(review.CreatedAt?.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("vi-VN")) ?? "N/A")</p>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(review.Title))
+                                            {
+                                                <h6 class="fw-6 mb-2">@review.Title</h6>
+                                            }
+                                            <p>@(review.Body ?? "Không có bình luận")</p>
+                                        </div>
+                                    </li>
+                                }
+                                @if (approvedReviews.Count > 3)
+                                {
+                                    <li class="list-review-item">
+                                        <button type="button" class="tf-btn btn-line" onclick="showAllReviews()">Xem tất cả đánh giá</button>
+                                    </li>
+                                }
+                            </ul>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-variant-2">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá bất động sản này!</p>
+                    }
+                    <div class="wrap-form-comment">
+                        <h5 class="text-black-2">Để lại bình luận</h5>
+                        <p class="text-variant-1 mt-8">Địa chỉ email của bạn sẽ không được công bố. Các trường bắt buộc được đánh dấu *</p>
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert-message alert-success">
+                                @TempData["SuccessMessage"]
+                            </div>
+                        }
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert-message alert-error">
+                                @TempData["ErrorMessage"]
+                            </div>
+                        }
+                        <div id="comments" class="comments">
+                            <div class="respond-comment">
+                                <form class="comment-form form-submit" id="reviewForm" asp-action="SubmitReview" asp-controller="Property" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="propertyId" value="@Model.PropertyId" />
+                                    <div class="form-wg group-ip">
+                                        <fieldset>
+                                            <label class="sub-ip">Tên *</label>
+                                            <input type="text" class="form-control" name="name" placeholder="Tên của bạn" required>
+                                        </fieldset>
+                                        <fieldset>
+                                            <label class="sub-ip">Email *</label>
+                                            <input type="email" class="form-control" name="email" placeholder="Email của bạn" required>
+                                        </fieldset>
+                                    </div>
+                                    <fieldset class="form-wg">
+                                        <label class="sub-ip">Đánh giá *</label>
+                                        <div class="rating-input mb-3">
+                                            <input type="radio" id="rating1" name="rating" value="1" required>
+                                            <label for="rating1"><i class="icon icon-star"></i></label>
+                                            <input type="radio" id="rating2" name="rating" value="2" required>
+                                            <label for="rating2"><i class="icon icon-star"></i></label>
+                                            <input type="radio" id="rating3" name="rating" value="3" required>
+                                            <label for="rating3"><i class="icon icon-star"></i></label>
+                                            <input type="radio" id="rating4" name="rating" value="4" required>
+                                            <label for="rating4"><i class="icon icon-star"></i></label>
+                                            <input type="radio" id="rating5" name="rating" value="5" required>
+                                            <label for="rating5"><i class="icon icon-star"></i></label>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="form-wg">
+                                        <label class="sub-ip">Tiêu đề</label>
+                                        <input type="text" class="form-control" name="title" placeholder="Tiêu đề đánh giá (tùy chọn)">
+                                    </fieldset>
+                                    <fieldset class="form-wg">
+                                        <label class="sub-ip">Đánh giá *</label>
+                                        <textarea name="body" rows="4" tabindex="4" placeholder="Viết đánh giá của bạn" aria-required="true" required></textarea>
+                                    </fieldset>
+                                    <button class="form-wg tf-btn primary w-100" name="submit" type="submit">
+                                        <span>Đăng bình luận</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-4 col-lg-5">
+                <div class="single-sidebar fixed-sidebar">
+                    @* Contact Sellers *@
+                    <div class="widget-box single-property-contact">
+                        <h5 class="title fw-6">Liên hệ người bán</h5>
+                        @if (Model.Agent != null && Model.Agent.User != null)
+                        {
+                            <div class="box-avatar">
+                                <div class="avatar avt-100 round">
+                                    <img src="@Url.Content($"~/assets/images/avatar/{(Model.Agent.User.Avatar ?? "avatarMacDinh.jpg")}")" alt="@Model.Agent.User.FullName">
+                                </div>
+                                <div class="info">
+                                    <h6 class="name">@Model.Agent.User.FullName</h6>
+                                    <ul class="list">
+                                        <li class="d-flex align-items-center gap-4 text-variant-1">
+                                            <i class="icon icon-phone"></i>@(Model.Agent.User.Phone ?? "N/A")
+                                        </li>
+                                        <li class="d-flex align-items-center gap-4 text-variant-1">
+                                            <i class="icon icon-mail"></i>@(Model.Agent.User.Email ?? "N/A")
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="box-avatar">
+                                <div class="avatar avt-100 round">
+                                    <img src="@Url.Content("~/assets/images/avatar/avatarMacDinh.jpg")" alt="Agent">
+                                </div>
+                                <div class="info">
+                                    <h6 class="name">Chưa có đại lý được chỉ định</h6>
+                                </div>
+                            </div>
+                        }
+                        <form action="#" class="contact-form" id="contactForm">
+                            <div class="ip-group">
+                                <input type="text" name="name" placeholder="Tên của bạn" class="form-control" required>
+                            </div>
+                            <div class="ip-group">
+                                <input type="tel" name="phone" placeholder="vd 0123456789" class="form-control" required>
+                            </div>
+                            <div class="ip-group">
+                                <input type="email" name="email" placeholder="email@example.com" class="form-control" required>
+                            </div>
+                            <div class="ip-group">
+                                <textarea name="message" rows="4" tabindex="4" placeholder="Tin nhắn" aria-required="true" required></textarea>
+                            </div>
+                            <button type="submit" class="tf-btn btn-view primary hover-btn-view w-100">
+                                Gửi tin nhắn <span class="icon icon-arrow-right2"></span>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    @* Why Choose Us *@
+                    <div class="widget-box single-property-whychoose">
+                        <h5 class="title fw-6">Tại sao chọn chúng tôi?</h5>
+                        <ul class="box-whychoose">
+                            <li class="item-why">
+                                <i class="icon icon-secure"></i>
+                                Đặt chỗ an toàn
+                            </li>
+                            <li class="item-why">
+                                <i class="icon icon-guarantee"></i>
+                                Đảm bảo giá tốt nhất
+                            </li>
+                            <li class="item-why">
+                                <i class="icon icon-booking"></i>
+                                Quy trình đặt chỗ dễ dàng
+                            </li>
+                            <li class="item-why">
+                                <i class="icon icon-support"></i>
+                                Hỗ trợ 24/7
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    @* Latest Properties *@
+                    <div class="box-latest-property">
+                        <h5 class="fw-6 title">Bất Động Sản Mới Nhất</h5>
+                        @{
+                            var latestProperties = ViewBag.LatestProperties as List<HomeLengo.Models.Property>;
+                            if (latestProperties == null)
+                            {
+                                latestProperties = new List<HomeLengo.Models.Property>();
+                            }
+                            
+                            // Debug: Kiểm tra số lượng properties
+                            // @latestProperties.Count properties found
+                            
+                            // Helper function để lấy image path
+                            string GetPropertyImagePath(HomeLengo.Models.Property prop)
+                            {
+                                var photo = prop.PropertyPhotos?
+                                    .OrderByDescending(p => p.IsPrimary == true)
+                                    .ThenBy(p => p.SortOrder ?? 0)
+                                    .FirstOrDefault();
+                                
+                                if (photo != null && !string.IsNullOrEmpty(photo.FilePath))
+                                {
+                                    var filePath = photo.FilePath.Trim();
+                                    if (filePath.StartsWith("~/"))
+                                        return filePath;
+                                    if (filePath.StartsWith("/"))
+                                        return "~" + filePath;
+                                    if (filePath.Contains("assets/"))
+                                        return "~/" + filePath.TrimStart('/');
+                                    return "~/assets/images/home/" + filePath.TrimStart('/');
+                                }
+                                return "~/assets/images/banner/banner-property-12.jpg";
+                            }
+                        }
+                        @if (latestProperties.Any())
+                        {
+                            <ul>
+                                @foreach (var item in latestProperties)
+                                {
+                                    var imagePath = GetPropertyImagePath(item);
+                                    <li class="latest-property-item">
+                                        <a href="@Url.Action("Details", "Property", new { id = item.PropertyId })" class="images-style">
+                                            <img src="@Url.Content(imagePath)" alt="@item.Title">
+                                        </a>
+                                        <div class="content">
+                                            <div class="text-capitalize text-btn">
+                                                <a href="@Url.Action("Details", "Property", new { id = item.PropertyId })" class="link">@item.Title</a>
+                                            </div>
+                                            <ul class="meta-list mt-6">
+                                                @if (item.Bedrooms.HasValue)
+                                                {
+                                                    <li class="item">
+                                                        <i class="icon icon-bed"></i>
+                                                        <span class="text-variant-1">Phòng ngủ:</span>
+                                                        <span class="fw-6">@item.Bedrooms</span>
+                                                    </li>
+                                                }
+                                                @if (item.Bathrooms.HasValue)
+                                                {
+                                                    <li class="item">
+                                                        <i class="icon icon-bath"></i>
+                                                        <span class="text-variant-1">Phòng tắm:</span>
+                                                        <span class="fw-6">@item.Bathrooms</span>
+                                                    </li>
+                                                }
+                                                @if (item.Area.HasValue)
+                                                {
+                                                    <li class="item">
+                                                        <i class="icon icon-sqft"></i>
+                                                        <span class="text-variant-1">Diện tích:</span>
+                                                        <span class="fw-6">@item.Area m²</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                            <div class="mt-10 text-btn">@item.Price.ToString("N0") @(item.Currency ?? "VND")</div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-variant-2">Chưa có bất động sản nào</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@* CSS để đảm bảo thumbnail đều nhau *@
+<style>
+    .thumbs-sw-pagi .swiper-slide {
+        width: auto !important;
+        flex-shrink: 0;
+    }
+    
+    .thumbs-sw-pagi .img-thumb-pagi {
+        width: 120px !important;
+        height: 120px !important;
+        border-radius: 8px;
+        overflow: hidden;
+        display: block;
+    }
+    
+    .thumbs-sw-pagi .img-thumb-pagi img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block;
+    }
+    
+    @@media (max-width: 768px) {
+        .thumbs-sw-pagi .img-thumb-pagi {
+            width: 80px !important;
+            height: 80px !important;
+        }
+    }
+    
+    /* Rating Input Styles */
+    .rating-input {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+    
+    .rating-input input[type="radio"] {
+        display: none;
+    }
+    
+    .rating-input label {
+        cursor: pointer;
+        font-size: 24px;
+        color: #ddd;
+        transition: color 0.2s;
+        margin: 0;
+    }
+    
+    .rating-input label i {
+        color: inherit;
+    }
+    
+    .rating-input label:hover,
+    .rating-input label:hover ~ label {
+        color: #ffc107;
+    }
+    
+    .rating-input input[type="radio"]:checked ~ label {
+        color: #ffc107;
+    }
+    
+    .rating-input input[type="radio"]:checked ~ label,
+    .rating-input input[type="radio"]:checked ~ label ~ label {
+        color: #ffc107;
+    }
+    
+    /* Reverse order for proper star highlighting */
+    .rating-input {
+        flex-direction: row-reverse;
+    }
+    
+    .rating-input input[type="radio"]:checked ~ label,
+    .rating-input input[type="radio"]:checked ~ label ~ label {
+        color: #ffc107;
+    }
+    
+    /* Alert Messages */
+    .alert-message {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+
+@* Loan Calculator JavaScript *@
+<script>
+    function calculateLoan() {
+        var totalAmount = parseFloat(document.getElementById('loan1').value) || 0;
+        var downPayment = parseFloat(document.getElementById('loan2').value) || 0;
+        var months = parseInt(document.getElementById('loan3').value) || 240;
+        var interestRate = parseFloat(document.getElementById('loan4').value) || 5;
+        
+        var loanAmount = totalAmount - downPayment;
+        var monthlyRate = (interestRate / 100) / 12;
+        
+        if (monthlyRate === 0) {
+            var monthlyPayment = loanAmount / months;
+        } else {
+            var monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+        }
+        
+        var currency = '@(Model.Currency ?? "VND")';
+        var formattedPayment = monthlyPayment.toLocaleString('vi-VN', { 
+            minimumFractionDigits: 0, 
+            maximumFractionDigits: 0 
+        });
+        
+        document.getElementById('monthlyPayment').textContent = formattedPayment + ' ' + currency;
+        document.getElementById('loanResult').style.display = 'flex';
+    }
+    
+    // Contact Form Handler
+    document.getElementById('contactForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Cảm ơn tin nhắn của bạn! Chúng tôi sẽ liên hệ sớm.');
+        this.reset();
+    });
+    
+    // Review Form Handler
+    document.getElementById('reviewForm')?.addEventListener('submit', function(e) {
+        var rating = document.querySelector('input[name="rating"]:checked');
+        if (!rating) {
+            e.preventDefault();
+            alert('Vui lòng chọn đánh giá.');
+            return false;
+        }
+        // Form will submit normally to server
+    });
+    
+    // Rating stars interaction
+    document.addEventListener('DOMContentLoaded', function() {
+        var ratingInputs = document.querySelectorAll('.rating-input input[type="radio"]');
+        var ratingLabels = document.querySelectorAll('.rating-input label');
+        
+        ratingInputs.forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                var value = parseInt(this.value);
+                ratingLabels.forEach(function(label, index) {
+                    var starValue = 5 - index; // Reverse order
+                    var icon = label.querySelector('i');
+                    if (icon) {
+                        if (starValue <= value) {
+                            icon.style.color = '#ffc107';
+                        } else {
+                            icon.style.color = '#ddd';
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Initialize labels color
+        ratingLabels.forEach(function(label) {
+            var icon = label.querySelector('i');
+            if (icon) {
+                icon.style.color = '#ddd';
+            }
+        });
+    });
+    
+    function showAllReviews() {
+        // Scroll to reviews section or show all reviews
+        var reviewsSection = document.querySelector('.single-wrapper-review');
+        if (reviewsSection) {
+            reviewsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+</script>
+
+@* Script để đảm bảo Swiper gallery được khởi tạo đúng *@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Đảm bảo Swiper được khởi tạo sau khi DOM load xong
+        // Code khởi tạo Swiper đã có trong carousel.js
+        // Kiểm tra xem Swiper đã được khởi tạo chưa
+        setTimeout(function() {
+            var swiperSingle = document.querySelector('.sw-single');
+            if (swiperSingle && !swiperSingle.swiper) {
+                // Nếu Swiper chưa được khởi tạo, thử khởi tạo lại
+                console.log('Swiper gallery initialized');
+            }
+        }, 500);
+    });
+</script>

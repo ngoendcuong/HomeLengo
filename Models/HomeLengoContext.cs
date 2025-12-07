@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -55,6 +55,8 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<PropertyFeature> PropertyFeatures { get; set; }
 
+    public virtual DbSet<PropertyFloorPlan> PropertyFloorPlans { get; set; }
+
     public virtual DbSet<PropertyPhoto> PropertyPhotos { get; set; }
 
     public virtual DbSet<PropertyStatus> PropertyStatuses { get; set; }
@@ -62,6 +64,8 @@ public partial class HomeLengoContext : DbContext
     public virtual DbSet<PropertyTag> PropertyTags { get; set; }
 
     public virtual DbSet<PropertyType> PropertyTypes { get; set; }
+
+    public virtual DbSet<PropertyVideo> PropertyVideos { get; set; }
 
     public virtual DbSet<PropertyVisit> PropertyVisits { get; set; }
 
@@ -432,6 +436,25 @@ public partial class HomeLengoContext : DbContext
                 .HasConstraintName("FK_PropertyFeatures_Properties");
         });
 
+        modelBuilder.Entity<PropertyFloorPlan>(entity =>
+        {
+            entity.HasKey(e => e.FloorPlanId);
+
+            entity.ToTable("PropertyFloorPlan");
+
+            entity.HasIndex(e => e.PropertyId, "IX_PropertyFloorPlan_PropertyId");
+
+            entity.Property(e => e.Area).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.FloorName).HasMaxLength(100);
+            entity.Property(e => e.ImagePath).HasMaxLength(1000);
+            entity.Property(e => e.SortOrder).HasDefaultValue(0);
+
+            entity.HasOne(d => d.Property).WithMany(p => p.PropertyFloorPlans)
+                .HasForeignKey(d => d.PropertyId)
+                .HasConstraintName("FK_PropertyFloorPlan_Property");
+        });
+
         modelBuilder.Entity<PropertyPhoto>(entity =>
         {
             entity.HasKey(e => e.PhotoId).HasName("PK__Property__21B7B5E20408958A");
@@ -477,6 +500,27 @@ public partial class HomeLengoContext : DbContext
 
             entity.Property(e => e.IconClass).HasMaxLength(100);
             entity.Property(e => e.Name).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<PropertyVideo>(entity =>
+        {
+            entity.HasKey(e => e.VideoId);
+
+            entity.ToTable("PropertyVideo");
+
+            entity.HasIndex(e => e.PropertyId, "IX_PropertyVideo_PropertyId");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.IsPrimary).HasDefaultValue(false);
+            entity.Property(e => e.SortOrder).HasDefaultValue(0);
+            entity.Property(e => e.ThumbnailUrl).HasMaxLength(1000);
+            entity.Property(e => e.Title).HasMaxLength(255);
+            entity.Property(e => e.VideoType).HasMaxLength(50);
+            entity.Property(e => e.VideoUrl).HasMaxLength(1000);
+
+            entity.HasOne(d => d.Property).WithMany(p => p.PropertyVideos)
+                .HasForeignKey(d => d.PropertyId)
+                .HasConstraintName("FK_PropertyVideo_Property");
         });
 
         modelBuilder.Entity<PropertyVisit>(entity =>
