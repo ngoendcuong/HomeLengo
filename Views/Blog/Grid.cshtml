@@ -1,0 +1,68 @@
+﻿@model IEnumerable<HomeLengo.Models.Blog>
+<!-- Page Title -->
+<section class="flat-title-page" style="background-image: url('/assets/images/banner/banner-property-12.jpg');">
+    <div class="container">
+        <div class="breadcrumb-content">
+            <ul class="breadcrumb">
+                <li><a href="index.html" class="text-white">Trang Chủ</a></li>
+
+                <li class="text-white">/ Tin Tức</li>
+            </ul>
+            <h1 class="text-center text-white title">Tin Tức</h1>
+        </div>
+    </div>
+</section>
+<!-- End Page Title -->
+<!-- Section Blog Grid -->
+<section class="flat-section">
+    <div class="container">
+        <div class="row">
+
+
+<section class="flat-section">
+    <div class="container">
+        <div class="row">
+
+            @foreach (var item in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <a href="/blog/detail/@item.BlogId" class="flat-blog-item hover-img">
+
+                        <div class="img-style">
+                            <img class="lazyload"
+                                 src="~/assets/images/blog/@item.Thumbnail"
+                                 alt="@item.Title" />
+                            <span class="date-post">
+                                @item.PublishedAt?.ToString("MMMM dd, yyyy")
+                            </span>
+                        </div>
+
+                        <div class="content-box">
+
+                            <div class="post-author">
+                                <span class="fw-6">@item.Author?.FullName</span>
+                                <span> | </span>
+
+                                <a href="/blog/category/@item.Category?.Slug" class="text-muted">
+                                    @item.Category?.Name
+                                </a>
+                            </div>
+
+                            <h5 class="title link">@item.Title</h5>
+
+                            <p class="description">
+                                @(item.Content.Length > 120
+                                    ? item.Content.Substring(0, 120) + "..."
+                                    : item.Content)
+                            </p>
+
+                        </div>
+
+                    </a>
+                </div>
+            }
+
+        </div>
+    </div>
+</section>
+<!-- End Section Blog Grid -->
