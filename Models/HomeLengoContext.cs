@@ -88,8 +88,16 @@ public partial class HomeLengoContext : DbContext
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("data source=LAPTOP-ET6L9RLV\\SQLEXPRESS; initial catalog=HomeLengo; integrated security=True; TrustServerCertificate=True;");
+    {
+        // Connection string is configured in Program.cs via appsettings.json
+        // Only configure here if options are not already set (for design-time scenarios)
+        if (!optionsBuilder.IsConfigured)
+        {
+            // This should not be reached in runtime as Program.cs configures the context
+            // But kept for design-time tooling (migrations, scaffolding, etc.)
+            // You can set a default connection string here for design-time only
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

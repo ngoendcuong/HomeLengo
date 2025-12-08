@@ -1,0 +1,582 @@
+@model HomeLengo.Models.Property
+@{
+    ViewData["Title"] = "Edit Property";
+}
+
+<div class="main-content">
+    <div class="main-content-inner">
+        <div class="button-show-hide show-mb">
+            <span class="body-1">Show Dashboard</span>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-7">Edit Property</h4>
+            <a href="/Admin/Property/MyProperties" class="tf-btn btn-line">Back to My Properties</a>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger" role="alert">
+                <h5>Please fix the following errors:</h5>
+                <div asp-validation-summary="All" class="text-danger"></div>
+            </div>
+        }
+
+        <form asp-area="Admin" asp-controller="Property" asp-action="Edit" asp-route-id="@Model.PropertyId" method="post" enctype="multipart/form-data" id="editPropertyForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PropertyId" />
+            <input type="hidden" asp-for="AgentId" />
+            <input type="hidden" asp-for="CreatedAt" />
+            <input type="hidden" name="primaryPhotoId" id="primaryPhotoId" value="@(Model.PropertyPhotos?.FirstOrDefault(p => p.IsPrimary == true)?.PhotoId)" />
+            <input type="hidden" name="photoOrder" id="photoOrder" value="" />
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Basic Information</h5>
+                <div class="box-info-property">
+                    <fieldset class="box box-fieldset">
+                        <label>
+                            Title:<span>*</span>
+                        </label>
+                        <input type="text" asp-for="Title" class="form-control" placeholder="Enter property title" required>
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </fieldset>
+                    
+                    <fieldset class="box box-fieldset">
+                        <label>Description:</label>
+                        <textarea asp-for="Description" class="textarea" placeholder="Enter property description" rows="5"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </fieldset>
+
+                    <div class="box grid-3 gap-30">
+                        <fieldset class="box-fieldset">
+                            <label>
+                                Property Type:<span>*</span>
+                            </label>
+                            <select asp-for="PropertyTypeId" asp-items="ViewBag.PropertyTypes" class="form-select" required>
+                                <option value="">-- Select Property Type --</option>
+                            </select>
+                            <span asp-validation-for="PropertyTypeId" class="text-danger"></span>
+                        </fieldset>
+
+                        <fieldset class="box-fieldset">
+                            <label>
+                                Status:<span>*</span>
+                            </label>
+                            <select asp-for="StatusId" asp-items="ViewBag.Statuses" class="form-select" required>
+                                <option value="">-- Select Status --</option>
+                            </select>
+                            <span asp-validation-for="StatusId" class="text-danger"></span>
+                        </fieldset>
+
+                        <fieldset class="box-fieldset">
+                            <label>
+                                Currency:<span>*</span>
+                            </label>
+                            <input type="text" asp-for="Currency" class="form-control" placeholder="VND, USD, etc." value="@(Model.Currency ?? "VND")" required>
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Upload Media</h5>
+                <div class="box-uploadfile text-center">
+                    <div class="uploadfile">
+                        <div class="btn-upload tf-btn primary">
+                            <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13.625 14.375V17.1875C13.625 17.705 13.205 18.125 12.6875 18.125H4.5625C4.31386 18.125 4.0754 18.0262 3.89959 17.8504C3.72377 17.6746 3.625 17.4361 3.625 17.1875V6.5625C3.625 6.045 4.045 5.625 4.5625 5.625H6.125C6.54381 5.62472 6.96192 5.65928 7.375 5.72834M13.625 14.375H16.4375C16.955 14.375 17.375 13.955 17.375 13.4375V9.375C17.375 5.65834 14.6725 2.57417 11.125 1.97834C10.7119 1.90928 10.2938 1.87472 9.875 1.875H8.3125C7.795 1.875 7.375 2.295 7.375 2.8125V5.72834M13.625 14.375H8.3125C8.06386 14.375 7.8254 14.2762 7.64959 14.1004C7.47377 13.9246 7.375 13.6861 7.375 13.4375V5.72834M17.375 11.25V9.6875C17.375 8.94158 17.0787 8.22621 16.5512 7.69876C16.0238 7.17132 15.3084 6.875 14.5625 6.875H13.3125C13.0639 6.875 12.8254 6.77623 12.6496 6.60041C12.4738 6.4246 12.375 6.18614 12.375 5.9375V4.6875C12.375 4.31816 12.3023 3.95243 12.1609 3.6112C12.0196 3.26998 11.8124 2.95993 11.5512 2.69876C11.2901 2.4376 10.98 2.23043 10.6388 2.08909C10.2976 1.94775 9.93184 1.875 9.5625 1.875H8.625" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Select photos
+                            <input type="file" class="ip-file" id="photoUpload" accept="image/*" multiple>
+                        </div>
+                        <p class="file-name fw-5">or drag photos here <br>
+                            <span>(Up to 10 photos)</span></p>
+                    </div>
+                </div>
+                <div class="box-img-upload" id="photoContainer" style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    @if (Model.PropertyPhotos != null && Model.PropertyPhotos.Any())
+                    {
+                        @foreach (var photo in Model.PropertyPhotos.OrderByDescending(p => p.IsPrimary == true).ThenBy(p => p.SortOrder ?? 0))
+                        {
+                            string GetImagePath(string filePath)
+                            {
+                                if (string.IsNullOrEmpty(filePath))
+                                    return "~/assets/images/home/house-18.jpg";
+                                
+                                filePath = filePath.Trim();
+                                
+                                if (filePath.StartsWith("~/"))
+                                    return filePath;
+                                
+                                if (filePath.StartsWith("/"))
+                                    return "~" + filePath;
+                                
+                                if (filePath.Contains("assets/"))
+                                    return "~/" + filePath.TrimStart('/');
+                                
+                                return "~/assets/images/home/" + filePath.TrimStart('/');
+                            }
+                            
+                            var photoUrl = Url.Content(GetImagePath(photo.FilePath));
+                            <div class="item-upload file-delete photo-item" data-photo-id="@photo.PhotoId" style="position: relative; width: 150px; height: 150px; cursor: move;">
+                                <img src="@photoUrl" alt="@photo.AltText" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/home/house-18.jpg")'">
+                                @if (photo.IsPrimary == true)
+                                {
+                                    <span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px; padding: 4px 8px; font-size: 11px; z-index: 10;">Primary</span>
+                                }
+                                <span class="icon icon-trash remove-file" data-photo-id="@photo.PhotoId" title="Delete photo" style="position: absolute; top: 5px; right: 5px; cursor: pointer; background: rgba(255,0,0,0.7); padding: 5px; border-radius: 4px; z-index: 10;"></span>
+                                @if (photo.IsPrimary != true)
+                                {
+                                    <span class="btn-set-primary" data-photo-id="@photo.PhotoId" title="Set as primary" style="position: absolute; bottom: 5px; left: 5px; padding: 4px 8px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; cursor: pointer; font-size: 11px; z-index: 10;">Set Primary</span>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Location</h5>
+                <div class="box-info-property">
+                    <fieldset class="box box-fieldset">
+                        <label>
+                            Full Address:<span>*</span>
+                        </label>
+                        <input type="text" asp-for="Address" class="form-control" placeholder="Enter property full address" required>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </fieldset>
+
+                    <div class="box grid-3 gap-30">
+                        <fieldset class="box-fieldset">
+                            <label>
+                                City:<span>*</span>
+                            </label>
+                            <select asp-for="CityId" asp-items="ViewBag.Cities" class="form-select" id="citySelect" required>
+                                <option value="">Select City</option>
+                            </select>
+                            <span asp-validation-for="CityId" class="text-danger"></span>
+                        </fieldset>
+
+                        <fieldset class="box-fieldset">
+                            <label>
+                                District:<span>*</span>
+                            </label>
+                            <select asp-for="DistrictId" asp-items="ViewBag.Districts" class="form-select" id="districtSelect" required>
+                                <option value="">Select District</option>
+                            </select>
+                            <span asp-validation-for="DistrictId" class="text-danger"></span>
+                        </fieldset>
+
+                        <fieldset class="box-fieldset">
+                            <label>
+                                Neighborhood:
+                            </label>
+                            <select asp-for="NeighborhoodId" asp-items="ViewBag.Neighborhoods" class="form-select" id="neighborhoodSelect">
+                                <option value="">Select Neighborhood</option>
+                            </select>
+                            <span asp-validation-for="NeighborhoodId" class="text-danger"></span>
+                        </fieldset>
+                    </div>
+
+                    <div class="box grid-2 gap-30">
+                        <fieldset class="box-fieldset">
+                            <label>Latitude:</label>
+                            <input type="number" asp-for="Latitude" class="form-control" step="any" placeholder="e.g., 10.762622">
+                            <span asp-validation-for="Latitude" class="text-danger"></span>
+                        </fieldset>
+
+                        <fieldset class="box-fieldset">
+                            <label>Longitude:</label>
+                            <input type="number" asp-for="Longitude" class="form-control" step="any" placeholder="e.g., 106.660172">
+                            <span asp-validation-for="Longitude" class="text-danger"></span>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Price</h5>
+                <div class="box-price-property">
+                    <fieldset class="box-fieldset">
+                        <label>Price:<span>*</span></label>
+                        <input type="number" asp-for="Price" class="form-control" placeholder="Enter price" step="0.01" min="0" required>
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </fieldset>
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Additional Information</h5>
+                <div class="box grid-3 gap-30">
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Area (SqFt):<span>*</span>
+                        </label>
+                        <input type="number" asp-for="Area" class="form-control" placeholder="Enter area" step="0.01" min="0">
+                        <span asp-validation-for="Area" class="text-danger"></span>
+                    </fieldset>
+
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Lot Size (SqFt):
+                        </label>
+                        <input type="number" asp-for="LotSize" class="form-control" placeholder="Enter lot size" step="0.01" min="0">
+                        <span asp-validation-for="LotSize" class="text-danger"></span>
+                    </fieldset>
+
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Bedrooms:
+                        </label>
+                        <input type="number" asp-for="Bedrooms" class="form-control" placeholder="Enter number of bedrooms" min="0">
+                        <span asp-validation-for="Bedrooms" class="text-danger"></span>
+                    </fieldset>
+                </div>
+
+                <div class="box grid-3 gap-30">
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Bathrooms:
+                        </label>
+                        <input type="number" asp-for="Bathrooms" class="form-control" placeholder="Enter number of bathrooms" min="0">
+                        <span asp-validation-for="Bathrooms" class="text-danger"></span>
+                    </fieldset>
+
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Views:
+                        </label>
+                        <input type="number" asp-for="Views" class="form-control" placeholder="Enter views count" min="0">
+                        <span asp-validation-for="Views" class="text-danger"></span>
+                    </fieldset>
+
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Is Featured:
+                        </label>
+                        <div class="form-check form-switch mt-2">
+                            <input type="checkbox" name="IsFeatured" value="true" class="form-check-input" id="isFeatured" @(Model.IsFeatured == true ? "checked" : "")>
+                            <input type="hidden" name="IsFeatured" value="false">
+                            <label class="form-check-label" for="isFeatured">Featured Property</label>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Amenities<span>*</span></h5>
+                <div class="box-amenities-property">
+                    @if (ViewBag.Amenities != null)
+                    {
+                        var amenities = ViewBag.Amenities as List<HomeLengo.Models.Amenity>;
+                        var selectedAmenities = ViewBag.SelectedAmenities as int[] ?? new int[0];
+                        
+                        @if (amenities != null && amenities.Any())
+                        {
+                            <div class="list-amenities">
+                                @foreach (var amenity in amenities)
+                                {
+                                    <fieldset class="amenities-item">
+                                        <input type="checkbox" name="selectedAmenities" value="@amenity.AmenityId" 
+                                               id="amenity_@amenity.AmenityId" 
+                                               class="tf-checkbox style-1" 
+                                               @(selectedAmenities.Contains(amenity.AmenityId) ? "checked" : "")>
+                                        <label for="amenity_@amenity.AmenityId" class="text-cb-amenities">@amenity.Name</label>
+                                    </fieldset>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No amenities available</p>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Features<span>*</span></h5>
+                <div class="box-amenities-property">
+                    @if (ViewBag.Features != null)
+                    {
+                        var features = ViewBag.Features as List<HomeLengo.Models.Feature>;
+                        var selectedFeatures = ViewBag.SelectedFeatures as int[] ?? new int[0];
+                        
+                        @if (features != null && features.Any())
+                        {
+                            <div class="list-amenities">
+                                @foreach (var feature in features)
+                                {
+                                    <fieldset class="amenities-item">
+                                        <input type="checkbox" name="selectedFeatures" value="@feature.FeatureId" 
+                                               id="feature_@feature.FeatureId" 
+                                               class="tf-checkbox style-1" 
+                                               @(selectedFeatures.Contains(feature.FeatureId) ? "checked" : "")>
+                                        <label for="feature_@feature.FeatureId" class="text-cb-amenities">@feature.Name</label>
+                                    </fieldset>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No features available</p>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-end">
+                <a href="/Admin/Property/MyProperties" class="tf-btn btn-line">Cancel</a>
+                <button type="submit" class="tf-btn primary">Update Property</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Ensure PropertyTypeId and StatusId are set from model if not already selected
+            var propertyTypeId = '@Model.PropertyTypeId';
+            var statusId = '@Model.StatusId';
+            
+            if (propertyTypeId && propertyTypeId !== '0' && $('#PropertyTypeId').val() === '' || $('#PropertyTypeId').val() === '0') {
+                $('#PropertyTypeId').val(propertyTypeId);
+            }
+            
+            if (statusId && statusId !== '0' && $('#StatusId').val() === '' || $('#StatusId').val() === '0') {
+                $('#StatusId').val(statusId);
+            }
+            
+            // Initialize photo order function
+            function updatePhotoOrder() {
+                var photoIds = [];
+                $('#photoContainer .photo-item').each(function() {
+                    var photoId = $(this).data('photo-id');
+                    if (photoId) {
+                        photoIds.push(photoId);
+                    }
+                });
+                $('#photoOrder').val(photoIds.join(','));
+            }
+            
+            // Initialize photo order on page load
+            updatePhotoOrder();
+            
+            // Handle city change to load districts
+            $('#citySelect').on('change', function() {
+                var cityId = $(this).val();
+                if (cityId) {
+                    $.ajax({
+                        url: '/Admin/Property/GetDistricts',
+                        type: 'GET',
+                        data: { cityId: cityId },
+                        success: function(data) {
+                            $('#districtSelect').empty().append('<option value="">Select District</option>');
+                            $('#neighborhoodSelect').empty().append('<option value="">Select Neighborhood</option>');
+                            $.each(data, function(i, district) {
+                                $('#districtSelect').append($('<option></option>').val(district.districtId).text(district.name));
+                            });
+                        }
+                    });
+                } else {
+                    $('#districtSelect').empty().append('<option value="">Select District</option>');
+                    $('#neighborhoodSelect').empty().append('<option value="">Select Neighborhood</option>');
+                }
+            });
+
+            // Handle district change to load neighborhoods
+            $('#districtSelect').on('change', function() {
+                var districtId = $(this).val();
+                if (districtId) {
+                    $.ajax({
+                        url: '/Admin/Property/GetNeighborhoods',
+                        type: 'GET',
+                        data: { districtId: districtId },
+                        success: function(data) {
+                            $('#neighborhoodSelect').empty().append('<option value="">Select Neighborhood</option>');
+                            $.each(data, function(i, neighborhood) {
+                                $('#neighborhoodSelect').append($('<option></option>').val(neighborhood.neighborhoodId).text(neighborhood.name));
+                            });
+                        }
+                    });
+                } else {
+                    $('#neighborhoodSelect').empty().append('<option value="">Select Neighborhood</option>');
+                }
+            });
+
+            // Handle photo upload
+            $('#photoUpload').on('change', function(e) {
+                var files = e.target.files;
+                if (files.length > 0) {
+                    var propertyId = @Model.PropertyId;
+                    var uploadCount = 0;
+                    var errorCount = 0;
+                    
+                    function uploadFile(index) {
+                        if (index >= files.length) {
+                            if (uploadCount > 0) {
+                                location.reload(); // Reload to show new photos
+                            }
+                            return;
+                        }
+                        
+                        var formData = new FormData();
+                        formData.append('file', files[index]);
+                        formData.append('propertyId', propertyId);
+
+                        $.ajax({
+                            url: '/Admin/Property/UploadPhoto',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function(response) {
+                                if (response.success) {
+                                    uploadCount++;
+                                } else {
+                                    errorCount++;
+                                    console.error('Error uploading file:', response.message);
+                                }
+                                uploadFile(index + 1);
+                            },
+                            error: function() {
+                                errorCount++;
+                                console.error('Error uploading file');
+                                uploadFile(index + 1);
+                            }
+                        });
+                    }
+                    
+                    uploadFile(0);
+                }
+            });
+
+            // Handle photo delete
+            $(document).on('click', '.remove-file', function(e) {
+                e.preventDefault();
+                var photoId = $(this).data('photo-id');
+                var $item = $(this).closest('.photo-item');
+                
+                if (confirm('Are you sure you want to delete this photo?')) {
+                    $.ajax({
+                        url: '/Admin/Property/DeletePhoto',
+                        type: 'POST',
+                        data: {
+                            photoId: photoId,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // If deleted photo was primary, clear primary
+                                if (currentPrimaryPhotoId == photoId) {
+                                    $('#primaryPhotoId').val('');
+                                    currentPrimaryPhotoId = null;
+                                }
+                                $item.fadeOut(300, function() {
+                                    $(this).remove();
+                                    updatePhotoOrder();
+                                });
+                            } else {
+                                alert('Error: ' + response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('An error occurred while deleting the photo.');
+                        }
+                    });
+                }
+            });
+
+            // Update photo order on form submit
+            $('#editPropertyForm').on('submit', function(e) {
+                updatePhotoOrder();
+                // Let form submit normally - server-side validation will handle errors
+            });
+
+            // Handle set primary photo
+            var currentPrimaryPhotoId = $('#primaryPhotoId').val();
+            $(document).on('click', '.btn-set-primary', function(e) {
+                e.preventDefault();
+                var photoId = $(this).data('photo-id');
+                
+                // Update UI immediately
+                $('.badge.bg-primary').remove();
+                $('.btn-set-primary').show();
+                
+                $(this).hide();
+                $(this).closest('.photo-item').prepend('<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px; padding: 4px 8px; font-size: 11px; z-index: 10;">Primary</span>');
+                
+                // Update hidden input
+                $('#primaryPhotoId').val(photoId);
+                currentPrimaryPhotoId = photoId;
+            });
+
+            // Drag and drop functionality
+            var uploadArea = $('.uploadfile');
+            uploadArea.on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).addClass('dragover');
+            });
+
+            uploadArea.on('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+            });
+
+            uploadArea.on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+                
+                var files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    var propertyId = @Model.PropertyId;
+                    var uploadCount = 0;
+                    var errorCount = 0;
+                    
+                    function uploadFile(index) {
+                        if (index >= files.length) {
+                            if (uploadCount > 0) {
+                                location.reload();
+                            }
+                            return;
+                        }
+                        
+                        var formData = new FormData();
+                        formData.append('file', files[index]);
+                        formData.append('propertyId', propertyId);
+
+                        $.ajax({
+                            url: '/Admin/Property/UploadPhoto',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function(response) {
+                                if (response.success) {
+                                    uploadCount++;
+                                } else {
+                                    errorCount++;
+                                    console.error('Error uploading file:', response.message);
+                                }
+                                uploadFile(index + 1);
+                            },
+                            error: function() {
+                                errorCount++;
+                                console.error('Error uploading file');
+                                uploadFile(index + 1);
+                            }
+                        });
+                    }
+                    
+                    uploadFile(0);
+                }
+            });
+        });
+    </script>
+}
+

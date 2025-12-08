@@ -1,0 +1,238 @@
+@model HomeLengo.Models.Message
+@{
+    ViewData["Title"] = "Message Details";
+    
+    var userIdStr = Context.Session.GetString("UserId");
+    int currentUserId = 0;
+    int.TryParse(userIdStr, out currentUserId);
+    
+    // Determine the other user (not the current logged-in user)
+    var otherUser = Model.FromUserId == currentUserId ? Model.ToUser : Model.FromUser;
+    var isUnread = Model.IsRead == false && Model.ToUserId == currentUserId;
+    var isSent = Model.FromUserId == currentUserId;
+    
+    var otherUserName = otherUser?.FullName ?? otherUser?.Username ?? "Unknown User";
+    var otherUserEmail = otherUser?.Email ?? "N/A";
+    var otherUserAvatar = !string.IsNullOrEmpty(otherUser?.Avatar) ? otherUser.Avatar : "avatarMacDinh.jpg";
+    var otherUserAvatarPath = $"~/assets/images/avatar/{otherUserAvatar}";
+}
+
+<div class="main-content">
+    <div class="main-content-inner wrap-dashboard-content">
+        <div class="button-show-hide show-mb">
+            <span class="body-1">Show Dashboard</span>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-7">Message Details</h4>
+            <a href="/Admin/Message" class="tf-btn btn-line">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back to Messages
+            </a>
+        </div>
+
+        <div class="widget-box-2">
+            <div class="message-detail">
+                <!-- User Information -->
+                <div class="user-box mb-4">
+                    <div class="avatar">
+                        <img src="@Url.Content(otherUserAvatarPath)" alt="@otherUserName" onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/avatar/avatarMacDinh.jpg")'">
+                    </div>
+                    <div class="content">
+                        <div class="name fw-6">
+                            @otherUserName
+                            @if (isUnread)
+                            {
+                                <span class="unread-badge-detail"></span>
+                            }
+                        </div>
+                        <div class="caption-2 text-variant-3">@otherUserEmail</div>
+                        <div class="caption-2 text-variant-3 mt-1">
+                            @if (isSent)
+                            {
+                                <span>To: @(Model.ToUser?.FullName ?? Model.ToUser?.Username ?? "Unknown")</span>
+                            }
+                            else
+                            {
+                                <span>From: @(Model.FromUser?.FullName ?? Model.FromUser?.Username ?? "Unknown")</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Status -->
+                <div class="mb-4">
+                    <div class="fw-6 mb-2">Status</div>
+                    <span class="btn-status @(isUnread ? "status-pending" : "")">
+                        @(isUnread ? "Unread" : "Read")
+                    </span>
+                </div>
+
+                <!-- Sent Date -->
+                <div class="mb-4">
+                    <div class="fw-6 mb-2">Sent Date</div>
+                    <div class="text">
+                        @if (Model.SentAt.HasValue)
+                        {
+                            <span>@Model.SentAt.Value.ToString("MMMM dd, yyyy 'at' HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Subject -->
+                <div class="mb-4">
+                    <div class="fw-6 mb-2">Subject</div>
+                    <div class="text">@(Model.Subject ?? "No subject")</div>
+                </div>
+
+                <!-- Message Content -->
+                <div class="mb-4">
+                    <div class="fw-6 mb-2">Message</div>
+                    <div class="message-body">@(Model.Body ?? "No message content")</div>
+                </div>
+
+                <!-- Property Information -->
+                @if (Model.Property != null)
+                {
+                    <div class="mb-4">
+                        <div class="fw-6 mb-2">Related Property</div>
+                        <div class="property-info">
+                            <a href="/Property/Details/@Model.Property.PropertyId" class="text-primary fw-6" style="text-decoration: none;">
+                                <span class="icon icon-home" style="margin-right: 8px;"></span>
+                                @Model.Property.Title
+                            </a>
+                            <div class="caption-2 text-variant-3 mt-1">
+                                Property ID: @Model.Property.PropertyId
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Property.Address))
+                            {
+                                <div class="caption-2 text-variant-3">
+                                    <span class="icon icon-location" style="margin-right: 4px;"></span>
+                                    @Model.Property.Address
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Actions -->
+                <div class="d-flex gap-2 mt-4 pt-4 border-top">
+                    @if (isUnread)
+                    {
+                        <form method="post" action="/Admin/Message/MarkAsRead/@Model.MessageId" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="tf-btn primary">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                                    <path d="M13.5 4L6 11.5L2.5 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Mark as Read
+                            </button>
+                        </form>
+                    }
+                    <form method="post" action="/Admin/Message/Delete/@Model.MessageId" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="tf-btn btn-line text-danger" onclick="return confirm('Are you sure you want to delete this message?');">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                                <path d="M9.82667 6.00035L9.596 12.0003M6.404 12.0003L6.17333 6.00035M12.8187 3.86035C13.0467 3.89501 13.2733 3.93168 13.5 3.97101M12.8187 3.86035L12.1067 13.1157C12.0776 13.4925 11.9074 13.8445 11.63 14.1012C11.3527 14.3579 10.9886 14.5005 10.6107 14.5003H5.38933C5.0114 14.5005 4.64735 14.3579 4.36999 14.1012C4.09262 13.8445 3.92239 13.4925 3.89333 13.1157L3.18133 3.86035M12.8187 3.86035C12.0492 3.74403 11.2758 3.65574 10.5 3.59568M3.18133 3.86035C2.95333 3.89435 2.72667 3.93101 2.5 3.97035M3.18133 3.86035C3.95076 3.74403 4.72416 3.65575 5.5 3.59568M10.5 3.59568V2.98501C10.5 2.19835 9.89333 1.54235 9.10667 1.51768C8.36908 1.49411 7.63092 1.49411 6.89333 1.51768C6.10667 1.54235 5.5 2.19901 5.5 2.98501V3.59568M10.5 3.59568C8.83581 3.46707 7.16419 3.46707 5.5 3.59568" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Delete Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-dashboard footer-dashboard-2">
+        <p>Copyright © 2024 Home Lengo</p>
+    </div>
+</div>
+
+<style>
+    .message-detail {
+        padding: 20px;
+    }
+    
+    .user-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .user-box .avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .user-box .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .user-box .content {
+        flex: 1;
+    }
+    
+    .user-box .name {
+        font-size: 18px;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .unread-badge-detail {
+        width: 10px;
+        height: 10px;
+        background-color: #1563df;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    
+    .message-detail .text {
+        color: #666;
+        line-height: 1.6;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    
+    .message-body {
+        color: #333;
+        line-height: 1.8;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .property-info {
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .property-info a {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .border-top {
+        border-top: 1px solid #e5e5e5;
+    }
+</style>

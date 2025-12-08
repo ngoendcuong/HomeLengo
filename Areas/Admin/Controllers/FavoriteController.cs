@@ -26,13 +26,16 @@ namespace HomeLengo.Areas.Admin.Controllers
             var query = _context.Favorites
                 .Where(f => f.UserId == userId)
                 .Include(f => f.Property)
-                    .ThenInclude(p => p.PropertyPhotos.Where(pp => pp.IsPrimary == true))
+                    .ThenInclude(p => p.PropertyPhotos)
                 .Include(f => f.Property)
                     .ThenInclude(p => p.Status)
                 .Include(f => f.Property)
                     .ThenInclude(p => p.PropertyType)
                 .Include(f => f.Property)
                     .ThenInclude(p => p.City)
+                .Include(f => f.Property)
+                    .ThenInclude(p => p.Agent)
+                        .ThenInclude(a => a.User)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
@@ -81,3 +84,4 @@ namespace HomeLengo.Areas.Admin.Controllers
         }
     }
 }
+

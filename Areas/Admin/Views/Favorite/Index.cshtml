@@ -4,158 +4,192 @@
 }
 
 <div class="main-content">
-    <div class="main-content-inner">
-        <h4 class="fw-7 mb-4">My Favorites</h4>
-
+    <div class="main-content-inner wrap-dashboard-content">
+        <div class="button-show-hide show-mb">
+            <span class="body-1">Show Dashboard</span>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <fieldset class="box-fieldset">
+                    <label>
+                        Search:<span>*</span>
+                    </label>
+                    <form method="get" action="/Admin/Favorite" id="searchForm">
+                        <input type="text" name="searchString" class="form-control" placeholder="Search by title, description, or address" value="@ViewBag.SearchString">
+                    </form>
+                </fieldset>
+            </div>
+        </div>
         <div class="widget-box-2 wd-listing">
-            <form method="get" action="/Admin/Favorite" class="wd-filter mb-3">
-                <div class="row g-3">
-                    <div class="col-md-10">
-                        <div class="ip-group icon-left">
-                            <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Search properties...">
-                            <span class="icon icon-search"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="tf-btn primary w-100">Search</button>
-                    </div>
-                </div>
-            </form>
-
-            <div class="d-flex gap-4 mb-3">
-                <span class="text-primary fw-7">@ViewBag.TotalCount</span>
-                <span class="fw-6">Properties found</span>
-            </div>
-
-            <div class="row g-4">
-                @if (Model != null && Model.Any())
-                {
-                    @foreach (var favorite in Model)
-                    {
-                        var property = favorite.Property;
-                        var photo = property.PropertyPhotos?
-                            .OrderByDescending(p => p.IsPrimary == true)
-                            .ThenBy(p => p.SortOrder ?? 0)
-                            .FirstOrDefault();
-                        
-                        string GetImagePath(string filePath)
-                        {
-                            if (string.IsNullOrEmpty(filePath))
-                                return "~/assets/images/home/house-18.jpg";
-                            
-                            filePath = filePath.Trim();
-                            
-                            if (filePath.StartsWith("~/"))
-                                return filePath;
-                            
-                            if (filePath.StartsWith("/"))
-                                return "~" + filePath;
-                            
-                            if (filePath.Contains("assets/"))
-                                return "~/" + filePath.TrimStart('/');
-                            
-                            return "~/assets/images/home/" + filePath.TrimStart('/');
-                        }
-                        
-                        var photoPath = photo?.FilePath;
-                        var defaultPhoto = "~/assets/images/home/house-18.jpg";
-                        var photoUrl = !string.IsNullOrEmpty(photoPath) 
-                            ? Url.Content(GetImagePath(photoPath))
-                            : Url.Content(defaultPhoto);
-                        
-                        <div class="col-md-6 col-lg-4">
-                            <div class="homelengo-box">
-                                <div class="archive-top">
-                                    <a href="/Property/Details/@property.PropertyId" class="images-group">
-                                        <div class="images-style">
-                                            <img class="lazyload" src="@photoUrl" alt="@property.Title" onerror="this.onerror=null; this.src='@Url.Content(defaultPhoto)'">
-                                        </div>
-                                        <div class="top">
-                                            <ul class="d-flex gap-6">
-                                                <li class="icon icon-bed"><span>@(property.Bedrooms ?? 0)</span></li>
-                                                <li class="icon icon-bath"><span>@(property.Bathrooms ?? 0)</span></li>
-                                                <li class="icon icon-square"><span>@(property.Area?.ToString("N0") ?? "0") m²</span></li>
-                                            </ul>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="archive-content">
-                                    <h3 class="title">
-                                        <a href="/Property/Details/@property.PropertyId">@property.Title</a>
-                                    </h3>
-                                    <div class="archive-location">
-                                        <span class="icon icon-location"></span>
-                                        <span>@(property.Address ?? "N/A")</span>
-                                    </div>
-                                    <div class="archive-bottom">
-                                        <div class="d-flex gap-8 align-items-center">
-                                            <div class="avatar avt-40 round">
-                                                @{
-                                                    var avatarFileName = property.Agent?.User?.Avatar;
-                                                    var avatarPath = string.IsNullOrEmpty(avatarFileName)
-                                                        ? "~/assets/images/avatar/default-avatar.gif"
-                                                        : $"~/assets/images/avatar/{avatarFileName}";
-                                                }
-                                                <img class="lazyload" src="@Url.Content(avatarPath)" alt="@property.Agent?.AgencyName" onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/avatar/avatarMacDinh.jpg")'">
-                                            </div>
-                                            <span>@(property.Agent?.AgencyName ?? "N/A")</span>
-                                        </div>
-                                        <h6 class="price">
-                                            @string.Format("{0:N0} {1}", property.Price, property.Currency ?? "VND")
-                                        </h6>
-                                    </div>
-                                    <div class="mt-3">
-                                        <form method="post" action="/Admin/Favorite/Delete/@favorite.FavoriteId" style="display:inline;">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="tf-btn btn-line" onclick="return confirm('Remove from favorites?');">
-                                                <span class="icon icon-heart"></span>
-                                                Remove from Favorites
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
-                else
-                {
-                    <div class="col-12">
-                        <div class="text-center py-5">
-                            <p>No favorite properties found</p>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            @if (ViewBag.TotalPages > 1)
+            <h5 class="title">My Favorites</h5>
+            @if (ViewBag.TotalCount != null)
             {
-                <ul class="wd-navigation mt-4">
-                    @if (ViewBag.CurrentPage > 1)
-                    {
-                        <li><a href="?page=@(ViewBag.CurrentPage - 1)&searchString=@ViewBag.SearchString" class="nav-item"><i class="icon icon-arr-l"></i></a></li>
-                    }
-                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                    {
-                        if (i == ViewBag.CurrentPage)
-                        {
-                            <li><a href="#" class="nav-item active">@i</a></li>
-                        }
-                        else if (i <= 3 || i > ViewBag.TotalPages - 3 || (i >= ViewBag.CurrentPage - 1 && i <= ViewBag.CurrentPage + 1))
-                        {
-                            <li><a href="?page=@i&searchString=@ViewBag.SearchString" class="nav-item">@i</a></li>
-                        }
-                        else if (i == 4 || i == ViewBag.TotalPages - 3)
-                        {
-                            <li><a href="#" class="nav-item">...</a></li>
-                        }
-                    }
-                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-                    {
-                        <li><a href="?page=@(ViewBag.CurrentPage + 1)&searchString=@ViewBag.SearchString" class="nav-item"><i class="icon icon-arr-r"></i></a></li>
-                    }
-                </ul>
+                <div class="d-flex gap-4 mb-3">
+                    <span class="text-primary fw-7">@ViewBag.TotalCount</span>
+                    <span class="fw-6">Properties found</span>
+                </div>
             }
+            <div class="wrap-table">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Listing</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var favorite in Model)
+                                {
+                                    var property = favorite.Property;
+                                    // Lấy ảnh: ưu tiên primary, nếu không có thì lấy ảnh đầu tiên
+                                    var photo = property.PropertyPhotos?
+                                        .OrderByDescending(p => p.IsPrimary == true)
+                                        .ThenBy(p => p.SortOrder ?? 0)
+                                        .ThenBy(p => p.PhotoId)
+                                        .FirstOrDefault();
+                                    
+                                    string GetImagePath(string filePath)
+                                    {
+                                        if (string.IsNullOrEmpty(filePath))
+                                            return "~/assets/images/home/house-18.jpg";
+                                        
+                                        filePath = filePath.Trim();
+                                        
+                                        if (filePath.StartsWith("~/"))
+                                            return filePath;
+                                        
+                                        if (filePath.StartsWith("/"))
+                                            return "~" + filePath;
+                                        
+                                        if (filePath.Contains("assets/"))
+                                            return "~/" + filePath.TrimStart('/');
+                                        
+                                        return "~/assets/images/home/" + filePath.TrimStart('/');
+                                    }
+                                    
+                                    var photoPath = photo?.FilePath;
+                                    var defaultPhoto = "~/assets/images/home/house-18.jpg";
+                                    var photoUrl = !string.IsNullOrEmpty(photoPath) 
+                                        ? Url.Content(GetImagePath(photoPath))
+                                        : Url.Content(defaultPhoto);
+                                    
+                                    var postingDate = property.CreatedAt?.ToString("MMMM dd, yyyy") ?? "N/A";
+                                    var addedDate = favorite.AddedAt?.ToString("MMMM dd, yyyy") ?? "N/A";
+                                    var price = property.Price.ToString("N0");
+                                    var currency = property.Currency ?? "VND";
+                                    
+                                    <tr class="file-delete">
+                                        <td>
+                                            <div class="listing-box">
+                                                <div class="images">
+                                                    <img src="@photoUrl" alt="@property.Title" onerror="this.onerror=null; this.src='@Url.Content(defaultPhoto)'">
+                                                </div>
+                                                <div class="content">
+                                                    <div class="title">
+                                                        <a href="/Property/Details/@property.PropertyId" class="link">@property.Title</a>
+                                                    </div>
+                                                    <div class="text-date">Posting date: @postingDate</div>
+                                                    <div class="text-btn text-primary">@currency @price</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span>@addedDate</span>
+                                        </td>
+                                        <td>
+                                            <ul class="list-action">
+                                                <li>
+                                                    <a href="/Property/Details/@property.PropertyId" class="item" title="View">
+                                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M11.2413 2.9915L12.366 1.86616C12.6005 1.63171 12.9184 1.5 13.25 1.5C13.5816 1.5 13.8995 1.63171 14.134 1.86616C14.3685 2.10062 14.5002 2.4186 14.5002 2.75016C14.5002 3.08173 14.3685 3.39971 14.134 3.63416L4.55467 13.2135C4.20222 13.5657 3.76758 13.8246 3.29 13.9668L1.5 14.5002L2.03333 12.7102C2.17552 12.2326 2.43442 11.7979 2.78667 11.4455L11.242 2.9915H11.2413ZM11.2413 2.9915L13 4.75016" stroke="#A3ABB0" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
+                                                        View
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <form method="post" action="/Admin/Favorite/Delete/@favorite.FavoriteId" style="display:inline;">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="remove-file item" title="Remove from Favorites" onclick="return confirm('Are you sure you want to remove this property from your favorites?');" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M9.82667 6.00035L9.596 12.0003M6.404 12.0003L6.17333 6.00035M12.8187 3.86035C13.0467 3.89501 13.2733 3.93168 13.5 3.97101M12.8187 3.86035L12.1067 13.1157C12.0776 13.4925 11.9074 13.8445 11.63 14.1012C11.3527 14.3579 10.9886 14.5005 10.6107 14.5003H5.38933C5.0114 14.5005 4.64735 14.3579 4.36999 14.1012C4.09262 13.8445 3.92239 13.4925 3.89333 13.1157L3.18133 3.86035M12.8187 3.86035C12.0492 3.74403 11.2758 3.65574 10.5 3.59568M3.18133 3.86035C2.95333 3.89435 2.72667 3.93101 2.5 3.97035M3.18133 3.86035C3.95076 3.74403 4.72416 3.65575 5.5 3.59568M10.5 3.59568V2.98501C10.5 2.19835 9.89333 1.54235 9.10667 1.51768C8.36908 1.49411 7.63092 1.49411 6.89333 1.51768C6.10667 1.54235 5.5 2.19901 5.5 2.98501V3.59568M10.5 3.59568C8.83581 3.46707 7.16419 3.46707 5.5 3.59568" stroke="#A3ABB0" stroke-linecap="round" stroke-linejoin="round"/>
+                                                            </svg>
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center py-4">No favorite properties found</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <ul class="wd-navigation">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <li><a href="?page=@(ViewBag.CurrentPage - 1)&searchString=@ViewBag.SearchString" class="nav-item"><i class="icon icon-arr-l"></i></a></li>
+                        }
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            if (i == ViewBag.CurrentPage)
+                            {
+                                <li><a href="#" class="nav-item active">@i</a></li>
+                            }
+                            else if (i <= 3 || i > ViewBag.TotalPages - 3 || (i >= ViewBag.CurrentPage - 1 && i <= ViewBag.CurrentPage + 1))
+                            {
+                                <li><a href="?page=@i&searchString=@ViewBag.SearchString" class="nav-item">@i</a></li>
+                            }
+                            else if (i == 4 || i == ViewBag.TotalPages - 3)
+                            {
+                                <li><a href="#" class="nav-item">...</a></li>
+                            }
+                        }
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <li><a href="?page=@(ViewBag.CurrentPage + 1)&searchString=@ViewBag.SearchString" class="nav-item"><i class="icon icon-arr-r"></i></a></li>
+                        }
+                    </ul>
+                }
+            </div>
         </div>
     </div>
+    <div class="footer-dashboard">
+        <p>Copyright © 2024 Home Lengo</p>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Handle search form
+            $('#searchForm input[name="searchString"]').on('keypress', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#searchForm').submit();
+                }
+            });
+
+            // Handle delete confirmation
+            $('.remove-file').on('click', function(e) {
+                if (!confirm('Are you sure you want to remove this property from your favorites?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+}

@@ -40,7 +40,18 @@ namespace HomeLengo.Areas.Admin.Controllers
 
             if (isRead.HasValue)
             {
-                query = query.Where(m => m.IsRead == isRead.Value);
+                if (isRead.Value == false)
+                {
+                    // For unread, only show messages where current user is the recipient and unread
+                    query = query.Where(m => m.ToUserId == userId && m.IsRead == false);
+                }
+                else
+                {
+                    // For read, show messages where:
+                    // - Current user is recipient and message is read, OR
+                    // - Current user is sender (sent messages are always considered "read" from sender's perspective)
+                    query = query.Where(m => (m.ToUserId == userId && m.IsRead == true) || m.FromUserId == userId);
+                }
             }
 
             var totalCount = await query.CountAsync();
@@ -146,3 +157,4 @@ namespace HomeLengo.Areas.Admin.Controllers
         }
     }
 }
+

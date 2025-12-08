@@ -1,4 +1,4 @@
-﻿using HomeLengo.Models;
+using HomeLengo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;

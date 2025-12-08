@@ -27,3 +27,4 @@ public partial class PropertyFloorPlan
 
     public virtual Property Property { get; set; } = null!;
 }
+

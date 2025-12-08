@@ -11,6 +11,8 @@
     var location = ViewBag.Location as string ?? "";
     var bedrooms = ViewBag.Bedrooms as int?;
     var bathrooms = ViewBag.Bathrooms as int?;
+    var bedroomsValue = bedrooms ?? 0;
+    var bathroomsValue = bathrooms ?? 0;
     var minPrice = ViewBag.MinPrice as decimal?;
     var maxPrice = ViewBag.MaxPrice as decimal?;
     var minSize = ViewBag.MinSize as decimal?;
@@ -21,6 +23,24 @@
     var pageSize = ViewBag.PageSize as int? ?? 10;
     var sortBy = ViewBag.SortBy as string ?? "default";
     var statusId = ViewBag.StatusId as int?;
+    
+    // Hàm format giá theo triệu/tỷ
+    Func<decimal, string> FormatPrice = (price) => {
+        if (price >= 1000000000)
+        {
+            var ty = price / 1000000000;
+            return ty.ToString("N1").TrimEnd('0').TrimEnd('.') + " tỷ";
+        }
+        else if (price >= 1000000)
+        {
+            var trieu = price / 1000000;
+            return trieu.ToString("N1").TrimEnd('0').TrimEnd('.') + " triệu";
+        }
+        else
+        {
+            return price.ToString("N0") + " VND";
+        }
+    };
 }
 
 <section class="flat-section flat-recommended flat-sidebar">
@@ -158,91 +178,21 @@
                                                     <div class="form-style box-select">
                                                         <select name="bedrooms" class="form-control">
                                                             <option value="">Phòng ngủ</option>
-                                                            @if (bedrooms == 1)
-                                                            {
-                                                                <option value="1" selected>1</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="1">1</option>
-                                                            }
-                                                            @if (bedrooms == 2)
-                                                            {
-                                                                <option value="2" selected>2</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="2">2</option>
-                                                            }
-                                                            @if (bedrooms == 3)
-                                                            {
-                                                                <option value="3" selected>3</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="3">3</option>
-                                                            }
-                                                            @if (bedrooms == 4)
-                                                            {
-                                                                <option value="4" selected>4</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="4">4</option>
-                                                            }
-                                                            @if (bedrooms == 5)
-                                                            {
-                                                                <option value="5" selected>5+</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="5">5+</option>
-                                                            }
+                                                            @if (bedroomsValue == 1) { <option value="1" selected>1</option> } else { <option value="1">1</option> }
+                                                            @if (bedroomsValue == 2) { <option value="2" selected>2</option> } else { <option value="2">2</option> }
+                                                            @if (bedroomsValue == 3) { <option value="3" selected>3</option> } else { <option value="3">3</option> }
+                                                            @if (bedroomsValue == 4) { <option value="4" selected>4</option> } else { <option value="4">4</option> }
+                                                            @if (bedroomsValue == 5) { <option value="5" selected>5+</option> } else { <option value="5">5+</option> }
                                                         </select>
                                                     </div>
                                                     <div class="form-style box-select">
                                                         <select name="bathrooms" class="form-control">
                                                             <option value="">Phòng tắm</option>
-                                                            @if (bathrooms == 1)
-                                                            {
-                                                                <option value="1" selected>1</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="1">1</option>
-                                                            }
-                                                            @if (bathrooms == 2)
-                                                            {
-                                                                <option value="2" selected>2</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="2">2</option>
-                                                            }
-                                                            @if (bathrooms == 3)
-                                                            {
-                                                                <option value="3" selected>3</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="3">3</option>
-                                                            }
-                                                            @if (bathrooms == 4)
-                                                            {
-                                                                <option value="4" selected>4</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="4">4</option>
-                                                            }
-                                                            @if (bathrooms == 5)
-                                                            {
-                                                                <option value="5" selected>5+</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="5">5+</option>
-                                                            }
+                                                            @if (bathroomsValue == 1) { <option value="1" selected>1</option> } else { <option value="1">1</option> }
+                                                            @if (bathroomsValue == 2) { <option value="2" selected>2</option> } else { <option value="2">2</option> }
+                                                            @if (bathroomsValue == 3) { <option value="3" selected>3</option> } else { <option value="3">3</option> }
+                                                            @if (bathroomsValue == 4) { <option value="4" selected>4</option> } else { <option value="4">4</option> }
+                                                            @if (bathroomsValue == 5) { <option value="5" selected>5+</option> } else { <option value="5">5+</option> }
                                                         </select>
                                                     </div>
                                                 </div>
@@ -251,17 +201,29 @@
                                                         <div class="box-title-price">
                                                             <span class="title-price fw-6">Giá:</span>
                                                             <div class="caption-price">
-                                                                <span id="slider-range-value1" class="fw-6">@((minPrice ?? 1000000000).ToString("N0"))</span>
-                                                                <span class="fw-6"> VND</span>
+                                                                <span id="slider-range-value1" class="fw-6">@FormatPrice(minPrice ?? 1000000000)</span>
                                                                 <span class="fw-6"> - </span>
-                                                                <span id="slider-range-value2" class="fw-6">@((maxPrice ?? 50000000000).ToString("N0"))</span>
-                                                                <span class="fw-6"> VND</span>
+                                                                <span id="slider-range-value2" class="fw-6">@FormatPrice(maxPrice ?? 50000000000)</span>
                                                             </div>
                                                         </div>
                                                         <div id="slider-range"></div>
                                                         <div class="slider-labels">
-                                                            <input type="hidden" name="minPrice" id="minPrice" value="@(minPrice ?? 1000000000)">
-                                                            <input type="hidden" name="maxPrice" id="maxPrice" value="@(maxPrice ?? 50000000000)">
+                                                            @if (minPrice.HasValue)
+                                                            {
+                                                                <input type="hidden" name="minPrice" id="minPrice" value="@minPrice.Value">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="hidden" name="minPrice" id="minPrice" value="">
+                                                            }
+                                                            @if (maxPrice.HasValue)
+                                                            {
+                                                                <input type="hidden" name="maxPrice" id="maxPrice" value="@maxPrice.Value">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="hidden" name="maxPrice" id="maxPrice" value="">
+                                                            }
                                                         </div>
                                                     </div>
                                                     <div class="form-style widget-price wd-price-2">
@@ -277,8 +239,22 @@
                                                         </div>
                                                         <div id="slider-range2"></div>
                                                         <div class="slider-labels">
-                                                            <input type="hidden" name="minSize" id="minSize" value="@(minSize ?? 0)">
-                                                            <input type="hidden" name="maxSize" id="maxSize" value="@(maxSize ?? 1000)">
+                                                            @if (minSize.HasValue)
+                                                            {
+                                                                <input type="hidden" name="minSize" id="minSize" value="@minSize.Value">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="hidden" name="minSize" id="minSize" value="">
+                                                            }
+                                                            @if (maxSize.HasValue)
+                                                            {
+                                                                <input type="hidden" name="maxSize" id="maxSize" value="@maxSize.Value">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="hidden" name="maxSize" id="maxSize" value="">
+                                                            }
                                                         </div>
                                                     </div>
                                                 </div>
@@ -349,91 +325,21 @@
                                                     <div class="form-style box-select">
                                                         <select name="bedrooms" class="form-control">
                                                             <option value="">Phòng ngủ</option>
-                                                            @if (bedrooms == 1)
-                                                            {
-                                                                <option value="1" selected>1</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="1">1</option>
-                                                            }
-                                                            @if (bedrooms == 2)
-                                                            {
-                                                                <option value="2" selected>2</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="2">2</option>
-                                                            }
-                                                            @if (bedrooms == 3)
-                                                            {
-                                                                <option value="3" selected>3</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="3">3</option>
-                                                            }
-                                                            @if (bedrooms == 4)
-                                                            {
-                                                                <option value="4" selected>4</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="4">4</option>
-                                                            }
-                                                            @if (bedrooms == 5)
-                                                            {
-                                                                <option value="5" selected>5+</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="5">5+</option>
-                                                            }
+                                                            @if (bedroomsValue == 1) { <option value="1" selected>1</option> } else { <option value="1">1</option> }
+                                                            @if (bedroomsValue == 2) { <option value="2" selected>2</option> } else { <option value="2">2</option> }
+                                                            @if (bedroomsValue == 3) { <option value="3" selected>3</option> } else { <option value="3">3</option> }
+                                                            @if (bedroomsValue == 4) { <option value="4" selected>4</option> } else { <option value="4">4</option> }
+                                                            @if (bedroomsValue == 5) { <option value="5" selected>5+</option> } else { <option value="5">5+</option> }
                                                         </select>
                                                     </div>
                                                     <div class="form-style box-select">
                                                         <select name="bathrooms" class="form-control">
                                                             <option value="">Phòng tắm</option>
-                                                            @if (bathrooms == 1)
-                                                            {
-                                                                <option value="1" selected>1</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="1">1</option>
-                                                            }
-                                                            @if (bathrooms == 2)
-                                                            {
-                                                                <option value="2" selected>2</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="2">2</option>
-                                                            }
-                                                            @if (bathrooms == 3)
-                                                            {
-                                                                <option value="3" selected>3</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="3">3</option>
-                                                            }
-                                                            @if (bathrooms == 4)
-                                                            {
-                                                                <option value="4" selected>4</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="4">4</option>
-                                                            }
-                                                            @if (bathrooms == 5)
-                                                            {
-                                                                <option value="5" selected>5+</option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="5">5+</option>
-                                                            }
+                                                            @if (bathroomsValue == 1) { <option value="1" selected>1</option> } else { <option value="1">1</option> }
+                                                            @if (bathroomsValue == 2) { <option value="2" selected>2</option> } else { <option value="2">2</option> }
+                                                            @if (bathroomsValue == 3) { <option value="3" selected>3</option> } else { <option value="3">3</option> }
+                                                            @if (bathroomsValue == 4) { <option value="4" selected>4</option> } else { <option value="4">4</option> }
+                                                            @if (bathroomsValue == 5) { <option value="5" selected>5+</option> } else { <option value="5">5+</option> }
                                                         </select>
                                                     </div>
                                                 </div>
@@ -442,17 +348,29 @@
                                                         <div class="box-title-price">
                                                             <span class="title-price fw-6">Giá:</span>
                                                             <div class="caption-price">
-                                                                <span id="slider-range-value1-sale" class="fw-6">@((minPrice ?? 1000000000).ToString("N0"))</span>
-                                                                <span class="fw-6"> VND</span>
+                                                                <span id="slider-range-value1-sale" class="fw-6">@FormatPrice(minPrice ?? 1000000000)</span>
                                                                 <span class="fw-6"> - </span>
-                                                                <span id="slider-range-value2-sale" class="fw-6">@((maxPrice ?? 50000000000).ToString("N0"))</span>
-                                                                <span class="fw-6"> VND</span>
+                                                                <span id="slider-range-value2-sale" class="fw-6">@FormatPrice(maxPrice ?? 50000000000)</span>
                                                             </div>
                                                         </div>
                                                         <div id="slider-range-sale"></div>
                                                         <div class="slider-labels">
-                                                            <input type="hidden" name="minPrice" id="minPriceSale" value="@(minPrice ?? 1000000000)">
-                                                            <input type="hidden" name="maxPrice" id="maxPriceSale" value="@(maxPrice ?? 50000000000)">
+                                                            @if (minPrice.HasValue)
+                                                            {
+                                                                <input type="hidden" name="minPrice" id="minPriceSale" value="@minPrice.Value">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="hidden" name="minPrice" id="minPriceSale" value="">
+                                                            }
+                                                            @if (maxPrice.HasValue)
+                                                            {
+                                                                <input type="hidden" name="maxPrice" id="maxPriceSale" value="@maxPrice.Value">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="hidden" name="maxPrice" id="maxPriceSale" value="">
+                                                            }
                                                         </div>
                                                     </div>
                                                     <div class="form-style widget-price wd-price-2">
@@ -468,8 +386,22 @@
                                                         </div>
                                                         <div id="slider-range2-sale"></div>
                                                         <div class="slider-labels">
-                                                            <input type="hidden" name="minSize" id="minSizeSale" value="@(minSize ?? 0)">
-                                                            <input type="hidden" name="maxSize" id="maxSizeSale" value="@(maxSize ?? 1000)">
+                                                            @if (minSize.HasValue)
+                                                            {
+                                                                <input type="hidden" name="minSize" id="minSizeSale" value="@minSize.Value">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="hidden" name="minSize" id="minSizeSale" value="">
+                                                            }
+                                                            @if (maxSize.HasValue)
+                                                            {
+                                                                <input type="hidden" name="maxSize" id="maxSizeSale" value="@maxSize.Value">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="hidden" name="maxSize" id="maxSizeSale" value="">
+                                                            }
                                                         </div>
                                                     </div>
                                                 </div>
@@ -771,6 +703,21 @@
                 return Math.round(value).toLocaleString('vi-VN');
             }
 
+            // Hàm helper để format giá theo triệu/tỷ
+            function formatPrice(value) {
+                if (isNaN(value) || value === null || value === undefined) return '0';
+                var numValue = Math.round(value);
+                if (numValue >= 1000000000) {
+                    var ty = numValue / 1000000000;
+                    return ty.toFixed(1).replace(/\.?0+$/, '') + ' tỷ';
+                } else if (numValue >= 1000000) {
+                    var trieu = numValue / 1000000;
+                    return trieu.toFixed(1).replace(/\.?0+$/, '') + ' triệu';
+                } else {
+                    return formatNumber(numValue) + ' VND';
+                }
+            }
+
             // Hàm khởi tạo slider cho tab Cho Thuê
             function initRentSliders() {
                 if (typeof noUiSlider === 'undefined') return;
@@ -786,21 +733,24 @@
                     var minPriceInput = document.getElementById("minPrice");
                     var maxPriceInput = document.getElementById("maxPrice");
                     
-                    // Lấy giá trị từ input, nếu không có hoặc = 0 thì dùng giá trị mặc định
-                    var minPriceVal = 1000000000; // Mặc định 1 tỷ
-                    var maxPriceVal = 50000000000; // Mặc định 50 tỷ
+                    // Lấy giá trị từ input, nếu không có hoặc = 0 thì dùng giá trị mặc định cho hiển thị
+                    var minPriceVal = 1000000000; // Mặc định 1 tỷ cho hiển thị
+                    var maxPriceVal = 50000000000; // Mặc định 50 tỷ cho hiển thị
+                    var hasPriceValue = false;
                     
-                    if (minPriceInput && minPriceInput.value) {
+                    if (minPriceInput && minPriceInput.value && minPriceInput.value !== '') {
                         var parsedMin = parseValue(minPriceInput.value, null);
                         if (parsedMin !== null && parsedMin > 0) {
                             minPriceVal = parsedMin;
+                            hasPriceValue = true;
                         }
                     }
                     
-                    if (maxPriceInput && maxPriceInput.value) {
+                    if (maxPriceInput && maxPriceInput.value && maxPriceInput.value !== '') {
                         var parsedMax = parseValue(maxPriceInput.value, null);
                         if (parsedMax !== null && parsedMax > 0) {
                             maxPriceVal = parsedMax;
+                            hasPriceValue = true;
                         }
                     }
                     
@@ -812,9 +762,14 @@
                         maxPriceVal = 50000000000;
                     }
                     
-                    // Cập nhật giá trị input hidden để đảm bảo đúng
-                    if (minPriceInput) minPriceInput.value = minPriceVal;
-                    if (maxPriceInput) maxPriceInput.value = maxPriceVal;
+                    // Chỉ cập nhật giá trị input hidden nếu có giá trị từ query string
+                    if (!hasPriceValue) {
+                        if (minPriceInput) minPriceInput.value = '';
+                        if (maxPriceInput) maxPriceInput.value = '';
+                    } else {
+                        if (minPriceInput) minPriceInput.value = minPriceVal;
+                        if (maxPriceInput) maxPriceInput.value = maxPriceVal;
+                    }
                     
                     noUiSlider.create(priceSlider, {
                         start: [minPriceVal, maxPriceVal],
@@ -836,7 +791,7 @@
                     
                     priceSlider.noUiSlider.on('update', function(values, handle) {
                         var numericValue = Math.round(parseFloat(values[handle]));
-                        var formattedValue = formatNumber(numericValue);
+                        var formattedValue = formatPrice(numericValue);
                         if (handle === 0) {
                             document.getElementById("slider-range-value1").innerHTML = formattedValue;
                             document.getElementById("minPrice").value = numericValue;
@@ -852,8 +807,8 @@
                             var initialValues = priceSlider.noUiSlider.get();
                             var val1El = document.getElementById("slider-range-value1");
                             var val2El = document.getElementById("slider-range-value2");
-                            if (val1El) val1El.innerHTML = formatNumber(Math.round(initialValues[0]));
-                            if (val2El) val2El.innerHTML = formatNumber(Math.round(initialValues[1]));
+                            if (val1El) val1El.innerHTML = formatPrice(Math.round(initialValues[0]));
+                            if (val2El) val2El.innerHTML = formatPrice(Math.round(initialValues[1]));
                         }
                     }, 50);
                 }
@@ -869,14 +824,16 @@
                     var minSizeInput = document.getElementById("minSize");
                     var maxSizeInput = document.getElementById("maxSize");
                     
-                    // Lấy giá trị từ input, nếu không có thì dùng giá trị mặc định
-                    var minSizeVal = 0; // Mặc định 0
-                    var maxSizeVal = 1000; // Mặc định 1000
+                    // Lấy giá trị từ input, nếu không có thì dùng giá trị mặc định cho hiển thị
+                    var minSizeVal = 0; // Mặc định 0 cho hiển thị
+                    var maxSizeVal = 1000; // Mặc định 1000 cho hiển thị
+                    var hasSizeValue = false;
                     
                     if (minSizeInput && minSizeInput.value !== null && minSizeInput.value !== '') {
                         var parsedMin = parseValue(minSizeInput.value, null);
                         if (parsedMin !== null) {
                             minSizeVal = parsedMin;
+                            hasSizeValue = true;
                         }
                     }
                     
@@ -884,6 +841,7 @@
                         var parsedMax = parseValue(maxSizeInput.value, null);
                         if (parsedMax !== null && parsedMax > 0) {
                             maxSizeVal = parsedMax;
+                            hasSizeValue = true;
                         }
                     }
                     
@@ -895,9 +853,14 @@
                         maxSizeVal = 1000;
                     }
                     
-                    // Cập nhật giá trị input hidden để đảm bảo đúng
-                    if (minSizeInput) minSizeInput.value = minSizeVal;
-                    if (maxSizeInput) maxSizeInput.value = maxSizeVal;
+                    // Chỉ cập nhật giá trị input hidden nếu có giá trị từ query string
+                    if (!hasSizeValue) {
+                        if (minSizeInput) minSizeInput.value = '';
+                        if (maxSizeInput) maxSizeInput.value = '';
+                    } else {
+                        if (minSizeInput) minSizeInput.value = minSizeVal;
+                        if (maxSizeInput) maxSizeInput.value = maxSizeVal;
+                    }
                     
                     noUiSlider.create(sizeSlider, {
                         start: [minSizeVal, maxSizeVal],
@@ -1007,7 +970,7 @@
                     
                     priceSliderSale.noUiSlider.on('update', function(values, handle) {
                         var numericValue = Math.round(parseFloat(values[handle]));
-                        var formattedValue = formatNumber(numericValue);
+                        var formattedValue = formatPrice(numericValue);
                         if (handle === 0) {
                             document.getElementById("slider-range-value1-sale").innerHTML = formattedValue;
                             document.getElementById("minPriceSale").value = numericValue;
@@ -1023,8 +986,8 @@
                             var initialSaleValues = priceSliderSale.noUiSlider.get();
                             var val1SaleEl = document.getElementById("slider-range-value1-sale");
                             var val2SaleEl = document.getElementById("slider-range-value2-sale");
-                            if (val1SaleEl) val1SaleEl.innerHTML = formatNumber(Math.round(initialSaleValues[0]));
-                            if (val2SaleEl) val2SaleEl.innerHTML = formatNumber(Math.round(initialSaleValues[1]));
+                            if (val1SaleEl) val1SaleEl.innerHTML = formatPrice(Math.round(initialSaleValues[0]));
+                            if (val2SaleEl) val2SaleEl.innerHTML = formatPrice(Math.round(initialSaleValues[1]));
                         }
                     }, 50);
                 }
@@ -1139,14 +1102,32 @@
                 
                 if (priceSlider && priceSlider.noUiSlider) {
                     var priceValues = priceSlider.noUiSlider.get();
-                    $('#minPrice').val(Math.round(priceValues[0]));
-                    $('#maxPrice').val(Math.round(priceValues[1]));
+                    var minPriceVal = Math.round(priceValues[0]);
+                    var maxPriceVal = Math.round(priceValues[1]);
+                    
+                    // Chỉ gửi giá trị nếu không phải giá trị mặc định
+                    if (minPriceVal === 1000000000 && maxPriceVal === 50000000000) {
+                        $('#minPrice').val('');
+                        $('#maxPrice').val('');
+                    } else {
+                        $('#minPrice').val(minPriceVal);
+                        $('#maxPrice').val(maxPriceVal);
+                    }
                 }
                 
                 if (sizeSlider && sizeSlider.noUiSlider) {
                     var sizeValues = sizeSlider.noUiSlider.get();
-                    $('#minSize').val(Math.round(sizeValues[0]));
-                    $('#maxSize').val(Math.round(sizeValues[1]));
+                    var minSizeVal = Math.round(sizeValues[0]);
+                    var maxSizeVal = Math.round(sizeValues[1]);
+                    
+                    // Chỉ gửi giá trị nếu không phải giá trị mặc định
+                    if (minSizeVal === 0 && maxSizeVal === 1000) {
+                        $('#minSize').val('');
+                        $('#maxSize').val('');
+                    } else {
+                        $('#minSize').val(minSizeVal);
+                        $('#maxSize').val(maxSizeVal);
+                    }
                 }
             });
 
@@ -1156,14 +1137,32 @@
                 
                 if (priceSliderSale && priceSliderSale.noUiSlider) {
                     var priceValues = priceSliderSale.noUiSlider.get();
-                    $('#minPriceSale').val(Math.round(priceValues[0]));
-                    $('#maxPriceSale').val(Math.round(priceValues[1]));
+                    var minPriceVal = Math.round(priceValues[0]);
+                    var maxPriceVal = Math.round(priceValues[1]);
+                    
+                    // Chỉ gửi giá trị nếu không phải giá trị mặc định
+                    if (minPriceVal === 1000000000 && maxPriceVal === 50000000000) {
+                        $('#minPriceSale').val('');
+                        $('#maxPriceSale').val('');
+                    } else {
+                        $('#minPriceSale').val(minPriceVal);
+                        $('#maxPriceSale').val(maxPriceVal);
+                    }
                 }
                 
                 if (sizeSliderSale && sizeSliderSale.noUiSlider) {
                     var sizeValues = sizeSliderSale.noUiSlider.get();
-                    $('#minSizeSale').val(Math.round(sizeValues[0]));
-                    $('#maxSizeSale').val(Math.round(sizeValues[1]));
+                    var minSizeVal = Math.round(sizeValues[0]);
+                    var maxSizeVal = Math.round(sizeValues[1]);
+                    
+                    // Chỉ gửi giá trị nếu không phải giá trị mặc định
+                    if (minSizeVal === 0 && maxSizeVal === 1000) {
+                        $('#minSizeSale').val('');
+                        $('#maxSizeSale').val('');
+                    } else {
+                        $('#minSizeSale').val(minSizeVal);
+                        $('#maxSizeSale').val(maxSizeVal);
+                    }
                 }
             });
 

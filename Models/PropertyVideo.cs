@@ -27,3 +27,4 @@ public partial class PropertyVideo
 
     public virtual Property Property { get; set; } = null!;
 }
+

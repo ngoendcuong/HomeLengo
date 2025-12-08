@@ -148,13 +148,29 @@ namespace HomeLengo.Controllers
             // Filter theo bedrooms
             if (bedrooms.HasValue && bedrooms.Value > 0)
             {
-                query = query.Where(p => p.Bedrooms.HasValue && p.Bedrooms.Value >= bedrooms.Value);
+                if (bedrooms.Value == 5)
+                {
+                    // 5+ nghĩa là >= 5
+                    query = query.Where(p => p.Bedrooms.HasValue && p.Bedrooms.Value >= 5);
+                }
+                else
+                {
+                    query = query.Where(p => p.Bedrooms.HasValue && p.Bedrooms.Value == bedrooms.Value);
+                }
             }
 
             // Filter theo bathrooms
             if (bathrooms.HasValue && bathrooms.Value > 0)
             {
-                query = query.Where(p => p.Bathrooms.HasValue && p.Bathrooms.Value >= bathrooms.Value);
+                if (bathrooms.Value == 5)
+                {
+                    // 5+ nghĩa là >= 5
+                    query = query.Where(p => p.Bathrooms.HasValue && p.Bathrooms.Value >= 5);
+                }
+                else
+                {
+                    query = query.Where(p => p.Bathrooms.HasValue && p.Bathrooms.Value == bathrooms.Value);
+                }
             }
 
             // Filter theo price range - chỉ áp dụng khi có giá trị từ query string
@@ -313,7 +329,68 @@ namespace HomeLengo.Controllers
 
             ViewBag.LatestProperties = latestProperties;
 
+            // Kiểm tra xem property đã được thêm vào favorites chưa
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            bool isFavorite = false;
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+            {
+                isFavorite = await _context.Favorites
+                    .AnyAsync(f => f.UserId == userId && f.PropertyId == id.Value);
+            }
+            ViewBag.IsFavorite = isFavorite;
+
             return View(property);
+        }
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        [Produces("application/json")]
+        public async Task<IActionResult> ToggleFavorite(int propertyId)
+        {
+            try
+            {
+                var userIdStr = HttpContext.Session.GetString("UserId");
+                if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để thêm vào yêu thích", isLoggedIn = false });
+                }
+
+                // Kiểm tra property có tồn tại không
+                var property = await _context.Properties.FindAsync(propertyId);
+                if (property == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bất động sản" });
+                }
+
+                // Kiểm tra xem đã có favorite chưa
+                var existingFavorite = await _context.Favorites
+                    .FirstOrDefaultAsync(f => f.UserId == userId && f.PropertyId == propertyId);
+
+                if (existingFavorite != null)
+                {
+                    // Xóa khỏi favorites
+                    _context.Favorites.Remove(existingFavorite);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, isFavorite = false, message = "Đã xóa khỏi yêu thích" });
+                }
+                else
+                {
+                    // Thêm vào favorites
+                    var favorite = new Favorite
+                    {
+                        UserId = userId,
+                        PropertyId = propertyId,
+                        AddedAt = DateTime.UtcNow
+                    };
+                    _context.Favorites.Add(favorite);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, isFavorite = true, message = "Đã thêm vào yêu thích" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
         }
 
         [HttpPost]

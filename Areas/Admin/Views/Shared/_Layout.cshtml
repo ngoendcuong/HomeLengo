@@ -194,7 +194,7 @@
                                 </a>
                             </li>
                             <li class="nav-menu-item">
-                                <a class="nav-menu-link" asp-area="Admin" asp-controller="Property" asp-action="Index">
+                                <a class="nav-menu-link" asp-area="Admin" asp-controller="Property" asp-action="MyProperties">
                                     <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <g opacity="0.2">
                                             <path d="M10.533 2.55664H7.10561C4.28686 2.55664 2.51953 4.55222 2.51953 7.37739V14.9986C2.51953 17.8237 4.27861 19.8193 7.10561 19.8193H15.1943C18.0222 19.8193 19.7813 17.8237 19.7813 14.9986V11.3062" stroke="#F1FAEE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -287,6 +287,9 @@
     <script type="text/javascript" src="~/assets/js/shortcodes.js"></script>
     <script type="text/javascript" src="~/assets/js/jqueryui.min.js"></script>
     <script type="text/javascript" src="~/assets/js/main.js"></script>
+    
+    @RenderSection("Scripts", required: false)
+    
     <style>
         .sidebar-menu-dashboard .box-menu-dashboard .nav-menu-item form {
             width: 100%;

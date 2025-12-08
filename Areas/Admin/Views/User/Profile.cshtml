@@ -1,0 +1,316 @@
+@model HomeLengo.Models.User
+@{
+    ViewData["Title"] = "My Profile";
+    var agent = ViewBag.Agent as HomeLengo.Models.Agent;
+    var isAgent = agent != null;
+}
+
+<div class="main-content">
+    <div class="main-content-inner wrap-dashboard-content-2">
+        <div class="button-show-hide show-mb">
+            <span class="body-1">Show Dashboard</span>
+        </div>
+        <div class="widget-box-2">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (isAgent)
+            {
+                <div class="box">
+                    <h5 class="title">Account Settings</h5>
+                    <div class="box-agent-account">
+                        <h6>Agent Account</h6>
+                        <p class="note">Your current account type is set to agent. If you want to remove your agent account and return to normal account, please contact the administrator.</p>
+                    </div>
+                </div>
+            }
+
+            <form method="post" asp-action="Profile" enctype="multipart/form-data" id="profileForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="PasswordHash" />
+                <input type="hidden" asp-for="Username" />
+
+                <div class="box">
+                    <h5 class="title">Avatar</h5>
+                    <div class="box-agent-avt">
+                        <div class="avatar">
+                            @{
+                                var avatarPath = !string.IsNullOrEmpty(Model.Avatar) 
+                                    ? $"~/assets/images/avatar/{Model.Avatar}" 
+                                    : "~/assets/images/avatar/avatarMacDinh.jpg";
+                            }
+                            <img src="@Url.Content(avatarPath)" alt="avatar" id="avatarPreview" loading="lazy" width="128" height="128" style="border-radius: 50%; object-fit: cover;" onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/avatar/avatarMacDinh.jpg")'">
+                        </div>
+                        <div class="content uploadfile">
+                            <p>Upload a new avatar</p>
+                            <div class="box-ip">
+                                <input type="file" name="avatarFile" id="avatarFile" class="ip-file" accept="image/*">
+                            </div>
+                            <p>JPEG, PNG - Max 5MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isAgent)
+                {
+                    <div class="box">
+                        <h5 class="title">Agent Poster</h5>
+                        <div class="box-agent-avt">
+                            <div class="img-poster">
+                                <img src="@Url.Content("~/assets/images/avatar/account-2.jpg")" alt="poster" id="posterPreview" loading="lazy" style="max-width: 200px; height: auto;">
+                            </div>
+                            <div class="content uploadfile">
+                                <p>Upload a new poster</p>
+                                <div class="box-ip">
+                                    <input type="file" name="posterFile" id="posterFile" class="ip-file" accept="image/*">
+                                </div>
+                                <span>JPEG, PNG - Max 5MB</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <h5 class="title">Information</h5>
+                <div class="box box-fieldset">
+                    <label>Full name:<span>*</span></label>
+                    <input type="text" asp-for="FullName" class="form-control style-1" required>
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+
+                @if (isAgent)
+                {
+                    <div class="box box-fieldset">
+                        <label>Description:</label>
+                        <textarea name="bio" class="form-control style-1" rows="5">@(agent?.Bio ?? "")</textarea>
+                    </div>
+                }
+
+                @if (isAgent)
+                {
+                    <div class="box grid-4 gap-30">
+                        <div class="box-fieldset">
+                            <label>Your Company:</label>
+                            <input type="text" name="agencyName" value="@agent?.AgencyName" class="form-control style-1">
+                        </div>
+                        <div class="box-fieldset">
+                            <label>License Number:</label>
+                            <input type="text" name="licenseNumber" value="@agent?.LicenseNumber" class="form-control style-1">
+                        </div>
+                    </div>
+                }
+
+                <div class="box grid-4 gap-30 box-info-2">
+                    <div class="box-fieldset">
+                        <label>Username:</label>
+                        <input type="text" value="@Model.Username" class="form-control style-1" disabled>
+                        <small class="text-muted">Username cannot be changed</small>
+                    </div>
+                    <div class="box-fieldset">
+                        <label>Email address:<span>*</span></label>
+                        <input type="email" asp-for="Email" class="form-control style-1" required>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="box-fieldset">
+                        <label>Your Phone:</label>
+                        <input type="text" asp-for="Phone" class="form-control style-1">
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="box box-fieldset">
+                    <label>Account Information:</label>
+                    <div class="d-flex gap-4 flex-wrap">
+                        <div>
+                            <small class="text-muted">Created:</small>
+                            <div>@(Model.CreatedAt?.ToString("MMMM dd, yyyy") ?? "N/A")</div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Status:</small>
+                            <div>
+                                <span class="btn-status @(Model.IsActive == true ? "status-for-sale" : "status-pending")">
+                                    @(Model.IsActive == true ? "Active" : "Inactive")
+                                </span>
+                            </div>
+                        </div>
+                        @if (isAgent)
+                        {
+                            <div>
+                                <small class="text-muted">Agent Since:</small>
+                                <div>@(agent?.CreatedAt?.ToString("MMMM dd, yyyy") ?? "N/A")</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="box">
+                    <button type="submit" class="tf-btn primary">Save & Update</button>
+                </div>
+            </form>
+
+            <h5 class="title">Change password</h5>
+            <form method="post" asp-action="ChangePassword" id="changePasswordForm">
+                @Html.AntiForgeryToken()
+                <div class="box grid-3 gap-30">
+                    <div class="box-fieldset">
+                        <label>Old Password:<span>*</span></label>
+                        <div class="box-password">
+                            <input type="password" name="oldPassword" id="oldPassword" class="form-contact style-1 password-field" placeholder="Old Password" required>
+                            <span class="show-pass" onclick="togglePassword('oldPassword', 'showPass1')">
+                                <i class="icon-pass icon-eye" id="showPass1"></i>
+                                <i class="icon-pass icon-eye-off" id="hidePass1" style="display: none;"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="box-fieldset">
+                        <label>New Password:<span>*</span></label>
+                        <div class="box-password">
+                            <input type="password" name="newPassword" id="newPassword" class="form-contact style-1 password-field2" placeholder="New Password" required>
+                            <span class="show-pass2" onclick="togglePassword('newPassword', 'showPass2')">
+                                <i class="icon-pass icon-eye" id="showPass2"></i>
+                                <i class="icon-pass icon-eye-off" id="hidePass2" style="display: none;"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="box-fieldset">
+                        <label>Confirm Password:<span>*</span></label>
+                        <div class="box-password">
+                            <input type="password" name="confirmPassword" id="confirmPassword" class="form-contact style-1 password-field3" placeholder="Confirm Password" required>
+                            <span class="show-pass3" onclick="togglePassword('confirmPassword', 'showPass3')">
+                                <i class="icon-pass icon-eye" id="showPass3"></i>
+                                <i class="icon-pass icon-eye-off" id="hidePass3" style="display: none;"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <button type="submit" class="tf-btn primary">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="footer-dashboard">
+        <p>Copyright © 2024 Home Lengo</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Avatar preview
+        document.getElementById('avatarFile')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Chỉ chấp nhận file ảnh định dạng: JPG, JPEG, PNG, GIF');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validate file size
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Kích thước file không được vượt quá 5MB');
+                    e.target.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Poster preview
+        document.getElementById('posterFile')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('posterPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Toggle password visibility
+        function togglePassword(inputId, showIconId) {
+            const input = document.getElementById(inputId);
+            const showIcon = document.getElementById(showIconId);
+            const hideIcon = document.getElementById(showIconId.replace('showPass', 'hidePass'));
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                showIcon.style.display = 'none';
+                hideIcon.style.display = 'inline';
+            } else {
+                input.type = 'password';
+                showIcon.style.display = 'inline';
+                hideIcon.style.display = 'none';
+            }
+        }
+
+        // Handle change password form submission
+        document.getElementById('changePasswordForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const response = await fetch('@Url.Action("ChangePassword", "User", new { area = "Admin" })', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message);
+                this.reset();
+            } else {
+                alert(result.message);
+            }
+        });
+
+        // Form submission validation
+        document.getElementById('profileForm')?.addEventListener('submit', function(e) {
+            const avatarFile = document.getElementById('avatarFile');
+            if (avatarFile && avatarFile.files.length > 0) {
+                const file = avatarFile.files[0];
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                
+                if (!allowedTypes.includes(file.type)) {
+                    e.preventDefault();
+                    alert('Chỉ chấp nhận file ảnh định dạng: JPG, JPEG, PNG, GIF');
+                    return false;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    e.preventDefault();
+                    alert('Kích thước file không được vượt quá 5MB');
+                    return false;
+                }
+            }
+        });
+
+        document.getElementById('posterFile')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                e.target.value = '';
+            }
+        });
+    </script>
+}

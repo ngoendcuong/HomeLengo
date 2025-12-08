@@ -1,0 +1,749 @@
+@model HomeLengo.Models.Property
+@{
+    ViewData["Title"] = "Add Property";
+}
+
+<div class="main-content">
+    <div class="main-content-inner wrap-dashboard-content">
+        <div class="button-show-hide show-mb">
+            <span class="body-1">Show Dashboard</span>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-7">Add Property</h4>
+            <a href="/Admin/Property/MyProperties" class="tf-btn btn-line">Back to My Properties</a>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger" role="alert">
+                <h5>Please fix the following errors:</h5>
+                <div asp-validation-summary="All" class="text-danger"></div>
+            </div>
+        }
+
+        <form asp-area="Admin" asp-controller="Property" asp-action="Create" method="post" enctype="multipart/form-data" id="createPropertyForm">
+            @Html.AntiForgeryToken()
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Upload Media</h5>
+                <div class="box-uploadfile text-center">
+                    <div class="uploadfile">
+                        <div class="btn-upload tf-btn primary">
+                            <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13.625 14.375V17.1875C13.625 17.705 13.205 18.125 12.6875 18.125H4.5625C4.31386 18.125 4.0754 18.0262 3.89959 17.8504C3.72377 17.6746 3.625 17.4361 3.625 17.1875V6.5625C3.625 6.045 4.045 5.625 4.5625 5.625H6.125C6.54381 5.62472 6.96192 5.65928 7.375 5.72834M13.625 14.375H16.4375C16.955 14.375 17.375 13.955 17.375 13.4375V9.375C17.375 5.65834 14.6725 2.57417 11.125 1.97834C10.7119 1.90928 10.2938 1.87472 9.875 1.875H8.3125C7.795 1.875 7.375 2.295 7.375 2.8125V5.72834M13.625 14.375H8.3125C8.06386 14.375 7.8254 14.2762 7.64959 14.1004C7.47377 13.9246 7.375 13.6861 7.375 13.4375V5.72834M17.375 11.25V9.6875C17.375 8.94158 17.0787 8.22621 16.5512 7.69876C16.0238 7.17132 15.3084 6.875 14.5625 6.875H13.3125C13.0639 6.875 12.8254 6.77623 12.6496 6.60041C12.4738 6.4246 12.375 6.18614 12.375 5.9375V4.6875C12.375 4.31816 12.3023 3.95243 12.1609 3.6112C12.0196 3.26998 11.8124 2.95993 11.5512 2.69876C11.2901 2.4376 10.98 2.23043 10.6388 2.08909C10.2976 1.94775 9.93184 1.875 9.5625 1.875H8.625" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Select photos
+                            <input type="file" class="ip-file" id="photoUpload" accept="image/*" multiple>
+                        </div>
+                        <p class="file-name fw-5">or drag photos here <br>
+                            <span>(Up to 10 photos)</span></p>
+                    </div>
+                </div>
+                <div class="box-img-upload" id="photoContainer" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
+                    <!-- Photos will be added here dynamically -->
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Information</h5>
+                <div class="box-info-property">
+                    <fieldset class="box box-fieldset">
+                        <label>
+                            Title:<span>*</span>
+                        </label>
+                        <input type="text" asp-for="Title" class="form-control" placeholder="Enter property title" required>
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </fieldset>
+                    
+                    <fieldset class="box box-fieldset">
+                        <label>Description:</label>
+                        <textarea asp-for="Description" class="textarea" placeholder="Your Description" rows="5"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </fieldset>
+
+                    <div class="box grid-3 gap-30">
+                        <fieldset class="box-fieldset">
+                            <label>
+                                Full Address:<span>*</span>
+                            </label>
+                            <input type="text" asp-for="Address" class="form-control" placeholder="Enter property full address" required>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </fieldset>
+
+                        <fieldset class="box-fieldset">
+                            <label>
+                                City:<span>*</span>
+                            </label>
+                            <select asp-for="CityId" asp-items="ViewBag.Cities" class="form-select" id="citySelect" required>
+                                <option value="">Select City</option>
+                            </select>
+                            <span asp-validation-for="CityId" class="text-danger"></span>
+                        </fieldset>
+
+                        <fieldset class="box-fieldset">
+                            <label>
+                                District:<span>*</span>
+                            </label>
+                            <select asp-for="DistrictId" asp-items="ViewBag.Districts" class="form-select" id="districtSelect" required>
+                                <option value="">Select District</option>
+                            </select>
+                            <span asp-validation-for="DistrictId" class="text-danger"></span>
+                        </fieldset>
+                    </div>
+
+                    <div class="box grid-2 gap-30">
+                        <fieldset class="box-fieldset">
+                            <label>
+                                Neighborhood:
+                            </label>
+                            <select asp-for="NeighborhoodId" asp-items="ViewBag.Neighborhoods" class="form-select" id="neighborhoodSelect">
+                                <option value="">Select Neighborhood</option>
+                            </select>
+                            <span asp-validation-for="NeighborhoodId" class="text-danger"></span>
+                        </fieldset>
+
+                        <fieldset class="box-fieldset">
+                            <label>Location (Latitude, Longitude):</label>
+                            <div class="box-ip">
+                                <input type="text" class="form-control" id="locationInput" placeholder="Click button to get location" readonly>
+                                <a href="javascript:void(0);" class="btn-location" id="getLocationBtn"><i class="icon icon-location"></i></a>
+                            </div>
+                            <input type="hidden" asp-for="Latitude" id="latitudeInput">
+                            <input type="hidden" asp-for="Longitude" id="longitudeInput">
+                        </fieldset>
+                    </div>
+
+                    <div class="box box-fieldset">
+                        <label>Map Preview:</label>
+                        <iframe class="map" id="mapPreview" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d135905.11693909427!2d-73.95165795400088!3d41.17584829642291!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2s!4v1727094281524!5m2!1sen!2s" height="456" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Price</h5>
+                <div class="box-price-property">
+                    <div class="box grid-2 gap-30">
+                        <fieldset class="box-fieldset">
+                            <label>Price:<span>*</span></label>
+                            <input type="number" asp-for="Price" class="form-control" placeholder="Example value: 12345.67" step="0.01" min="0" required>
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </fieldset>
+                        <fieldset class="box-fieldset">
+                            <label>
+                                Currency:<span>*</span>
+                            </label>
+                            <input type="text" asp-for="Currency" class="form-control" placeholder="VND, USD, etc." value="VND" required>
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Additional Information</h5>
+                <div class="box grid-3 gap-30">
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Property Type:<span>*</span>
+                        </label>
+                        <select asp-for="PropertyTypeId" asp-items="ViewBag.PropertyTypes" class="form-select" required>
+                            <option value="">Choose</option>
+                        </select>
+                        <span asp-validation-for="PropertyTypeId" class="text-danger"></span>
+                    </fieldset>
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Property Status:<span>*</span>
+                        </label>
+                        <select asp-for="StatusId" asp-items="ViewBag.Statuses" class="form-select" required>
+                            <option value="">Choose</option>
+                        </select>
+                        <span asp-validation-for="StatusId" class="text-danger"></span>
+                    </fieldset>
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Is Featured:
+                        </label>
+                        <div class="form-check form-switch mt-2">
+                            <input type="checkbox" name="IsFeatured" value="true" class="form-check-input" id="isFeatured">
+                            <input type="hidden" name="IsFeatured" value="false">
+                            <label class="form-check-label" for="isFeatured">Featured Property</label>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="box grid-3 gap-30">
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Size (SqFt):<span>*</span>
+                        </label>
+                        <input type="number" asp-for="Area" class="form-control" placeholder="Enter area" step="0.01" min="0">
+                        <span asp-validation-for="Area" class="text-danger"></span>
+                    </fieldset>
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Land Area (SqFt):
+                        </label>
+                        <input type="number" asp-for="LotSize" class="form-control" placeholder="Enter lot size" step="0.01" min="0">
+                        <span asp-validation-for="LotSize" class="text-danger"></span>
+                    </fieldset>
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Views:
+                        </label>
+                        <input type="number" asp-for="Views" class="form-control" placeholder="Enter views count" min="0" value="0">
+                        <span asp-validation-for="Views" class="text-danger"></span>
+                    </fieldset>
+                </div>
+                <div class="box grid-3 gap-30">
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Bedrooms:<span>*</span>
+                        </label>
+                        <input type="number" asp-for="Bedrooms" class="form-control" placeholder="Enter number of bedrooms" min="0">
+                        <span asp-validation-for="Bedrooms" class="text-danger"></span>
+                    </fieldset>
+                    <fieldset class="box-fieldset">
+                        <label>
+                            Bathrooms:<span>*</span>
+                        </label>
+                        <input type="number" asp-for="Bathrooms" class="form-control" placeholder="Enter number of bathrooms" min="0">
+                        <span asp-validation-for="Bathrooms" class="text-danger"></span>
+                    </fieldset>
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Amenities<span>*</span></h5>
+                <div class="box-amenities-property">
+                    @if (ViewBag.Amenities != null)
+                    {
+                        var amenities = ViewBag.Amenities as List<HomeLengo.Models.Amenity>;
+                        @if (amenities != null && amenities.Any())
+                        {
+                            <div class="list-amenities">
+                                @foreach (var amenity in amenities)
+                                {
+                                    <fieldset class="amenities-item">
+                                        <input type="checkbox" name="selectedAmenities" value="@amenity.AmenityId" 
+                                               id="amenity_@amenity.AmenityId" 
+                                               class="tf-checkbox style-1">
+                                        <label for="amenity_@amenity.AmenityId" class="text-cb-amenities">@amenity.Name</label>
+                                    </fieldset>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No amenities available</p>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Features<span>*</span></h5>
+                <div class="box-amenities-property">
+                    @if (ViewBag.Features != null)
+                    {
+                        var features = ViewBag.Features as List<HomeLengo.Models.Feature>;
+                        @if (features != null && features.Any())
+                        {
+                            <div class="list-amenities">
+                                @foreach (var feature in features)
+                                {
+                                    <fieldset class="amenities-item">
+                                        <input type="checkbox" name="selectedFeatures" value="@feature.FeatureId" 
+                                               id="feature_@feature.FeatureId" 
+                                               class="tf-checkbox style-1">
+                                        <label for="feature_@feature.FeatureId" class="text-cb-amenities">@feature.Name</label>
+                                    </fieldset>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No features available</p>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Videos</h5>
+                <div id="videoContainer">
+                    <div class="video-item mb-3">
+                        <fieldset class="box-fieldset">
+                            <label class="text-btn">Video URL:</label>
+                            <input type="text" name="videoUrls" class="form-control" placeholder="Youtube, vimeo url">
+                        </fieldset>
+                    </div>
+                </div>
+                <button type="button" class="tf-btn btn-line" id="addVideoBtn">
+                    <span class="icon icon-plus"></span> Add Another Video
+                </button>
+            </div>
+
+            <div class="widget-box-2 mb-20">
+                <h5 class="title">Floors</h5>
+                <div class="box-radio-check">
+                    <div class="text-btn mb-16">Enable Floor Plan:</div>
+                    <fieldset class="fieldset-radio">
+                        <input type="radio" class="tf-checkbox style-1" name="enableFloorPlan" id="radioEnable" value="enable" checked> 
+                        <label for="radioEnable" class="text-radio">Enable</label>
+                    </fieldset>
+                    <fieldset class="fieldset-radio">
+                        <input type="radio" class="tf-checkbox style-1" name="enableFloorPlan" id="radioDisable" value="disable"> 
+                        <label for="radioDisable" class="text-radio">Disable</label>
+                    </fieldset>
+                </div>
+                <div id="floorPlanContainer">
+                    <div class="box-floor-property file-delete floor-plan-item" data-floor-index="0">
+                        <div class="top d-flex justify-content-between align-items-center">
+                            <h6>Floor 1:</h6>
+                            <a href="javascript:void(0);" class="remove-file remove-floor"><span class="icon icon-close2"></span></a>
+                        </div>
+                        <fieldset class="box box-fieldset">
+                            <label>Floor Name:</label>
+                            <input type="text" name="floorPlans[0].FloorName" class="form-control style-1" placeholder="e.g., Ground Floor">
+                        </fieldset>
+                        <div class="grid-2 box gap-30">
+                            <fieldset class="box-fieldset">
+                                <label>Floor Area (SqFt):</label>
+                                <input type="number" name="floorPlans[0].Area" class="form-control style-1" placeholder="Enter area" step="0.01" min="0">
+                            </fieldset>
+                            <fieldset class="box-fieldset">
+                                <label>Bedrooms:</label>
+                                <input type="number" name="floorPlans[0].Bedrooms" class="form-control style-1" placeholder="Number of bedrooms" min="0">
+                            </fieldset>
+                        </div>
+                        <div class="grid-2 box gap-30">
+                            <fieldset class="box-fieldset">
+                                <label>Bathrooms:</label>
+                                <input type="number" name="floorPlans[0].Bathrooms" class="form-control style-1" placeholder="Number of bathrooms" min="0">
+                            </fieldset>
+                            <fieldset class="box-fieldset">
+                                <label>Floor Image:</label>
+                                <div class="box-floor-img uploadfile">
+                                    <div class="btn-upload tf-btn primary">
+                                        <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2.375 13.125L6.67417 8.82583C6.84828 8.65172 7.05498 8.51361 7.28246 8.41938C7.50995 8.32515 7.75377 8.27665 8 8.27665C8.24623 8.27665 8.49005 8.32515 8.71754 8.41938C8.94502 8.51361 9.15172 8.65172 9.32583 8.82583L13.625 13.125M12.375 11.875L13.5492 10.7008C13.7233 10.5267 13.93 10.3886 14.1575 10.2944C14.385 10.2001 14.6288 10.1516 14.875 10.1516C15.1212 10.1516 15.365 10.2001 15.5925 10.2944C15.82 10.3886 16.0267 10.5267 16.2008 10.7008L18.625 13.125M3.625 16.25H17.375C17.7065 16.25 18.0245 16.1183 18.2589 15.8839C18.4933 15.6495 18.625 15.3315 18.625 15V5C18.625 4.66848 18.4933 4.35054 18.2589 4.11612C18.0245 3.8817 17.7065 3.75 17.375 3.75H3.625C3.29348 3.75 2.97554 3.8817 2.74112 4.11612C2.5067 4.35054 2.375 4.66848 2.375 5V15C2.375 15.3315 2.5067 15.6495 2.74112 15.8839C2.97554 16.1183 3.29348 16.25 3.625 16.25ZM12.375 6.875H12.3817V6.88167H12.375V6.875ZM12.6875 6.875C12.6875 6.95788 12.6546 7.03737 12.596 7.09597C12.5374 7.15458 12.4579 7.1875 12.375 7.1875C12.2921 7.1875 12.2126 7.15458 12.154 7.09597C12.0954 7.03737 12.0625 6.95788 12.0625 6.875C12.0625 6.79212 12.0954 6.71263 12.154 6.65403C12.2126 6.59542 12.2921 6.5625 12.375 6.5625C12.4579 6.5625 12.5374 6.59542 12.596 6.65403C12.6546 6.71263 12.6875 6.79212 12.6875 6.875Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        Choose File
+                                        <input type="file" class="ip-file floor-image-upload" accept="image/*" data-floor-index="0">
+                                    </div>
+                                    <p class="file-name">Or drop file here to upload</p>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <fieldset class="box box-fieldset">
+                            <label>Description:</label>
+                            <textarea name="floorPlans[0].Description" class="textarea" placeholder="Floor description"></textarea>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <a href="javascript:void(0);" class="btn-add-floor" id="addFloorBtn"><span class="icon icon-plus"></span></a>
+                </div>
+            </div>
+
+            <div class="box-btn">
+                <button type="submit" class="tf-btn primary">Add Property</button>
+                <a href="/Admin/Property/MyProperties" class="tf-btn btn-line">Cancel</a>
+            </div>
+        </form>
+    </div>
+    <div class="footer-dashboard">
+        <p>Copyright © 2024 Home Lengo</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var photoFiles = [];
+            var floorPlanFiles = {};
+            var floorPlanIndex = 1;
+
+            // Handle city change to load districts
+            $('#citySelect').on('change', function() {
+                var cityId = $(this).val();
+                if (cityId) {
+                    $.ajax({
+                        url: '/Admin/Property/GetDistricts',
+                        type: 'GET',
+                        data: { cityId: cityId },
+                        success: function(data) {
+                            $('#districtSelect').empty().append('<option value="">Select District</option>');
+                            $('#neighborhoodSelect').empty().append('<option value="">Select Neighborhood</option>');
+                            $.each(data, function(i, district) {
+                                $('#districtSelect').append($('<option></option>').val(district.districtId).text(district.name));
+                            });
+                        }
+                    });
+                } else {
+                    $('#districtSelect').empty().append('<option value="">Select District</option>');
+                    $('#neighborhoodSelect').empty().append('<option value="">Select Neighborhood</option>');
+                }
+            });
+
+            // Handle district change to load neighborhoods
+            $('#districtSelect').on('change', function() {
+                var districtId = $(this).val();
+                if (districtId) {
+                    $.ajax({
+                        url: '/Admin/Property/GetNeighborhoods',
+                        type: 'GET',
+                        data: { districtId: districtId },
+                        success: function(data) {
+                            $('#neighborhoodSelect').empty().append('<option value="">Select Neighborhood</option>');
+                            $.each(data, function(i, neighborhood) {
+                                $('#neighborhoodSelect').append($('<option></option>').val(neighborhood.neighborhoodId).text(neighborhood.name));
+                            });
+                        }
+                    });
+                } else {
+                    $('#neighborhoodSelect').empty().append('<option value="">Select Neighborhood</option>');
+                }
+            });
+
+            // Get location button
+            $('#getLocationBtn').on('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+                        $('#latitudeInput').val(lat);
+                        $('#longitudeInput').val(lng);
+                        $('#locationInput').val(lat + ', ' + lng);
+                        updateMapPreview(lat, lng);
+                    }, function(error) {
+                        alert('Error getting location: ' + error.message);
+                    });
+                } else {
+                    alert('Geolocation is not supported by this browser.');
+                }
+            });
+
+            function updateMapPreview(lat, lng) {
+                var mapUrl = 'https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3000!2d' + lng + '!3d' + lat + '!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2s!4v1727094281524!5m2!1sen!2s';
+                $('#mapPreview').attr('src', mapUrl);
+            }
+
+            // Photo upload handling
+            $('#photoUpload').on('change', function(e) {
+                var files = Array.from(e.target.files);
+                if (files.length > 10) {
+                    alert('Maximum 10 photos allowed');
+                    files = files.slice(0, 10);
+                }
+                
+                // Replace photoFiles with new files (don't concat to avoid duplicates)
+                photoFiles = files;
+                // Reset primary to first photo when new photos are selected
+                if (photoFiles.length > 0) {
+                    primaryPhotoIndex = 0;
+                }
+                displayPhotos();
+            });
+
+            var primaryPhotoIndex = 0; // Default to first photo
+            
+            function displayPhotos() {
+                $('#photoContainer').empty();
+                photoFiles.forEach(function(file, index) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var isPrimary = index === primaryPhotoIndex;
+                        var photoHtml = '<div class="item-upload file-delete photo-item" data-photo-index="' + index + '" style="position: relative; width: 150px; height: 150px; cursor: move;">' +
+                            '<img src="' + e.target.result + '" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">' +
+                            (isPrimary ? '<span class="badge bg-primary" style="position: absolute; top: 5px; left: 5px; padding: 4px 8px; font-size: 11px; z-index: 10;">Primary</span>' : '') +
+                            '<span class="icon icon-trash remove-photo" data-photo-index="' + index + '" title="Remove photo" style="position: absolute; top: 5px; right: 5px; cursor: pointer; background: rgba(255,0,0,0.7); padding: 5px; border-radius: 4px; z-index: 10;"></span>' +
+                            (!isPrimary ? '<span class="btn-set-primary" data-photo-index="' + index + '" title="Set as primary" style="position: absolute; bottom: 5px; left: 5px; padding: 4px 8px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; cursor: pointer; font-size: 11px; z-index: 10;">Set Primary</span>' : '') +
+                            '</div>';
+                        $('#photoContainer').append(photoHtml);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // Remove photo
+            $(document).on('click', '.remove-photo', function(e) {
+                e.stopPropagation();
+                var index = $(this).data('photo-index');
+                
+                // If removing primary photo, set first remaining photo as primary
+                if (index === primaryPhotoIndex) {
+                    if (photoFiles.length > 1) {
+                        // Find new primary index (first photo after removed one, or first photo)
+                        primaryPhotoIndex = index === 0 ? 0 : index - 1;
+                    } else {
+                        primaryPhotoIndex = 0;
+                    }
+                } else if (index < primaryPhotoIndex) {
+                    // Adjust primary index if removed photo was before primary
+                    primaryPhotoIndex--;
+                }
+                
+                photoFiles.splice(index, 1);
+                displayPhotos();
+            });
+            
+            // Set primary photo
+            $(document).on('click', '.btn-set-primary', function(e) {
+                e.stopPropagation();
+                var index = $(this).data('photo-index');
+                primaryPhotoIndex = index;
+                displayPhotos();
+            });
+
+            // Drag and drop for photos
+            $('.uploadfile').on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).addClass('dragover');
+            });
+
+            $('.uploadfile').on('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+            });
+
+            $('.uploadfile').on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+                
+                var files = Array.from(e.originalEvent.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+                if (files.length > 10) {
+                    alert('Maximum 10 photos allowed');
+                    files = files.slice(0, 10);
+                }
+                photoFiles = photoFiles.concat(files);
+                displayPhotos();
+            });
+
+            // Add video
+            $('#addVideoBtn').on('click', function() {
+                var videoHtml = '<div class="video-item mb-3">' +
+                    '<fieldset class="box-fieldset">' +
+                    '<label class="text-btn">Video URL:</label>' +
+                    '<div class="d-flex gap-2">' +
+                    '<input type="text" name="videoUrls" class="form-control" placeholder="Youtube, vimeo url">' +
+                    '<button type="button" class="tf-btn btn-line remove-video">Remove</button>' +
+                    '</div>' +
+                    '</fieldset>' +
+                    '</div>';
+                $('#videoContainer').append(videoHtml);
+            });
+
+            // Remove video
+            $(document).on('click', '.remove-video', function() {
+                $(this).closest('.video-item').remove();
+            });
+
+            // Add floor plan
+            $('#addFloorBtn').on('click', function() {
+                var floorHtml = '<div class="box-floor-property file-delete floor-plan-item" data-floor-index="' + floorPlanIndex + '">' +
+                    '<div class="top d-flex justify-content-between align-items-center">' +
+                    '<h6>Floor ' + (floorPlanIndex + 1) + ':</h6>' +
+                    '<a href="javascript:void(0);" class="remove-file remove-floor"><span class="icon icon-close2"></span></a>' +
+                    '</div>' +
+                    '<fieldset class="box box-fieldset">' +
+                    '<label>Floor Name:</label>' +
+                    '<input type="text" name="floorPlans[' + floorPlanIndex + '].FloorName" class="form-control style-1" placeholder="e.g., Ground Floor">' +
+                    '</fieldset>' +
+                    '<div class="grid-2 box gap-30">' +
+                    '<fieldset class="box-fieldset">' +
+                    '<label>Floor Area (SqFt):</label>' +
+                    '<input type="number" name="floorPlans[' + floorPlanIndex + '].Area" class="form-control style-1" placeholder="Enter area" step="0.01" min="0">' +
+                    '</fieldset>' +
+                    '<fieldset class="box-fieldset">' +
+                    '<label>Bedrooms:</label>' +
+                    '<input type="number" name="floorPlans[' + floorPlanIndex + '].Bedrooms" class="form-control style-1" placeholder="Number of bedrooms" min="0">' +
+                    '</fieldset>' +
+                    '</div>' +
+                    '<div class="grid-2 box gap-30">' +
+                    '<fieldset class="box-fieldset">' +
+                    '<label>Bathrooms:</label>' +
+                    '<input type="number" name="floorPlans[' + floorPlanIndex + '].Bathrooms" class="form-control style-1" placeholder="Number of bathrooms" min="0">' +
+                    '</fieldset>' +
+                    '<fieldset class="box-fieldset">' +
+                    '<label>Floor Image:</label>' +
+                    '<div class="box-floor-img uploadfile">' +
+                    '<div class="btn-upload tf-btn primary">' +
+                    '<svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                    '<path d="M2.375 13.125L6.67417 8.82583C6.84828 8.65172 7.05498 8.51361 7.28246 8.41938C7.50995 8.32515 7.75377 8.27665 8 8.27665C8.24623 8.27665 8.49005 8.32515 8.71754 8.41938C8.94502 8.51361 9.15172 8.65172 9.32583 8.82583L13.625 13.125M12.375 11.875L13.5492 10.7008C13.7233 10.5267 13.93 10.3886 14.1575 10.2944C14.385 10.2001 14.6288 10.1516 14.875 10.1516C15.1212 10.1516 15.365 10.2001 15.5925 10.2944C15.82 10.3886 16.0267 10.5267 16.2008 10.7008L18.625 13.125M3.625 16.25H17.375C17.7065 16.25 18.0245 16.1183 18.2589 15.8839C18.4933 15.6495 18.625 15.3315 18.625 15V5C18.625 4.66848 18.4933 4.35054 18.2589 4.11612C18.0245 3.8817 17.7065 3.75 17.375 3.75H3.625C3.29348 3.75 2.97554 3.8817 2.74112 4.11612C2.5067 4.35054 2.375 4.66848 2.375 5V15C2.375 15.3315 2.5067 15.6495 2.74112 15.8839C2.97554 16.1183 3.29348 16.25 3.625 16.25ZM12.375 6.875H12.3817V6.88167H12.375V6.875ZM12.6875 6.875C12.6875 6.95788 12.6546 7.03737 12.596 7.09597C12.5374 7.15458 12.4579 7.1875 12.375 7.1875C12.2921 7.1875 12.2126 7.15458 12.154 7.09597C12.0954 7.03737 12.0625 6.95788 12.0625 6.875C12.0625 6.79212 12.0954 6.71263 12.154 6.65403C12.2126 6.59542 12.2921 6.5625 12.375 6.5625C12.4579 6.5625 12.5374 6.59542 12.596 6.65403C12.6546 6.71263 12.6875 6.79212 12.6875 6.875Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+                    '</svg>' +
+                    'Choose File' +
+                    '<input type="file" class="ip-file floor-image-upload" accept="image/*" data-floor-index="' + floorPlanIndex + '">' +
+                    '</div>' +
+                    '<p class="file-name">Or drop file here to upload</p>' +
+                    '</div>' +
+                    '</fieldset>' +
+                    '</div>' +
+                    '<fieldset class="box box-fieldset">' +
+                    '<label>Description:</label>' +
+                    '<textarea name="floorPlans[' + floorPlanIndex + '].Description" class="textarea" placeholder="Floor description"></textarea>' +
+                    '</fieldset>' +
+                    '</div>';
+                $('#floorPlanContainer').append(floorHtml);
+                floorPlanIndex++;
+            });
+
+            // Remove floor plan
+            $(document).on('click', '.remove-floor', function() {
+                var floorIndex = $(this).closest('.floor-plan-item').data('floor-index');
+                delete floorPlanFiles[floorIndex];
+                $(this).closest('.floor-plan-item').remove();
+            });
+
+            // Floor plan image upload
+            $(document).on('change', '.floor-image-upload', function() {
+                var file = this.files[0];
+                var floorIndex = $(this).data('floor-index');
+                if (file) {
+                    floorPlanFiles[floorIndex] = file;
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $(this).closest('.box-floor-img').find('.file-name').text(file.name);
+                    }.bind(this);
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Handle form submission - use regular form submit for better model binding
+            $('#createPropertyForm').on('submit', function(e) {
+                var form = this;
+                var hasErrors = false;
+                
+                // Validate required fields before submit
+                var requiredFields = [
+                    { selector: 'input[name="Title"]', message: 'Title is required' },
+                    { selector: 'select[name="PropertyTypeId"]', message: 'Property Type is required' },
+                    { selector: 'select[name="StatusId"]', message: 'Status is required' },
+                    { selector: 'input[name="Address"]', message: 'Address is required' },
+                    { selector: 'select[name="CityId"]', message: 'City is required' },
+                    { selector: 'select[name="DistrictId"]', message: 'District is required' },
+                    { selector: 'input[name="Price"]', message: 'Price is required' }
+                ];
+                
+                requiredFields.forEach(function(field) {
+                    var $field = $(form).find(field.selector);
+                    if (!$field.val() || $field.val() === '' || $field.val() === '0') {
+                        alert(field.message);
+                        $field.focus();
+                        hasErrors = true;
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+                
+                if (hasErrors) {
+                    return false;
+                }
+                
+                // Always use AJAX to properly handle files from photoFiles array
+                e.preventDefault();
+                submitViaAjax(form);
+            });
+            
+            // Function to submit via AJAX
+            function submitViaAjax(form) {
+                var formData = new FormData(form);
+                
+                // Add photos from photoFiles array
+                // Important: Make sure photos are added correctly
+                if (photoFiles && photoFiles.length > 0) {
+                    photoFiles.forEach(function(file) {
+                        if (file && file instanceof File) {
+                            formData.append('photos', file);
+                        }
+                    });
+                    
+                    // Add primary photo index (only once)
+                    formData.append('primaryPhotoIndex', primaryPhotoIndex.toString());
+                } else {
+                    // If photoFiles is empty, check if files are in the file input
+                    var fileInput = document.getElementById('photoUpload');
+                    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                        for (var i = 0; i < fileInput.files.length; i++) {
+                            formData.append('photos', fileInput.files[i]);
+                        }
+                        formData.append('primaryPhotoIndex', '0');
+                    }
+                }
+
+                // Add floor plan images
+                Object.keys(floorPlanFiles).forEach(function(floorIndex) {
+                    formData.append('floorPlanImages.' + floorIndex, floorPlanFiles[floorIndex]);
+                });
+
+                var submitBtn = $(form).find('button[type="submit"]');
+                var originalText = submitBtn.html();
+                submitBtn.prop('disabled', true).html('Saving...');
+
+                $.ajax({
+                    url: $(form).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response, status, xhr) {
+                        // Check if response is a redirect
+                        var redirectUrl = xhr.getResponseHeader('Location');
+                        if (redirectUrl) {
+                            window.location.href = redirectUrl;
+                        } else if (typeof response === 'string' && response.includes('MyProperties')) {
+                            window.location.href = '/Admin/Property/MyProperties';
+                        } else {
+                            // Response might be HTML, try to extract redirect or reload
+                            window.location.href = '/Admin/Property/MyProperties';
+                        }
+                    },
+                    error: function(xhr) {
+                        submitBtn.prop('disabled', false).html(originalText);
+                        console.error('Error status:', xhr.status);
+                        console.error('Error response:', xhr.responseText);
+                        
+                        if (xhr.status === 400 || xhr.status === 200) {
+                            // 400 or 200 with validation errors - parse HTML response
+                            try {
+                                var parser = new DOMParser();
+                                var doc = parser.parseFromString(xhr.responseText, 'text/html');
+                                var errorDiv = doc.querySelector('.alert-danger');
+                                var validationSummary = doc.querySelector('[asp-validation-summary]');
+                                
+                                if (errorDiv) {
+                                    var errorText = errorDiv.textContent.trim();
+                                    if (errorText) {
+                                        alert('Error: ' + errorText);
+                                    }
+                                }
+                                
+                                // Show validation errors if any
+                                var errors = doc.querySelectorAll('.text-danger, .field-validation-error');
+                                if (errors.length > 0) {
+                                    var errorMsg = 'Please fix the following errors:\n';
+                                    errors.forEach(function(el) {
+                                        if (el.textContent.trim()) {
+                                            errorMsg += el.textContent.trim() + '\n';
+                                        }
+                                    });
+                                    alert(errorMsg);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing response:', e);
+                                alert('An error occurred. Please check the console for details.');
+                            }
+                        } else {
+                            alert('An error occurred while saving the property. Status: ' + xhr.status);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

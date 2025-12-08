@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using HomeLengo.Models;
+using HomeLengo.Services;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace HomeLengo.Areas.Admin.Controllers
 {
@@ -9,10 +12,12 @@ namespace HomeLengo.Areas.Admin.Controllers
     public class UserController : Controller
     {
         private readonly HomeLengoContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public UserController(HomeLengoContext context)
+        public UserController(HomeLengoContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         // GET: Admin/User
@@ -227,6 +232,9 @@ namespace HomeLengo.Areas.Admin.Controllers
                 return NotFound();
             }
 
+            // Get agent info if exists
+            var agent = user.Agents.FirstOrDefault();
+            ViewBag.Agent = agent;
             ViewBag.Roles = _context.Roles.ToList();
             return View(user);
         }
@@ -234,7 +242,7 @@ namespace HomeLengo.Areas.Admin.Controllers
         // POST: Admin/User/Profile
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Profile(User user, int[] selectedRoles)
+        public async Task<IActionResult> Profile(User user, IFormFile? avatarFile, IFormFile? posterFile, string? agencyName, string? licenseNumber, string? bio)
         {
             var userIdStr = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
@@ -242,75 +250,222 @@ namespace HomeLengo.Areas.Admin.Controllers
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
 
+            // Validate required fields manually
+            if (string.IsNullOrWhiteSpace(user.FullName))
+            {
+                TempData["ErrorMessage"] = "Họ tên không được để trống";
+                return RedirectToAction(nameof(Profile));
+            }
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                TempData["ErrorMessage"] = "Email không được để trống";
+                return RedirectToAction(nameof(Profile));
+            }
+
             if (userId != user.UserId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                var existingUser = await _context.Users
+                    .Include(u => u.Agents)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (existingUser == null)
                 {
-                    // Không cho phép thay đổi password từ đây
-                    var existingUser = await _context.Users.FindAsync(userId);
-                    if (existingUser != null)
-                    {
-                        existingUser.FullName = user.FullName;
-                        existingUser.Email = user.Email;
-                        existingUser.Phone = user.Phone;
-                        existingUser.Avatar = user.Avatar;
-                        existingUser.ModifiedAt = DateTime.UtcNow;
-
-                        // Cập nhật session nếu cần
-                        HttpContext.Session.SetString("FullName", existingUser.FullName ?? "");
-                        HttpContext.Session.SetString("Email", existingUser.Email);
-                        if (!string.IsNullOrEmpty(existingUser.Avatar))
-                        {
-                            HttpContext.Session.SetString("Avatar", existingUser.Avatar);
-                        }
-
-                        // Update roles nếu có
-                        if (selectedRoles != null)
-                        {
-                            var existingRoles = _context.UserRoles.Where(ur => ur.UserId == userId).ToList();
-                            _context.UserRoles.RemoveRange(existingRoles);
-                            foreach (var roleId in selectedRoles)
-                            {
-                                _context.UserRoles.Add(new UserRole
-                                {
-                                    UserId = userId,
-                                    RoleId = roleId,
-                                    AssignedAt = DateTime.UtcNow
-                                });
-                            }
-                        }
-
-                        await _context.SaveChangesAsync();
-                        ViewBag.SuccessMessage = "Profile updated successfully!";
-                    }
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                // Update user info
+                existingUser.FullName = user.FullName;
+                existingUser.Email = user.Email;
+                existingUser.Phone = user.Phone;
+                existingUser.ModifiedAt = DateTime.UtcNow;
+
+                // Handle avatar upload
+                if (avatarFile != null && avatarFile.Length > 0)
                 {
-                    if (!UserExists(user.UserId))
+                    // Validate file type
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(avatarFile.FileName).ToLowerInvariant();
+                    
+                    if (!allowedExtensions.Contains(fileExtension))
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Chỉ chấp nhận file ảnh định dạng: JPG, JPEG, PNG, GIF";
+                    }
+                    else if (avatarFile.Length > 5 * 1024 * 1024) // 5MB
+                    {
+                        TempData["ErrorMessage"] = "Kích thước file không được vượt quá 5MB";
                     }
                     else
                     {
-                        throw;
+                        var avatarFileName = await SaveFile(avatarFile, "avatar");
+                        if (!string.IsNullOrEmpty(avatarFileName))
+                        {
+                            // Delete old avatar if exists and is not default
+                            if (!string.IsNullOrEmpty(existingUser.Avatar) && 
+                                existingUser.Avatar != "avatarMacDinh.jpg" &&
+                                !existingUser.Avatar.StartsWith("http"))
+                            {
+                                try
+                                {
+                                    var oldAvatarPath = Path.Combine(_environment.WebRootPath, "assets", "images", "avatar", existingUser.Avatar);
+                                    if (System.IO.File.Exists(oldAvatarPath))
+                                    {
+                                        System.IO.File.Delete(oldAvatarPath);
+                                    }
+                                }
+                                catch
+                                {
+                                    // Ignore deletion errors
+                                }
+                            }
+                            
+                            existingUser.Avatar = avatarFileName;
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = "Không thể lưu file ảnh. Vui lòng thử lại.";
+                        }
                     }
                 }
+
+                // Update or create agent info
+                var agent = existingUser.Agents.FirstOrDefault();
+                if (agent != null)
+                {
+                    // Update existing agent
+                    if (!string.IsNullOrEmpty(agencyName))
+                        agent.AgencyName = agencyName;
+                    if (!string.IsNullOrEmpty(licenseNumber))
+                        agent.LicenseNumber = licenseNumber;
+                    if (!string.IsNullOrEmpty(bio))
+                        agent.Bio = bio;
+
+                    // Handle poster upload for agent
+                    if (posterFile != null && posterFile.Length > 0)
+                    {
+                        // Note: Agent model doesn't have a poster field, so we'll skip this for now
+                        // You can add a Poster field to Agent model if needed
+                    }
+                }
+                else if (!string.IsNullOrEmpty(agencyName) || !string.IsNullOrEmpty(licenseNumber))
+                {
+                    // Create new agent if agency info is provided
+                    agent = new Agent
+                    {
+                        UserId = userId,
+                        AgencyName = agencyName,
+                        LicenseNumber = licenseNumber,
+                        Bio = bio,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.Agents.Add(agent);
+                }
+
+                // Update session
+                HttpContext.Session.SetString("FullName", existingUser.FullName ?? "");
+                HttpContext.Session.SetString("Email", existingUser.Email);
+                if (!string.IsNullOrEmpty(existingUser.Avatar))
+                {
+                    HttpContext.Session.SetString("Avatar", existingUser.Avatar);
+                }
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Profile updated successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error updating profile: " + ex.Message;
             }
 
-            var updatedUser = await _context.Users
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                .Include(u => u.Agents)
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+            return RedirectToAction(nameof(Profile));
+        }
 
-            ViewBag.Roles = _context.Roles.ToList();
-            ViewBag.SelectedRoles = updatedUser?.UserRoles.Select(ur => ur.RoleId).ToArray() ?? new int[0];
-            return View(updatedUser);
+        // POST: Admin/User/ChangePassword
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        [Produces("application/json")]
+        public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword, string confirmPassword)
+        {
+            var userIdStr = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
+            {
+                return Json(new { success = false, message = "Vui lòng nhập đầy đủ thông tin" });
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                return Json(new { success = false, message = "Mật khẩu mới và xác nhận không khớp" });
+            }
+
+            if (newPassword.Length < 6)
+            {
+                return Json(new { success = false, message = "Mật khẩu phải có ít nhất 6 ký tự" });
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not found" });
+            }
+
+            // Verify old password
+            if (!PasswordHasher.VerifyPassword(oldPassword, user.PasswordHash))
+            {
+                return Json(new { success = false, message = "Mật khẩu cũ không đúng" });
+            }
+
+            // Update password
+            user.PasswordHash = PasswordHasher.HashPassword(newPassword);
+            user.ModifiedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
+        }
+
+        // Helper method to save uploaded file
+        private async Task<string?> SaveFile(IFormFile file, string folder)
+        {
+            if (file == null || file.Length == 0)
+                return null;
+
+            try
+            {
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "assets", "images", folder);
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // Sanitize filename
+                var fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                var extension = Path.GetExtension(file.FileName);
+                var sanitizedFileName = string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
+                var uniqueFileName = $"{Guid.NewGuid()}_{sanitizedFileName}{extension}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                return uniqueFileName;
+            }
+            catch (Exception ex)
+            {
+                // Log error for debugging
+                System.Diagnostics.Debug.WriteLine($"Error saving file: {ex.Message}");
+                return null;
+            }
         }
 
         private bool UserExists(int id)

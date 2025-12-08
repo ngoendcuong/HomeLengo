@@ -3,6 +3,7 @@
     ViewData["Title"] = Model.Title;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@Html.AntiForgeryToken()
 
 <div class="flat-section-v4">
     <div class="container">
@@ -73,9 +74,12 @@
                 
                 <ul class="icon-box">
                     <li>
-                        <a href="#" class="item">
-                            <svg class="icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15.75 6.1875C15.75 4.32375 14.1758 2.8125 12.234 2.8125C10.7828 2.8125 9.53625 3.657 9 4.86225C8.46375 3.657 7.21725 2.8125 5.76525 2.8125C3.825 2.8125 2.25 4.32375 2.25 6.1875C2.25 11.6025 9 15.1875 9 15.1875C9 15.1875 15.75 11.6025 15.75 6.1875Z" stroke="#A3ABB0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <a href="javascript:void(0);" class="item favorite-btn" data-property-id="@Model.PropertyId" title="@(ViewBag.IsFavorite == true ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích")" onclick="return false;">
+                            <svg class="icon favorite-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.75 6.1875C15.75 4.32375 14.1758 2.8125 12.234 2.8125C10.7828 2.8125 9.53625 3.657 9 4.86225C8.46375 3.657 7.21725 2.8125 5.76525 2.8125C3.825 2.8125 2.25 4.32375 2.25 6.1875C2.25 11.6025 9 15.1875 9 15.1875C9 15.1875 15.75 11.6025 15.75 6.1875Z" 
+                                      stroke="@(ViewBag.IsFavorite == true ? "#FF6B6B" : "#A3ABB0")" 
+                                      fill="@(ViewBag.IsFavorite == true ? "#FF6B6B" : "none")"
+                                      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </a>
                     </li>
@@ -1026,6 +1030,24 @@
         color: #721c24;
         border: 1px solid #f5c6cb;
     }
+    
+    /* Favorite Icon Styles */
+    .favorite-btn {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    
+    .favorite-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    .favorite-icon path {
+        transition: all 0.3s ease;
+    }
+    
+    .favorite-btn:hover .favorite-icon path {
+        stroke: #FF6B6B;
+    }
 </style>
 
 @* Loan Calculator JavaScript *@
@@ -1111,6 +1133,133 @@
             reviewsSection.scrollIntoView({ behavior: 'smooth' });
         }
     }
+    
+    // Favorite toggle functionality
+    (function() {
+        function initFavoriteButton() {
+            // Wait for jQuery to be available
+            if (typeof jQuery === 'undefined') {
+                console.log('Waiting for jQuery...');
+                setTimeout(initFavoriteButton, 100);
+                return;
+            }
+            
+            console.log('Initializing favorite button handler');
+            var favoriteBtn = document.querySelector('.favorite-btn');
+            if (!favoriteBtn) {
+                console.error('Favorite button not found');
+                return;
+            }
+            console.log('Favorite button found, property ID:', favoriteBtn.getAttribute('data-property-id'));
+            
+            // Remove any existing handlers
+            jQuery('.favorite-btn').off('click.favorite');
+            
+            // Add click handler
+            jQuery('.favorite-btn').on('click.favorite', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Favorite button clicked!');
+                
+                var btn = jQuery(this);
+                var propertyId = btn.data('property-id') || btn.attr('data-property-id');
+                console.log('Property ID:', propertyId);
+                
+                if (!propertyId) {
+                    alert('Không tìm thấy ID bất động sản');
+                    return false;
+                }
+                
+                var icon = btn.find('.favorite-icon path');
+                if (icon.length === 0) {
+                    console.error('Icon path not found');
+                    return false;
+                }
+                
+                // Disable button during request
+                btn.css('opacity', '0.6');
+                btn.css('pointer-events', 'none');
+                
+                jQuery.ajax({
+                    url: '/Property/ToggleFavorite',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    data: { 
+                        propertyId: propertyId
+                    },
+                    success: function(response) {
+                        console.log('AJAX Success Response:', response);
+                        btn.css('opacity', '1');
+                        btn.css('pointer-events', 'auto');
+                        
+                        if (response && response.success) {
+                            // Update icon appearance
+                            if (response.isFavorite) {
+                                icon.attr('stroke', '#FF6B6B');
+                                icon.attr('fill', '#FF6B6B');
+                                btn.attr('title', 'Xóa khỏi yêu thích');
+                            } else {
+                                icon.attr('stroke', '#A3ABB0');
+                                icon.attr('fill', 'none');
+                                btn.attr('title', 'Thêm vào yêu thích');
+                            }
+                            
+                            // Show notification
+                            if (response.message) {
+                                alert(response.message);
+                            }
+                        } else {
+                            if (response && response.isLoggedIn === false) {
+                                if (confirm('Bạn cần đăng nhập để sử dụng tính năng này. Bạn có muốn đăng nhập không?')) {
+                                    window.location.href = '/Account/Login';
+                                }
+                            } else {
+                                alert(response && response.message ? response.message : 'Có lỗi xảy ra');
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', {
+                            status: status,
+                            error: error,
+                            statusCode: xhr.status,
+                            responseText: xhr.responseText
+                        });
+                        btn.css('opacity', '1');
+                        btn.css('pointer-events', 'auto');
+                        
+                        var errorMsg = 'Có lỗi xảy ra khi cập nhật yêu thích';
+                        try {
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            } else if (xhr.status === 401) {
+                                errorMsg = 'Bạn cần đăng nhập để sử dụng tính năng này';
+                                if (confirm(errorMsg + '. Bạn có muốn đăng nhập không?')) {
+                                    window.location.href = '/Account/Login';
+                                }
+                                return;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing response:', e);
+                        }
+                        alert(errorMsg);
+                    }
+                });
+                
+                return false;
+            });
+            
+            console.log('Favorite button handler initialized successfully');
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFavoriteButton);
+        } else {
+            // DOM already loaded
+            initFavoriteButton();
+        }
+    })();
 </script>
 
 @* Script để đảm bảo Swiper gallery được khởi tạo đúng *@
