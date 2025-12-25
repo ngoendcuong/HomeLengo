@@ -7,7 +7,7 @@ public partial class AdminAudit
 {
     public int AuditId { get; set; }
 
-    public int? AdminUserId { get; set; }
+    public int? UserId { get; set; }
 
     public string? Action { get; set; }
 
@@ -19,5 +19,5 @@ public partial class AdminAudit
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual User? AdminUser { get; set; }
+    public virtual User? User { get; set; }
 }

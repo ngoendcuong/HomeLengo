@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -88,22 +88,14 @@ public partial class HomeLengoContext : DbContext
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // Connection string is configured in Program.cs via appsettings.json
-        // Only configure here if options are not already set (for design-time scenarios)
-        if (!optionsBuilder.IsConfigured)
-        {
-            // This should not be reached in runtime as Program.cs configures the context
-            // But kept for design-time tooling (migrations, scaffolding, etc.)
-            // You can set a default connection string here for design-time only
-        }
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("data source= NGOENDCUONG\\SQLEXPRESS; initial catalog=HomeLengo; integrated security=True; TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AdminAudit>(entity =>
         {
-            entity.HasKey(e => e.AuditId).HasName("PK__AdminAud__A17F2398B1E77281");
+            entity.HasKey(e => e.AuditId).HasName("PK__AdminAud__A17F2398B600F383");
 
             entity.ToTable("AdminAudit");
 
@@ -112,14 +104,14 @@ public partial class HomeLengoContext : DbContext
             entity.Property(e => e.TargetId).HasMaxLength(200);
             entity.Property(e => e.TargetTable).HasMaxLength(200);
 
-            entity.HasOne(d => d.AdminUser).WithMany(p => p.AdminAudits)
-                .HasForeignKey(d => d.AdminUserId)
-                .HasConstraintName("FK_AdminAudit_User");
+            entity.HasOne(d => d.User).WithMany(p => p.AdminAudits)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_AdminAudit_Users");
         });
 
         modelBuilder.Entity<Agent>(entity =>
         {
-            entity.HasKey(e => e.AgentId).HasName("PK__Agents__9AC3BFF181454FF2");
+            entity.HasKey(e => e.AgentId).HasName("PK__Agents__9AC3BFF1588DA148");
 
             entity.Property(e => e.AgencyName).HasMaxLength(255);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
@@ -132,16 +124,16 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Amenity>(entity =>
         {
-            entity.HasKey(e => e.AmenityId).HasName("PK__Amenitie__842AF50B71740996");
+            entity.HasKey(e => e.AmenityId).HasName("PK__Amenitie__842AF50B9921C64B");
 
-            entity.HasIndex(e => e.Name, "UQ__Amenitie__737584F64ADB034F").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Amenitie__737584F6BDD15996").IsUnique();
 
             entity.Property(e => e.Name).HasMaxLength(200);
         });
 
         modelBuilder.Entity<Blog>(entity =>
         {
-            entity.HasKey(e => e.BlogId).HasName("PK__Blogs__54379E3063760D7B");
+            entity.HasKey(e => e.BlogId).HasName("PK__Blogs__54379E30871B5B5B");
 
             entity.HasIndex(e => e.CategoryId, "IDX_Blogs_Category");
 
@@ -168,9 +160,9 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<BlogCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__BlogCate__19093A0B74F5FE19");
+            entity.HasKey(e => e.CategoryId).HasName("PK__BlogCate__19093A0B56D09700");
 
-            entity.HasIndex(e => e.Name, "UQ__BlogCate__737584F6721F4DD0").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__BlogCate__737584F615D308EF").IsUnique();
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Name).HasMaxLength(200);
@@ -179,7 +171,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<BlogComment>(entity =>
         {
-            entity.HasKey(e => e.CommentId).HasName("PK__BlogComm__C3B4DFCA37D00401");
+            entity.HasKey(e => e.CommentId).HasName("PK__BlogComm__C3B4DFCA31DE97F9");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.IsApproved).HasDefaultValue(false);
@@ -195,7 +187,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Booking>(entity =>
         {
-            entity.HasKey(e => e.BookingId).HasName("PK__Bookings__73951AEDA2750B1B");
+            entity.HasKey(e => e.BookingId).HasName("PK__Bookings__73951AED889B8DB3");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Status)
@@ -219,7 +211,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<City>(entity =>
         {
-            entity.HasKey(e => e.CityId).HasName("PK__Cities__F2D21B7681C68D5E");
+            entity.HasKey(e => e.CityId).HasName("PK__Cities__F2D21B76A42BD89E");
 
             entity.Property(e => e.Code).HasMaxLength(50);
             entity.Property(e => e.Name).HasMaxLength(200);
@@ -227,7 +219,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<District>(entity =>
         {
-            entity.HasKey(e => e.DistrictId).HasName("PK__District__85FDA4C669ECC48E");
+            entity.HasKey(e => e.DistrictId).HasName("PK__District__85FDA4C673A57B63");
 
             entity.Property(e => e.Name).HasMaxLength(200);
 
@@ -238,7 +230,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Favorite>(entity =>
         {
-            entity.HasKey(e => e.FavoriteId).HasName("PK__Favorite__CE74FAD56ED80593");
+            entity.HasKey(e => e.FavoriteId).HasName("PK__Favorite__CE74FAD57DB18314");
 
             entity.HasIndex(e => new { e.UserId, e.PropertyId }, "UX_Favorites_User_Property").IsUnique();
 
@@ -255,16 +247,16 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Feature>(entity =>
         {
-            entity.HasKey(e => e.FeatureId).HasName("PK__Features__82230BC92E834457");
+            entity.HasKey(e => e.FeatureId).HasName("PK__Features__82230BC9AEBCB2C1");
 
-            entity.HasIndex(e => e.Name, "UQ__Features__737584F637BE4105").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Features__737584F6E2103C01").IsUnique();
 
             entity.Property(e => e.Name).HasMaxLength(150);
         });
 
         modelBuilder.Entity<Inquiry>(entity =>
         {
-            entity.HasKey(e => e.InquiryId).HasName("PK__Inquirie__05E6E7CFF20A72D5");
+            entity.HasKey(e => e.InquiryId).HasName("PK__Inquirie__05E6E7CF60FB188D");
 
             entity.Property(e => e.ContactEmail).HasMaxLength(255);
             entity.Property(e => e.ContactName).HasMaxLength(255);
@@ -286,7 +278,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Menu>(entity =>
         {
-            entity.HasKey(e => e.MenuId).HasName("PK__Menus__C99ED230CD355C5A");
+            entity.HasKey(e => e.MenuId).HasName("PK__Menus__C99ED230E9E0BEE0");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.IconClass).HasMaxLength(100);
@@ -302,7 +294,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Message>(entity =>
         {
-            entity.HasKey(e => e.MessageId).HasName("PK__Messages__C87C0C9CC9CFE144");
+            entity.HasKey(e => e.MessageId).HasName("PK__Messages__C87C0C9C33931952");
 
             entity.Property(e => e.IsRead).HasDefaultValue(false);
             entity.Property(e => e.SentAt).HasDefaultValueSql("(sysutcdatetime())");
@@ -323,7 +315,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Neighborhood>(entity =>
         {
-            entity.HasKey(e => e.NeighborhoodId).HasName("PK__Neighbor__268014694E5975D7");
+            entity.HasKey(e => e.NeighborhoodId).HasName("PK__Neighbor__2680146904E04A15");
 
             entity.Property(e => e.Name).HasMaxLength(200);
 
@@ -334,7 +326,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__20CF2E1265B832BB");
+            entity.HasKey(e => e.NotificationId).HasName("PK__Notifica__20CF2E121D25F9F5");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.IsRead).HasDefaultValue(false);
@@ -347,7 +339,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payments__9B556A382ACB5F89");
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payments__9B556A3834F75B8B");
 
             entity.Property(e => e.Provider).HasMaxLength(100);
             entity.Property(e => e.ProviderRef).HasMaxLength(200);
@@ -362,7 +354,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Property>(entity =>
         {
-            entity.HasKey(e => e.PropertyId).HasName("PK__Properti__70C9A7351754C91A");
+            entity.HasKey(e => e.PropertyId).HasName("PK__Properti__70C9A735F885B74F");
 
             entity.ToTable(tb => tb.HasTrigger("TRG_Properties_UpdateModifiedAt"));
 
@@ -416,7 +408,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<PropertyAmenity>(entity =>
         {
-            entity.HasKey(e => e.PropertyAmenityId).HasName("PK__Property__0D6BB45E484D3F71");
+            entity.HasKey(e => e.PropertyAmenityId).HasName("PK__Property__0D6BB45EB0B55467");
 
             entity.HasOne(d => d.Amenity).WithMany(p => p.PropertyAmenities)
                 .HasForeignKey(d => d.AmenityId)
@@ -429,7 +421,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<PropertyFeature>(entity =>
         {
-            entity.HasKey(e => e.PropertyFeatureId).HasName("PK__Property__6B73C3A66DDF909D");
+            entity.HasKey(e => e.PropertyFeatureId).HasName("PK__Property__6B73C3A606D8DA26");
 
             entity.HasIndex(e => e.PropertyId, "IDX_PropertyFeatures_Property");
 
@@ -465,7 +457,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<PropertyPhoto>(entity =>
         {
-            entity.HasKey(e => e.PhotoId).HasName("PK__Property__21B7B5E22245A890");
+            entity.HasKey(e => e.PhotoId).HasName("PK__Property__21B7B5E20408958A");
 
             entity.Property(e => e.AltText).HasMaxLength(255);
             entity.Property(e => e.FilePath).HasMaxLength(1000);
@@ -480,16 +472,16 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<PropertyStatus>(entity =>
         {
-            entity.HasKey(e => e.StatusId).HasName("PK__Property__C8EE2063ABABEC39");
+            entity.HasKey(e => e.StatusId).HasName("PK__Property__C8EE2063531FD622");
 
-            entity.HasIndex(e => e.Name, "UQ__Property__737584F6675C5055").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Property__737584F67DEDFFC1").IsUnique();
 
             entity.Property(e => e.Name).HasMaxLength(100);
         });
 
         modelBuilder.Entity<PropertyTag>(entity =>
         {
-            entity.HasKey(e => e.PropertyTagId).HasName("PK__Property__902DC87796B16093");
+            entity.HasKey(e => e.PropertyTagId).HasName("PK__Property__902DC877167FA8B7");
 
             entity.HasOne(d => d.Property).WithMany(p => p.PropertyTags)
                 .HasForeignKey(d => d.PropertyId)
@@ -502,9 +494,9 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<PropertyType>(entity =>
         {
-            entity.HasKey(e => e.PropertyTypeId).HasName("PK__Property__BDE14DB45D6DF5BC");
+            entity.HasKey(e => e.PropertyTypeId).HasName("PK__Property__BDE14DB4E891A527");
 
-            entity.HasIndex(e => e.Name, "UQ__Property__737584F6EB4631A0").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Property__737584F6E12411DE").IsUnique();
 
             entity.Property(e => e.IconClass).HasMaxLength(100);
             entity.Property(e => e.Name).HasMaxLength(100);
@@ -533,7 +525,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<PropertyVisit>(entity =>
         {
-            entity.HasKey(e => e.VisitId).HasName("PK__Property__4D3AA1DEF64F68E4");
+            entity.HasKey(e => e.VisitId).HasName("PK__Property__4D3AA1DE0071F893");
 
             entity.Property(e => e.UserAgent).HasMaxLength(1000);
             entity.Property(e => e.VisitedAt).HasDefaultValueSql("(sysutcdatetime())");
@@ -547,7 +539,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Report>(entity =>
         {
-            entity.HasKey(e => e.ReportId).HasName("PK__Reports__D5BD4805C069F2F5");
+            entity.HasKey(e => e.ReportId).HasName("PK__Reports__D5BD4805D0D6971A");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.ReportType).HasMaxLength(100);
@@ -555,7 +547,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Review>(entity =>
         {
-            entity.HasKey(e => e.ReviewId).HasName("PK__Reviews__74BC79CE119F0555");
+            entity.HasKey(e => e.ReviewId).HasName("PK__Reviews__74BC79CE83DDC011");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.IsApproved).HasDefaultValue(false);
@@ -572,9 +564,9 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1A40804829");
+            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1ABE57D35A");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B6160961F40A5").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B6160A6FBF2D7").IsUnique();
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Description).HasMaxLength(255);
@@ -583,7 +575,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<SearchHistory>(entity =>
         {
-            entity.HasKey(e => e.SearchId).HasName("PK__SearchHi__21C535F484443812");
+            entity.HasKey(e => e.SearchId).HasName("PK__SearchHi__21C535F4067034C4");
 
             entity.ToTable("SearchHistory");
 
@@ -597,7 +589,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Setting>(entity =>
         {
-            entity.HasKey(e => e.SettingKey).HasName("PK__Settings__01E719ACABA2A8B6");
+            entity.HasKey(e => e.SettingKey).HasName("PK__Settings__01E719AC6AFBC78A");
 
             entity.Property(e => e.SettingKey).HasMaxLength(200);
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysutcdatetime())");
@@ -605,16 +597,16 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<Tag>(entity =>
         {
-            entity.HasKey(e => e.TagId).HasName("PK__Tags__657CF9AC23A29DAE");
+            entity.HasKey(e => e.TagId).HasName("PK__Tags__657CF9ACD70E04F4");
 
-            entity.HasIndex(e => e.Name, "UQ__Tags__737584F657A8ACD2").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__Tags__737584F67590A263").IsUnique();
 
             entity.Property(e => e.Name).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Transaction>(entity =>
         {
-            entity.HasKey(e => e.TransactionId).HasName("PK__Transact__55433A6B13362006");
+            entity.HasKey(e => e.TransactionId).HasName("PK__Transact__55433A6B9FFBA12A");
 
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
@@ -638,11 +630,11 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C6C290FAB");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C3AE00A9F");
 
-            entity.HasIndex(e => e.Username, "UQ__Users__536C85E43576FE69").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Users__536C85E4AF27249D").IsUnique();
 
-            entity.HasIndex(e => e.Email, "UQ__Users__A9D105345A0CAD15").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D1053496FEC1AF").IsUnique();
 
             entity.Property(e => e.Avatar).HasMaxLength(500);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
@@ -656,7 +648,7 @@ public partial class HomeLengoContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.UserRoleId).HasName("PK__UserRole__3D978A35CCF437B3");
+            entity.HasKey(e => e.UserRoleId).HasName("PK__UserRole__3D978A3523F17F97");
 
             entity.HasIndex(e => new { e.UserId, e.RoleId }, "UX_UserRole_User_Role").IsUnique();
 

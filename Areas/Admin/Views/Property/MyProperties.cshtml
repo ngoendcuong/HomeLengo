@@ -69,39 +69,41 @@
                                             .FirstOrDefault()
                                         : null;
                                     
+                                    var defaultPhoto = "~/assets/images/home/house-18.jpg";
+                                    string photoUrl;
+                                    
+                                    // Hàm helper để lấy đường dẫn ảnh đúng - giống như trong Details.cshtml (đang hoạt động)
                                     string GetImagePath(string filePath)
                                     {
                                         if (string.IsNullOrEmpty(filePath))
-                                            return "~/assets/images/home/house-18.jpg";
+                                            return defaultPhoto;
                                         
+                                        // Loại bỏ khoảng trắng
                                         filePath = filePath.Trim();
                                         
-                                        // Nếu đã có ~/ thì giữ nguyên
+                                        // Nếu FilePath đã bắt đầu bằng ~/ hoặc /, giữ nguyên
                                         if (filePath.StartsWith("~/"))
                                             return filePath;
                                         
-                                        // Nếu bắt đầu bằng / thì thêm ~
                                         if (filePath.StartsWith("/"))
                                             return "~" + filePath;
                                         
-                                        // Nếu chứa assets/ thì thêm ~/ vào đầu (không thêm / nếu đã có)
+                                        // Nếu FilePath đã chứa "assets/", thêm ~/ vào đầu
                                         if (filePath.Contains("assets/"))
-                                        {
-                                            if (!filePath.StartsWith("/"))
-                                                return "~/" + filePath;
-                                            return "~" + filePath;
-                                        }
+                                            return "~/" + filePath.TrimStart('/');
                                         
-                                        // Mặc định thêm đường dẫn home
+                                        // Nếu chỉ là tên file, thêm đường dẫn mặc định (giống như trong Property component)
                                         return "~/assets/images/home/" + filePath.TrimStart('/');
                                     }
                                     
-                                    var photoPath = photo?.FilePath;
-                                    var defaultPhoto = "~/assets/images/home/house-18.jpg";
-                                    
-                                    var photoUrl = !string.IsNullOrEmpty(photoPath) 
-                                        ? Url.Content(GetImagePath(photoPath))
-                                        : Url.Content(defaultPhoto);
+                                    if (photo != null && !string.IsNullOrEmpty(photo.FilePath))
+                                    {
+                                        photoUrl = Url.Content(GetImagePath(photo.FilePath));
+                                    }
+                                    else
+                                    {
+                                        photoUrl = Url.Content(defaultPhoto);
+                                    }
                                     
                                     // Tạo class status với màu sắc khác nhau
                                     var statusName = property.Status?.Name?.ToLower() ?? "";
@@ -119,14 +121,7 @@
                                         <td>
                                             <div class="listing-box">
                                                 <div class="images">
-                                                    @if (photo != null)
-                                                    {
-                                                        <img src="@photoUrl" alt="@property.Title" onerror="this.onerror=null; this.src='@Url.Content(defaultPhoto)'">
-                                                    }
-                                                    else
-                                                    {
-                                                        <img src="@Url.Content(defaultPhoto)" alt="@property.Title">
-                                                    }
+                                                    <img src="@photoUrl" alt="@property.Title" onerror="this.onerror=null; this.src='@Url.Content(defaultPhoto)'">
                                                 </div>
                                                 <div class="content">
                                                     <div class="title">

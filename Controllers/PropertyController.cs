@@ -100,177 +100,166 @@ namespace HomeLengo.Controllers
                 .Include(p => p.Agent)
                     .ThenInclude(a => a.User);
 
-            // Filter theo StatusId (Bán = 1, Cho Thuê = 2)
-            // Mặc định hiển thị Cho Thuê (StatusId = 2) nếu không có statusId
-            if (statusId.HasValue && (statusId.Value == 1 || statusId.Value == 2))
+            if (statusId == 1 || statusId == 2)
             {
-                // Đảo ngược: statusId từ form (1=Cho Thuê, 2=Bán) sang database (1=Bán, 2=Cho Thuê)
-                int dbStatusId = statusId.Value == 1 ? 2 : 1;
-                query = query.Where(p => p.StatusId == dbStatusId);
+                query = query.Where(p => p.StatusId == statusId.Value);
             }
             else
             {
-                // Mặc định hiển thị Cho Thuê (StatusId = 2 trong database)
-                query = query.Where(p => p.StatusId == 2);
-            }
-
-            // Filter theo keyword
-            if (!string.IsNullOrWhiteSpace(keyword))
-            {
-                query = query.Where(p => p.Title.Contains(keyword) || 
-                    (p.Description != null && p.Description.Contains(keyword)));
+                // Mặc định: hiển thị tất cả trừ đã bán
+                query = query.Where(p => p.StatusId != 3);
             }
 
             // Filter theo location
             if (!string.IsNullOrWhiteSpace(location))
-            {
-                query = query.Where(p => 
-                    (p.Address != null && p.Address.Contains(location)) ||
-                    (p.Neighborhood != null && p.Neighborhood.Name.Contains(location)) ||
-                    (p.District != null && p.District.Name.Contains(location)) ||
-                    (p.City != null && p.City.Name.Contains(location)));
-            }
-
-            // Filter theo propertyTypeId
-            if (propertyTypeId.HasValue && propertyTypeId.Value > 0)
-            {
-                query = query.Where(p => p.PropertyTypeId == propertyTypeId.Value);
-                ViewBag.SelectedPropertyTypeId = propertyTypeId.Value;
-                var selectedType = propertyTypes.FirstOrDefault(pt => pt.PropertyTypeId == propertyTypeId.Value);
-                ViewBag.SelectedPropertyTypeName = selectedType?.Name ?? "Tất cả";
-            }
-            else
-            {
-                ViewBag.SelectedPropertyTypeId = null;
-                ViewBag.SelectedPropertyTypeName = "Tất cả";
-            }
-
-            // Filter theo bedrooms
-            if (bedrooms.HasValue && bedrooms.Value > 0)
-            {
-                if (bedrooms.Value == 5)
                 {
-                    // 5+ nghĩa là >= 5
-                    query = query.Where(p => p.Bedrooms.HasValue && p.Bedrooms.Value >= 5);
+                    query = query.Where(p =>
+                        (p.Address != null && p.Address.Contains(location)) ||
+                        (p.Neighborhood != null && p.Neighborhood.Name.Contains(location)) ||
+                        (p.District != null && p.District.Name.Contains(location)) ||
+                        (p.City != null && p.City.Name.Contains(location)));
+                }
+
+                // Filter theo propertyTypeId
+                if (propertyTypeId.HasValue && propertyTypeId.Value > 0)
+                {
+                    query = query.Where(p => p.PropertyTypeId == propertyTypeId.Value);
+                    ViewBag.SelectedPropertyTypeId = propertyTypeId.Value;
+                    var selectedType = propertyTypes.FirstOrDefault(pt => pt.PropertyTypeId == propertyTypeId.Value);
+                    ViewBag.SelectedPropertyTypeName = selectedType?.Name ?? "Tất cả";
                 }
                 else
                 {
-                    query = query.Where(p => p.Bedrooms.HasValue && p.Bedrooms.Value == bedrooms.Value);
+                    ViewBag.SelectedPropertyTypeId = null;
+                    ViewBag.SelectedPropertyTypeName = "Tất cả";
                 }
-            }
 
-            // Filter theo bathrooms
-            if (bathrooms.HasValue && bathrooms.Value > 0)
-            {
-                if (bathrooms.Value == 5)
+                // Filter theo bedrooms
+                if (bedrooms.HasValue && bedrooms.Value > 0)
                 {
-                    // 5+ nghĩa là >= 5
-                    query = query.Where(p => p.Bathrooms.HasValue && p.Bathrooms.Value >= 5);
+                    if (bedrooms.Value == 5)
+                    {
+                        // 5+ nghĩa là >= 5
+                        query = query.Where(p => p.Bedrooms.HasValue && p.Bedrooms.Value >= 5);
+                    }
+                    else
+                    {
+                        query = query.Where(p => p.Bedrooms.HasValue && p.Bedrooms.Value == bedrooms.Value);
+                    }
                 }
-                else
+
+                // Filter theo bathrooms
+                if (bathrooms.HasValue && bathrooms.Value > 0)
                 {
-                    query = query.Where(p => p.Bathrooms.HasValue && p.Bathrooms.Value == bathrooms.Value);
+                    if (bathrooms.Value == 5)
+                    {
+                        // 5+ nghĩa là >= 5
+                        query = query.Where(p => p.Bathrooms.HasValue && p.Bathrooms.Value >= 5);
+                    }
+                    else
+                    {
+                        query = query.Where(p => p.Bathrooms.HasValue && p.Bathrooms.Value == bathrooms.Value);
+                    }
                 }
-            }
 
-            // Filter theo price range - chỉ áp dụng khi có giá trị từ query string
-            if (minPrice.HasValue)
-            {
-                query = query.Where(p => p.Price >= minPrice.Value);
-            }
-            if (maxPrice.HasValue)
-            {
-                query = query.Where(p => p.Price <= maxPrice.Value);
-            }
-
-            // Filter theo size range - chỉ áp dụng khi có giá trị từ query string
-            if (minSize.HasValue)
-            {
-                query = query.Where(p => p.Area.HasValue && p.Area.Value >= minSize.Value);
-            }
-            if (maxSize.HasValue)
-            {
-                query = query.Where(p => p.Area.HasValue && p.Area.Value <= maxSize.Value);
-            }
-
-            // Filter theo amenities
-            if (amenities != null && amenities.Length > 0)
-            {
-                // Lọc properties có tất cả các amenities được chọn
-                foreach (var amenityId in amenities)
+                // Filter theo price range - chỉ áp dụng khi có giá trị từ query string
+                if (minPrice.HasValue)
                 {
-                    query = query.Where(p => p.PropertyAmenities.Any(pa => pa.AmenityId == amenityId));
+                    query = query.Where(p => p.Price >= minPrice.Value);
                 }
+                if (maxPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price <= maxPrice.Value);
+                }
+
+                // Filter theo size range - chỉ áp dụng khi có giá trị từ query string
+                if (minSize.HasValue)
+                {
+                    query = query.Where(p => p.Area.HasValue && p.Area.Value >= minSize.Value);
+                }
+                if (maxSize.HasValue)
+                {
+                    query = query.Where(p => p.Area.HasValue && p.Area.Value <= maxSize.Value);
+                }
+
+                // Filter theo amenities
+                if (amenities != null && amenities.Length > 0)
+                {
+                    // Lọc properties có tất cả các amenities được chọn
+                    foreach (var amenityId in amenities)
+                    {
+                        query = query.Where(p => p.PropertyAmenities.Any(pa => pa.AmenityId == amenityId));
+                    }
+                }
+
+                // Sắp xếp
+                switch (sortBy?.ToLower())
+                {
+                    case "newest":
+                        query = query.OrderByDescending(p => p.CreatedAt.HasValue ? p.CreatedAt.Value : DateTime.MinValue)
+                            .ThenByDescending(p => p.PropertyId);
+                        break;
+                    case "oldest":
+                        query = query.OrderBy(p => p.CreatedAt.HasValue ? p.CreatedAt.Value : DateTime.MaxValue)
+                            .ThenBy(p => p.PropertyId);
+                        break;
+                    case "price-low":
+                        query = query.OrderBy(p => p.Price).ThenByDescending(p => p.PropertyId);
+                        break;
+                    case "price-high":
+                        query = query.OrderByDescending(p => p.Price).ThenByDescending(p => p.PropertyId);
+                        break;
+                    default: // "default"
+                        query = query.OrderByDescending(p => p.IsFeatured == true)
+                            .ThenByDescending(p => p.CreatedAt.HasValue ? p.CreatedAt.Value : DateTime.MinValue)
+                            .ThenByDescending(p => p.PropertyId);
+                        break;
+                }
+
+                // Lấy tổng số properties trước khi phân trang
+                var totalCount = await query.CountAsync();
+                ViewBag.TotalCount = totalCount;
+
+                // Phân trang
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.PageSize = pageSize;
+                ViewBag.SortBy = sortBy;
+
+                // Lấy properties cho trang hiện tại
+                var properties = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                // Lấy latest properties cho sidebar (Cho Thuê - StatusId = 2)
+                var latestProperties = await _context.Properties
+                    .Include(p => p.PropertyPhotos)
+                    .Include(p => p.PropertyType)
+                    .Include(p => p.Status)
+                    .Where(p => p.StatusId == 2)
+                    .OrderByDescending(p => p.CreatedAt.HasValue ? p.CreatedAt.Value : DateTime.MinValue)
+                    .ThenByDescending(p => p.IsFeatured == true)
+                    .Take(5)
+                    .ToListAsync();
+
+                ViewBag.LatestProperties = latestProperties;
+
+                // Lưu các filter values để hiển thị lại
+                ViewBag.Keyword = keyword;
+                ViewBag.Location = location;
+                ViewBag.StatusId = statusId;
+                ViewBag.Bedrooms = bedrooms;
+                ViewBag.Bathrooms = bathrooms;
+                ViewBag.MinPrice = minPrice;
+                ViewBag.MaxPrice = maxPrice;
+                ViewBag.MinSize = minSize;
+                ViewBag.MaxSize = maxSize;
+                ViewBag.SelectedAmenities = amenities ?? Array.Empty<int>();
+
+                return View(properties);
             }
-
-            // Sắp xếp
-            switch (sortBy?.ToLower())
-            {
-                case "newest":
-                    query = query.OrderByDescending(p => p.CreatedAt.HasValue ? p.CreatedAt.Value : DateTime.MinValue)
-                        .ThenByDescending(p => p.PropertyId);
-                    break;
-                case "oldest":
-                    query = query.OrderBy(p => p.CreatedAt.HasValue ? p.CreatedAt.Value : DateTime.MaxValue)
-                        .ThenBy(p => p.PropertyId);
-                    break;
-                case "price-low":
-                    query = query.OrderBy(p => p.Price).ThenByDescending(p => p.PropertyId);
-                    break;
-                case "price-high":
-                    query = query.OrderByDescending(p => p.Price).ThenByDescending(p => p.PropertyId);
-                    break;
-                default: // "default"
-                    query = query.OrderByDescending(p => p.IsFeatured == true)
-                        .ThenByDescending(p => p.CreatedAt.HasValue ? p.CreatedAt.Value : DateTime.MinValue)
-                        .ThenByDescending(p => p.PropertyId);
-                    break;
-            }
-
-            // Lấy tổng số properties trước khi phân trang
-            var totalCount = await query.CountAsync();
-            ViewBag.TotalCount = totalCount;
-
-            // Phân trang
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = totalPages;
-            ViewBag.PageSize = pageSize;
-            ViewBag.SortBy = sortBy;
-
-            // Lấy properties cho trang hiện tại
-            var properties = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            // Lấy latest properties cho sidebar (Cho Thuê - StatusId = 2)
-            var latestProperties = await _context.Properties
-                .Include(p => p.PropertyPhotos)
-                .Include(p => p.PropertyType)
-                .Include(p => p.Status)
-                .Where(p => p.StatusId == 2)
-                .OrderByDescending(p => p.CreatedAt.HasValue ? p.CreatedAt.Value : DateTime.MinValue)
-                .ThenByDescending(p => p.IsFeatured == true)
-                .Take(5)
-                .ToListAsync();
-
-            ViewBag.LatestProperties = latestProperties;
-
-            // Lưu các filter values để hiển thị lại
-            ViewBag.Keyword = keyword;
-            ViewBag.Location = location;
-            ViewBag.StatusId = statusId;
-            ViewBag.Bedrooms = bedrooms;
-            ViewBag.Bathrooms = bathrooms;
-            ViewBag.MinPrice = minPrice;
-            ViewBag.MaxPrice = maxPrice;
-            ViewBag.MinSize = minSize;
-            ViewBag.MaxSize = maxSize;
-            ViewBag.SelectedAmenities = amenities ?? Array.Empty<int>();
-
-            return View(properties);
-        }
 
         public async Task<IActionResult> Details(int? id)
         {

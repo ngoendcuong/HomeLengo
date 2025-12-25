@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 public interface IGeminiService
 {
@@ -21,61 +21,68 @@ public class GeminiService : IGeminiService
 
     public async Task<string> GetAnswer(string userQuestion)
     {
-        // Bước 1: Lấy dữ liệu từ DB dựa trên câu hỏi
-        string dbContext = await _productService.GetRelevantProductsAsText(userQuestion);
+        userQuestion ??= "";
 
-        // Bước 2: Chuẩn bị Prompt (Kịch bản)
-        string prompt = $@"
-            Bạn là nhân viên tư vấn bán hàng chuyên nghiệp.
-            Dưới đây là thông tin sản phẩm trong kho (Định dạng JSON):
-            {dbContext}
+        // Lấy dữ liệu liên quan từ DB (đã là JSON gọn)
+        var dbContextJson = await _productService.GetRelevantProductsAsText(userQuestion);
 
-            Câu hỏi của khách: ""{userQuestion}""
+        // Prompt đúng domain bất động sản + cho phép trả lời câu hỏi chung
+        var prompt = $@"
+Bạn là trợ lý ảo của website bất động sản HomeLengo.
+- Nếu câu hỏi liên quan bất động sản (giá, địa chỉ, diện tích, danh sách, gợi ý...), hãy dựa vào dữ liệu JSON bên dưới.
+- Nếu câu hỏi là kiến thức chung (ví dụ: hôm nay ngày mấy, bây giờ mấy giờ, thời tiết...), hãy trả lời như chat bình thường.
+- Trả lời ngắn gọn, thân thiện, tiếng Việt. Không nhắc đến ""JSON"" hay ""database"".
 
-            Yêu cầu:
-            1. Trả lời dựa trên dữ liệu JSON cung cấp.
-            2. Nếu sản phẩm hết hàng (Stock = 0), hãy báo khách.
-            3. Văn phong thân thiện, không nhắc đến kỹ thuật như 'JSON' hay 'Database'.
-            4. Trả lời bằng Tiếng Việt.
-        ";
+Dữ liệu bất động sản (JSON):
+{dbContextJson}
 
-        // Bước 3: Cấu hình gọi API Gemini
-        string apiKey = _config["Gemini:ApiKey"];
-        string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
+Câu hỏi người dùng: ""{userQuestion}""
+";
 
-        // Cấu trúc Body theo chuẩn Google API
+        var apiKey = _config["Gemini:ApiKey"];
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return "Thiếu cấu hình Gemini:ApiKey trong appsettings.";
+
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
+
         var requestBody = new
         {
-            contents = new[] { new { parts = new[] { new { text = prompt } } } }
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = prompt }
+                    }
+                }
+            }
         };
 
-        var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+        var json = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        // Bước 4: Gửi Request
         var response = await _httpClient.PostAsync(url, content);
+        var raw = await response.Content.ReadAsStringAsync();
 
-        if (response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
+            return $"Lỗi Gemini: {response.StatusCode}. Chi tiết: {raw}";
+
+        try
         {
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-            dynamic result = JsonConvert.DeserializeObject(jsonResponse);
+            using var doc = JsonDocument.Parse(raw);
+            var text = doc.RootElement
+                .GetProperty("candidates")[0]
+                .GetProperty("content")
+                .GetProperty("parts")[0]
+                .GetProperty("text")
+                .GetString();
 
-            try
-            {
-                // Lấy nội dung text trả về
-                return result.candidates[0].content.parts[0].text;
-            }
-            catch { return "Gemini trả về nhưng không đọc được nội dung."; }
+            return string.IsNullOrWhiteSpace(text) ? "Mình chưa lấy được câu trả lời từ Gemini." : text!;
         }
-        // ... đoạn code if (response.IsSuccessStatusCode) ở trên giữ nguyên ...
-
-        else
+        catch
         {
-            // ĐỌC LỖI THỰC SỰ TỪ GOOGLE
-            var errorJson = await response.Content.ReadAsStringAsync();
-
-            // Trả về lỗi chi tiết để debug (sau này chạy ngon thì xóa đi)
-            return $"Lỗi kết nối API: {response.StatusCode}. Chi tiết: {errorJson}";
+            return "Gemini trả về nhưng không đọc được nội dung.";
         }
-        //return "Hệ thống AI đang bảo trì, vui lòng thử lại sau.";
     }
 }

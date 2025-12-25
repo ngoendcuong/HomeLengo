@@ -263,6 +263,9 @@ namespace HomeLengo.Areas.Admin.Controllers
                                 _context.PropertyPhotos.Add(propertyPhoto);
                             }
                         }
+                        
+                        // Save photos immediately to ensure they are persisted
+                        await _context.SaveChangesAsync();
                     }
 
                     // Add videos - handle both array and single values
@@ -858,15 +861,29 @@ namespace HomeLengo.Areas.Admin.Controllers
                 .ToListAsync();
             
             // Ensure PropertyPhotos are loaded (in case of lazy loading issues)
-            foreach (var prop in properties)
+            // Load all PropertyPhotos for all properties in one query for better performance
+            if (properties.Any())
             {
-                if (prop.PropertyPhotos == null || !prop.PropertyPhotos.Any())
+                var propertyIds = properties.Select(p => p.PropertyId).ToList();
+                var allPhotos = await _context.PropertyPhotos
+                    .Where(pp => propertyIds.Contains(pp.PropertyId))
+                    .OrderByDescending(pp => pp.IsPrimary == true)
+                    .ThenBy(pp => pp.SortOrder ?? 0)
+                    .ThenBy(pp => pp.PhotoId)
+                    .ToListAsync();
+                
+                // Group photos by PropertyId and assign to each property
+                var photosByProperty = allPhotos.GroupBy(p => p.PropertyId).ToDictionary(g => g.Key, g => g.ToList());
+                foreach (var prop in properties)
                 {
-                    prop.PropertyPhotos = await _context.PropertyPhotos
-                        .Where(pp => pp.PropertyId == prop.PropertyId)
-                        .OrderByDescending(pp => pp.IsPrimary == true)
-                        .ThenBy(pp => pp.SortOrder ?? 0)
-                        .ToListAsync();
+                    if (photosByProperty.ContainsKey(prop.PropertyId))
+                    {
+                        prop.PropertyPhotos = photosByProperty[prop.PropertyId];
+                    }
+                    else
+                    {
+                        prop.PropertyPhotos = new List<PropertyPhoto>();
+                    }
                 }
             }
 

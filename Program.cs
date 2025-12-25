@@ -11,8 +11,8 @@ builder.Services.AddDbContext<HomeLengoContext>(options =>
 });
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddControllersWithViews()
+    .AddRazorRuntimeCompilation();
 
 // Session configuration
 builder.Services.AddDistributedMemoryCache();
@@ -34,9 +34,6 @@ builder.Services.AddHttpClient();
 // 3. Đăng ký các Service ta vừa viết
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IGeminiService, GeminiService>();
-
-// 4. Controller & View (Mặc định)
-builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 

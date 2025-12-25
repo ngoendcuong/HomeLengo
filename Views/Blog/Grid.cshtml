@@ -4,8 +4,7 @@
     <div class="container">
         <div class="breadcrumb-content">
             <ul class="breadcrumb">
-                <li><a href="index.html" class="text-white">Trang Chủ</a></li>
-
+                <li><a href="/" class="text-white">Trang Chủ</a></li>
                 <li class="text-white">/ Tin Tức</li>
             </ul>
             <h1 class="text-center text-white title">Tin Tức</h1>
@@ -17,17 +16,10 @@
 <section class="flat-section">
     <div class="container">
         <div class="row">
-
-
-<section class="flat-section">
-    <div class="container">
-        <div class="row">
-
             @foreach (var item in Model)
             {
                 <div class="col-lg-4 col-md-6">
                     <a href="/blog/detail/@item.BlogId" class="flat-blog-item hover-img">
-
                         <div class="img-style">
                             <img class="lazyload"
                                  src="~/assets/images/blog/@item.Thumbnail"
@@ -36,32 +28,51 @@
                                 @item.PublishedAt?.ToString("MMMM dd, yyyy")
                             </span>
                         </div>
-
                         <div class="content-box">
-
                             <div class="post-author">
                                 <span class="fw-6">@item.Author?.FullName</span>
-                                <span> | </span>
-
-                                <a href="/blog/category/@item.Category?.Slug" class="text-muted">
-                                    @item.Category?.Name
-                                </a>
+                                <span>@item.Category?.Name</span>
                             </div>
-
                             <h5 class="title link">@item.Title</h5>
-
                             <p class="description">
-                                @(item.Content.Length > 120
+                                @(item.Content != null && item.Content.Length > 120
                                     ? item.Content.Substring(0, 120) + "..."
                                     : item.Content)
                             </p>
-
                         </div>
-
                     </a>
                 </div>
             }
-
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="col-12 text-center pt-26 line-t">
+                    <ul class="justify-content-center wd-navigation">
+                        @if (ViewBag.Page > 1)
+                        {
+                            <li><a href="/blog/grid?page=@(ViewBag.Page - 1)" class="nav-item"><i class="icon icon-arr-l"></i></a></li>
+                        }
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            if (i == ViewBag.Page)
+                            {
+                                <li><a href="#" class="nav-item active">@i</a></li>
+                            }
+                            else if (i <= 3 || i > ViewBag.TotalPages - 3 || (i >= ViewBag.Page - 1 && i <= ViewBag.Page + 1))
+                            {
+                                <li><a href="/blog/grid?page=@i" class="nav-item">@i</a></li>
+                            }
+                            else if (i == 4 || i == ViewBag.TotalPages - 3)
+                            {
+                                <li><a href="#" class="nav-item">...</a></li>
+                            }
+                        }
+                        @if (ViewBag.Page < ViewBag.TotalPages)
+                        {
+                            <li><a href="/blog/grid?page=@(ViewBag.Page + 1)" class="nav-item"><i class="icon icon-arr-r"></i></a></li>
+                        }
+                    </ul>
+                </div>
+            }
         </div>
     </div>
 </section>

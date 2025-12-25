@@ -1,7 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Net;
 
 namespace HomeLengo.Models;
 
@@ -39,4 +37,3 @@ public partial class Blog
 
     public virtual BlogCategory? Category { get; set; }
 }
-

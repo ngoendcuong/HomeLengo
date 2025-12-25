@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace HomeLengo.Models;
@@ -13,11 +13,11 @@ public partial class PropertyFloorPlan
 
     public string ImagePath { get; set; } = null!;
 
-    public decimal? Area { get; set; }
-
     public int? Bedrooms { get; set; }
 
     public int? Bathrooms { get; set; }
+
+    public decimal? Area { get; set; }
 
     public string? Description { get; set; }
 
@@ -27,4 +27,3 @@ public partial class PropertyFloorPlan
 
     public virtual Property Property { get; set; } = null!;
 }
-

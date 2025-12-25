@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using HomeLengo.Models; 
+﻿using System.Text.Json;
+using HomeLengo.Models;
+using Microsoft.EntityFrameworkCore;
 
 public interface IProductService
 {
@@ -18,23 +18,43 @@ public class ProductService : IProductService
 
     public async Task<string> GetRelevantProductsAsText(string userQuery)
     {
-        // 1. Tách từ khóa đơn giản từ câu hỏi của user (Ví dụ: "giá iphone")
-        // Ở đây làm đơn giản, thực tế có thể dùng Full-Text Search
-        var keywords = userQuery.ToLower().Split(' ');
+        userQuery ??= "";
+        var q = userQuery.Trim();
 
-        // 2. Query DB: Lấy sản phẩm có tên hoặc mô tả chứa từ khóa
-        var query = _context.Properties.AsQueryable();
+        // Query cơ bản (chỉ lấy field cần thiết, AsNoTracking cho nhanh)
+        var query = _context.Properties
+            .AsNoTracking()
+            .Where(p => p.StatusId == 2); // tuỳ bạn: giữ mặc định "Cho thuê" để phù hợp logic listing
 
-        // Logic lọc đơn giản: Lấy 10 sản phẩm mới nhất (hoặc logic tìm kiếm của bạn)
-        // Lưu ý: Gemini 1.5 Flash có thể đọc hàng nghìn dòng, nhưng lọc trước vẫn tốt hơn.
-        var products = await query
+        // Nếu user có nhập từ khóa thì lọc thực sự
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            query = query.Where(p =>
+                p.Title.Contains(q) ||
+                (p.Address != null && p.Address.Contains(q)) ||
+                (p.Description != null && p.Description.Contains(q))
+            );
+        }
+
+        var items = await query
+            .OrderByDescending(p => p.CreatedAt ?? DateTime.MinValue)
+            .ThenByDescending(p => p.PropertyId)
             .Take(20)
-            .Select(p => new { p.Title, p.Price, p.Address, p.Description }) // Chỉ lấy trường cần thiết
+            .Select(p => new
+            {
+                p.PropertyId,
+                p.Title,
+                p.Price,
+                p.Address,
+                p.Area
+            })
             .ToListAsync();
 
-        if (!products.Any()) return "Không tìm thấy dữ liệu sản phẩm nào.";
+        if (items.Count == 0) return "[]";
 
-        // 3. Serialize thành JSON gọn nhẹ
-        return JsonConvert.SerializeObject(products);
+        return JsonSerializer.Serialize(items, new JsonSerializerOptions
+        {
+            WriteIndented = false
+        });
     }
 }

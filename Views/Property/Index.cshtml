@@ -51,23 +51,6 @@
                 <p class="text">Hiện có @totalCount bất động sản.</p>
             </div>
             <div class="box-filter-tab">
-                <ul class="nav-tab-filter" role="tablist">
-                    <li class="nav-tab-item" role="presentation">   
-                        <a href="#gridLayout" class="nav-link-item active" data-bs-toggle="tab">
-                            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.54883 5.90508C4.54883 5.1222 5.17272 4.5 5.91981 4.5C6.66686 4.5 7.2908 5.12221 7.2908 5.90508C7.2908 6.68801 6.66722 7.3101 5.91981 7.3101C5.17241 7.3101 4.54883 6.68801 4.54883 5.90508Z" stroke="#A3ABB0"/>
-                                <path d="M10.6045 5.90508C10.6045 5.12221 11.2284 4.5 11.9755 4.5C12.7229 4.5 13.3466 5.1222 13.3466 5.90508C13.3466 6.68789 12.7227 7.3101 11.9755 7.3101C11.2284 7.3101 10.6045 6.68794 10.6045 5.90508Z" stroke="#A3ABB0"/>
-                                <path d="M19.4998 5.90514C19.4998 6.68797 18.8757 7.31016 18.1288 7.31016C17.3818 7.31016 16.7578 6.68794 16.7578 5.90508C16.7578 5.12211 17.3813 4.5 18.1288 4.5C18.8763 4.5 19.4998 5.12215 19.4998 5.90514Z" stroke="#A3ABB0"/>
-                                <path d="M7.24249 12.0098C7.24249 12.7927 6.61849 13.4148 5.87133 13.4148C5.12411 13.4148 4.5 12.7926 4.5 12.0098C4.5 11.2268 5.12419 10.6045 5.87133 10.6045C6.61842 10.6045 7.24249 11.2267 7.24249 12.0098Z" stroke="#A3ABB0"/>
-                                <path d="M13.2976 12.0098C13.2976 12.7927 12.6736 13.4148 11.9266 13.4148C11.1795 13.4148 10.5557 12.7928 10.5557 12.0098C10.5557 11.2266 11.1793 10.6045 11.9266 10.6045C12.6741 10.6045 13.2976 11.2265 13.2976 12.0098Z" stroke="#A3ABB0"/>
-                                <path d="M19.4516 12.0098C19.4516 12.7928 18.828 13.4148 18.0807 13.4148C17.3329 13.4148 16.709 12.7926 16.709 12.0098C16.709 11.2268 17.3332 10.6045 18.0807 10.6045C18.8279 10.6045 19.4516 11.2266 19.4516 12.0098Z" stroke="#A3ABB0"/>
-                                <path d="M4.54297 18.0945C4.54297 17.3116 5.16709 16.6895 5.9143 16.6895C6.66137 16.6895 7.28523 17.3114 7.28523 18.0945C7.28523 18.8776 6.66139 19.4996 5.9143 19.4996C5.16714 19.4996 4.54297 18.8771 4.54297 18.0945Z" stroke="#A3ABB0"/>
-                                <path d="M10.5986 18.0945C10.5986 17.3116 11.2227 16.6895 11.97 16.6895C12.7169 16.6895 13.3409 17.3115 13.3409 18.0945C13.3409 18.8776 12.7169 19.4996 11.97 19.4996C11.2225 19.4996 10.5986 18.8772 10.5986 18.0945Z" stroke="#A3ABB0"/>
-                                <path d="M16.752 18.0945C16.752 17.3115 17.376 16.6895 18.1229 16.6895C18.8699 16.6895 19.4939 17.3115 19.4939 18.0945C19.4939 18.8776 18.8702 19.4996 18.1229 19.4996C17.376 19.4996 16.752 18.8772 16.752 18.0945Z" stroke="#A3ABB0"/>
-                            </svg>
-                        </a>
-                    </li>
-                </ul>
                 @{
                     // Build query string for sorting and page size
                     var filterQueryParams = new System.Text.StringBuilder();
@@ -90,20 +73,6 @@
                     }
                     var filterQueryString = filterQueryParams.ToString();
                 }
-                <div class="nice-select select-filter list-page" tabindex="0">
-                    <span class="current">Hiển thị: @pageSize</span>
-                    <ul class="list">  
-                        <li data-value="10" class="option @(pageSize == 10 ? "selected" : "")">
-                            <a href="?pageSize=10&sortBy=@sortBy@filterQueryString" style="text-decoration: none; color: inherit;">Hiển thị: 10</a>
-                        </li>
-                        <li data-value="30" class="option @(pageSize == 30 ? "selected" : "")">
-                            <a href="?pageSize=30&sortBy=@sortBy@filterQueryString" style="text-decoration: none; color: inherit;">Hiển thị: 30</a>
-                        </li>
-                        <li data-value="50" class="option @(pageSize == 50 ? "selected" : "")">
-                            <a href="?pageSize=50&sortBy=@sortBy@filterQueryString" style="text-decoration: none; color: inherit;">Hiển thị: 50</a>
-                        </li>
-                    </ul>
-                </div>
                 <div class="nice-select select-filter list-sort" tabindex="0">
                     <span class="current">@(sortBy == "default" ? "Sắp xếp (Mặc định)" : sortBy == "newest" ? "Mới nhất" : sortBy == "oldest" ? "Cũ nhất" : sortBy == "price-low" ? "Giá thấp đến cao" : "Giá cao đến thấp")</span>
                     <ul class="list">  
@@ -131,19 +100,29 @@
                 <div class="widget-sidebar fixed-sidebar">
                     <div class="flat-tab flat-tab-form widget-filter-search widget-box">
                         <ul class="nav-tab-form" role="tablist">
-                            <li class="nav-tab-item" role="presentation">   
-                                <a href="#forRent" class="nav-link-item @(statusId == 1 || !statusId.HasValue ? "active" : "")" data-bs-toggle="tab" data-status-id="1">Cho Thuê</a>
+                            <li class="nav-tab-item" role="presentation">
+                                <a href="#forRent"
+                                   class="nav-link-item @(statusId == 2 ? "active" : "")"
+                                   data-bs-toggle="tab">
+                                    Cho Thuê
+                                </a>
                             </li>
                             <li class="nav-tab-item" role="presentation">
-                                <a href="#forSale" class="nav-link-item @(statusId == 2 ? "active" : "")" data-bs-toggle="tab" data-status-id="2">Bán</a>
+                                <a href="#forSale"
+                                   class="nav-link-item @(statusId == 1 ? "active" : "")"
+                                   data-bs-toggle="tab">
+                                    Bán
+                                </a>
                             </li>
                         </ul>
                         <div class="tab-content">
-                            <div class="tab-pane fade @(statusId == 1 || !statusId.HasValue ? "active show" : "")" id="forRent" role="tabpanel">
+                            <div class="tab-pane fade @(statusId == 2 ? "active show" : "")"
+                                 id="forRent" role="tabpanel">
+
                                 <div class="form-sl">
-                                    <form method="get" action="/Property" id="filterFormRent">
+                                    <form method="get" action="/Property">
                                         <input type="hidden" name="page" value="1" />
-                                        <input type="hidden" name="statusId" id="statusIdRent" value="1" />
+                                        <input type="hidden" name="statusId" value="2" />
                                         <div class="wd-filter-select">
                                             <div class="inner-group">
                                                 <div class="box">
@@ -203,7 +182,7 @@
                                                             <div class="caption-price">
                                                                 <span id="slider-range-value1" class="fw-6">@FormatPrice(minPrice ?? 1000000000)</span>
                                                                 <span class="fw-6"> - </span>
-                                                                <span id="slider-range-value2" class="fw-6">@FormatPrice(maxPrice ?? 50000000000)</span>
+                                                                <span id="slider-range-value2" class="fw-6">@FormatPrice(maxPrice ?? 20000000000)</span>
                                                             </div>
                                                         </div>
                                                         <div id="slider-range"></div>
@@ -230,11 +209,9 @@
                                                         <div class="box-title-price">
                                                             <span class="title-price fw-6">Diện tích:</span>
                                                             <div class="caption-price">
-                                                                <span id="slider-range-value01" class="fw-6">@((minSize ?? 0).ToString("N0"))</span>
-                                                                <span class="fw-6"> m²</span>
+                                                                <span id="slider-range-value01" class="fw-6">@((minSize ?? 0).ToString("N0")) m²</span>
                                                                 <span class="fw-6"> đến </span>
-                                                                <span id="slider-range-value02" class="fw-6">@((maxSize ?? 1000).ToString("N0"))</span>
-                                                                <span class="fw-6"> m²</span>
+                                                                <span id="slider-range-value02" class="fw-6">@((maxSize ?? 500).ToString("N0")) m²</span>
                                                             </div>
                                                         </div>
                                                         <div id="slider-range2"></div>
@@ -286,11 +263,13 @@
                                     </form>
                                 </div>
                             </div>
-                            <div class="tab-pane fade @(statusId == 2 ? "active show" : "")" id="forSale" role="tabpanel">
+                            <div class="tab-pane fade @(statusId == 1 ? "active show" : "")"
+                                 id="forSale" role="tabpanel">
+
                                 <div class="form-sl">
-                                    <form method="get" action="/Property" id="filterFormSale">
+                                    <form method="get" action="/Property">
                                         <input type="hidden" name="page" value="1" />
-                                        <input type="hidden" name="statusId" id="statusIdSale" value="2" />
+                                        <input type="hidden" name="statusId" value="1" />
                                         <div class="wd-filter-select">
                                             <div class="inner-group">
                                                 <div class="box">
@@ -350,7 +329,7 @@
                                                             <div class="caption-price">
                                                                 <span id="slider-range-value1-sale" class="fw-6">@FormatPrice(minPrice ?? 1000000000)</span>
                                                                 <span class="fw-6"> - </span>
-                                                                <span id="slider-range-value2-sale" class="fw-6">@FormatPrice(maxPrice ?? 50000000000)</span>
+                                                                <span id="slider-range-value2-sale" class="fw-6">@FormatPrice(maxPrice ?? 20000000000)</span>
                                                             </div>
                                                         </div>
                                                         <div id="slider-range-sale"></div>
@@ -377,11 +356,9 @@
                                                         <div class="box-title-price">
                                                             <span class="title-price fw-6">Diện tích:</span>
                                                             <div class="caption-price">
-                                                                <span id="slider-range-value01-sale" class="fw-6">@((minSize ?? 0).ToString("N0"))</span>
-                                                                <span class="fw-6"> m²</span>
+                                                                <span id="slider-range-value01-sale" class="fw-6">@((minSize ?? 0).ToString("N0")) m²</span>
                                                                 <span class="fw-6"> đến </span>
-                                                                <span id="slider-range-value02-sale" class="fw-6">@((maxSize ?? 1000).ToString("N0"))</span>
-                                                                <span class="fw-6"> m²</span>
+                                                                <span id="slider-range-value02-sale" class="fw-6">@((maxSize ?? 500).ToString("N0")) m²</span>
                                                             </div>
                                                         </div>
                                                         <div id="slider-range2-sale"></div>
@@ -479,7 +456,7 @@
                                             @if (latest.Area.HasValue)
                                             {
                                                 <li class="item">
-                                                    <i class="icon icon-sqft"></i>
+                                                    <i class="icon "></i>
                                                     <span class="text-variant-1">Diện tích:</span>
                                                     <span class="fw-6">@latest.Area m²</span>
                                                 </li>
@@ -576,7 +553,7 @@
                                                         @if (item.Area.HasValue)
                                                         {
                                                             <li class="item">
-                                                                <i class="icon icon-sqft"></i>
+                                                                <i class="icon "></i>
                                                                 <span class="text-variant-1">Diện tích:</span>
                                                                 <span class="fw-6">@item.Area m²</span>
                                                             </li>
@@ -675,513 +652,191 @@
 
 @section Scripts {
     <script>
-        // Initialize sliders if noUiSlider is available
-        $(document).ready(function() {
-            // Ngăn form submit tự động khi thay đổi các trường
-            // Chỉ cho phép submit khi nhấn nút "Tìm Kiếm"
-            $('#filterFormRent select, #filterFormRent input[type="text"], #filterFormRent input[type="checkbox"]').on('change', function(e) {
-                // Không làm gì cả, chỉ cập nhật giá trị
-            });
+        $(document).ready(function () {
 
-            $('#filterFormSale select, #filterFormSale input[type="text"], #filterFormSale input[type="checkbox"]').on('change', function(e) {
-                // Không làm gì cả, chỉ cập nhật giá trị
-            });
+            /* =========================
+               HELPER FUNCTIONS
+            ========================== */
 
-            // Hàm helper để parse giá trị từ input
             function parseValue(value, defaultValue) {
-                if (value === null || value === undefined || value === '') return defaultValue;
-                // Chuyển sang string và loại bỏ tất cả ký tự không phải số
-                var cleaned = String(value).replace(/[^\d]/g, '');
-                if (cleaned === '') return defaultValue;
-                var parsed = parseFloat(cleaned);
+                if (!value) return defaultValue;
+                var cleaned = value.toString().replace(/[^\d]/g, '');
+                var parsed = parseInt(cleaned);
                 return isNaN(parsed) ? defaultValue : parsed;
             }
 
-            // Hàm helper để format số
-            function formatNumber(value) {
-                if (isNaN(value) || value === null || value === undefined) return '0';
-                return Math.round(value).toLocaleString('vi-VN');
-            }
-
-            // Hàm helper để format giá theo triệu/tỷ
+            // FORMAT GIÁ THEO CHUẨN VIỆT NAM
             function formatPrice(value) {
-                if (isNaN(value) || value === null || value === undefined) return '0';
-                var numValue = Math.round(value);
-                if (numValue >= 1000000000) {
-                    var ty = numValue / 1000000000;
-                    return ty.toFixed(1).replace(/\.?0+$/, '') + ' tỷ';
-                } else if (numValue >= 1000000) {
-                    var trieu = numValue / 1000000;
-                    return trieu.toFixed(1).replace(/\.?0+$/, '') + ' triệu';
-                } else {
-                    return formatNumber(numValue) + ' VND';
-                }
+                if (isNaN(value)) return '0';
+                value = Math.round(value);
+
+                if (value >= 1000000000)
+                    return (value / 1000000000).toFixed(1).replace(/\.0$/, '') + ' tỷ';
+
+                if (value >= 1000000)
+                    return (value / 1000000).toFixed(0) + ' triệu';
+
+                return value.toLocaleString('vi-VN') + ' VND';
             }
 
-            // Hàm khởi tạo slider cho tab Cho Thuê
-            function initRentSliders() {
-                if (typeof noUiSlider === 'undefined') return;
+            /* =========================
+               RENT SLIDERS (CHO THUÊ)
+            ========================== */
 
-                // Price range slider for Rent tab (Cho Thuê)
+            function initRentSliders() {
+
+                /* ===== GIÁ ===== */
                 var priceSlider = document.getElementById("slider-range");
                 if (priceSlider) {
-                    // Xóa slider cũ nếu đã tồn tại
-                    if (priceSlider.noUiSlider) {
-                        priceSlider.noUiSlider.destroy();
-                    }
 
-                    var minPriceInput = document.getElementById("minPrice");
-                    var maxPriceInput = document.getElementById("maxPrice");
-                    
-                    // Lấy giá trị từ input, nếu không có hoặc = 0 thì dùng giá trị mặc định cho hiển thị
-                    var minPriceVal = 1000000000; // Mặc định 1 tỷ cho hiển thị
-                    var maxPriceVal = 50000000000; // Mặc định 50 tỷ cho hiển thị
-                    var hasPriceValue = false;
-                    
-                    if (minPriceInput && minPriceInput.value && minPriceInput.value !== '') {
-                        var parsedMin = parseValue(minPriceInput.value, null);
-                        if (parsedMin !== null && parsedMin > 0) {
-                            minPriceVal = parsedMin;
-                            hasPriceValue = true;
-                        }
-                    }
-                    
-                    if (maxPriceInput && maxPriceInput.value && maxPriceInput.value !== '') {
-                        var parsedMax = parseValue(maxPriceInput.value, null);
-                        if (parsedMax !== null && parsedMax > 0) {
-                            maxPriceVal = parsedMax;
-                            hasPriceValue = true;
-                        }
-                    }
-                    
-                    // Đảm bảo giá trị trong khoảng hợp lệ (1 tỷ - 50 tỷ)
-                    minPriceVal = Math.max(1000000000, Math.min(50000000000, Math.round(minPriceVal)));
-                    maxPriceVal = Math.max(1000000000, Math.min(50000000000, Math.round(maxPriceVal)));
-                    if (minPriceVal >= maxPriceVal) {
-                        minPriceVal = 1000000000;
-                        maxPriceVal = 50000000000;
-                    }
-                    
-                    // Chỉ cập nhật giá trị input hidden nếu có giá trị từ query string
-                    if (!hasPriceValue) {
-                        if (minPriceInput) minPriceInput.value = '';
-                        if (maxPriceInput) maxPriceInput.value = '';
-                    } else {
-                        if (minPriceInput) minPriceInput.value = minPriceVal;
-                        if (maxPriceInput) maxPriceInput.value = maxPriceVal;
-                    }
-                    
+                    if (priceSlider.noUiSlider)
+                        priceSlider.noUiSlider.destroy();
+
                     noUiSlider.create(priceSlider, {
-                        start: [minPriceVal, maxPriceVal],
+                        start: [1000000000, 20000000000], // 1 – 20 tỷ
                         connect: true,
                         range: {
-                            'min': 1000000000,
-                            'max': 50000000000
+                            min: 1000000000,
+                            max: 20000000000
                         },
-                        step: 100000000, // Bước nhảy 100 triệu
-                        format: {
-                            to: function(value) {
-                                return formatNumber(value);
-                            },
-                            from: function(value) {
-                                return parseValue(value, 1000000000);
-                            }
-                        }
+                        step: 100000000
                     });
-                    
-                    priceSlider.noUiSlider.on('update', function(values, handle) {
-                        var numericValue = Math.round(parseFloat(values[handle]));
-                        var formattedValue = formatPrice(numericValue);
-                        if (handle === 0) {
-                            document.getElementById("slider-range-value1").innerHTML = formattedValue;
-                            document.getElementById("minPrice").value = numericValue;
-                        } else {
-                            document.getElementById("slider-range-value2").innerHTML = formattedValue;
-                            document.getElementById("maxPrice").value = numericValue;
-                        }
+
+                    // HIỂN THỊ BAN ĐẦU
+                    $("#slider-range-value1").text(formatPrice(1000000000));
+                    $("#slider-range-value2").text(formatPrice(20000000000));
+
+                    priceSlider.noUiSlider.on('update', function (values) {
+                        var min = Math.round(values[0]);
+                        var max = Math.round(values[1]);
+
+                        $("#slider-range-value1").text(formatPrice(min));
+                        $("#slider-range-value2").text(formatPrice(max));
+
+                        $("#minPrice").val(min);
+                        $("#maxPrice").val(max);
                     });
-                    
-                    // Cập nhật giá trị hiển thị ban đầu
-                    setTimeout(function() {
-                        if (priceSlider.noUiSlider) {
-                            var initialValues = priceSlider.noUiSlider.get();
-                            var val1El = document.getElementById("slider-range-value1");
-                            var val2El = document.getElementById("slider-range-value2");
-                            if (val1El) val1El.innerHTML = formatPrice(Math.round(initialValues[0]));
-                            if (val2El) val2El.innerHTML = formatPrice(Math.round(initialValues[1]));
-                        }
-                    }, 50);
                 }
-                
-                // Size range slider for Rent tab (Cho Thuê)
+
+                /* ===== DIỆN TÍCH ===== */
                 var sizeSlider = document.getElementById("slider-range2");
                 if (sizeSlider) {
-                    // Xóa slider cũ nếu đã tồn tại
-                    if (sizeSlider.noUiSlider) {
+
+                    if (sizeSlider.noUiSlider)
                         sizeSlider.noUiSlider.destroy();
-                    }
 
-                    var minSizeInput = document.getElementById("minSize");
-                    var maxSizeInput = document.getElementById("maxSize");
-                    
-                    // Lấy giá trị từ input, nếu không có thì dùng giá trị mặc định cho hiển thị
-                    var minSizeVal = 0; // Mặc định 0 cho hiển thị
-                    var maxSizeVal = 1000; // Mặc định 1000 cho hiển thị
-                    var hasSizeValue = false;
-                    
-                    if (minSizeInput && minSizeInput.value !== null && minSizeInput.value !== '') {
-                        var parsedMin = parseValue(minSizeInput.value, null);
-                        if (parsedMin !== null) {
-                            minSizeVal = parsedMin;
-                            hasSizeValue = true;
-                        }
-                    }
-                    
-                    if (maxSizeInput && maxSizeInput.value !== null && maxSizeInput.value !== '') {
-                        var parsedMax = parseValue(maxSizeInput.value, null);
-                        if (parsedMax !== null && parsedMax > 0) {
-                            maxSizeVal = parsedMax;
-                            hasSizeValue = true;
-                        }
-                    }
-                    
-                    // Đảm bảo giá trị trong khoảng hợp lệ (0 - 1000)
-                    minSizeVal = Math.max(0, Math.min(1000, Math.round(minSizeVal)));
-                    maxSizeVal = Math.max(0, Math.min(1000, Math.round(maxSizeVal)));
-                    if (minSizeVal >= maxSizeVal) {
-                        minSizeVal = 0;
-                        maxSizeVal = 1000;
-                    }
-                    
-                    // Chỉ cập nhật giá trị input hidden nếu có giá trị từ query string
-                    if (!hasSizeValue) {
-                        if (minSizeInput) minSizeInput.value = '';
-                        if (maxSizeInput) maxSizeInput.value = '';
-                    } else {
-                        if (minSizeInput) minSizeInput.value = minSizeVal;
-                        if (maxSizeInput) maxSizeInput.value = maxSizeVal;
-                    }
-                    
                     noUiSlider.create(sizeSlider, {
-                        start: [minSizeVal, maxSizeVal],
+                        start: [0, 500], // 0 – 500 m²
                         connect: true,
                         range: {
-                            'min': 0,
-                            'max': 1000
+                            min: 0,
+                            max: 500
                         },
-                        step: 1,
-                        format: {
-                            to: function(value) {
-                                return formatNumber(value);
-                            },
-                            from: function(value) {
-                                return parseValue(value, 0);
-                            }
-                        }
+                        step: 1
                     });
-                    
-                    sizeSlider.noUiSlider.on('update', function(values, handle) {
-                        var numericValue = Math.round(parseFloat(values[handle]));
-                        var formattedValue = formatNumber(numericValue);
-                        if (handle === 0) {
-                            document.getElementById("slider-range-value01").innerHTML = formattedValue;
-                            document.getElementById("minSize").value = numericValue;
-                        } else {
-                            document.getElementById("slider-range-value02").innerHTML = formattedValue;
-                            document.getElementById("maxSize").value = numericValue;
-                        }
+
+                    // HIỂN THỊ BAN ĐẦU
+                    $("#slider-range-value01").text("0 m²");
+                    $("#slider-range-value02").text("500 m²");
+
+                    sizeSlider.noUiSlider.on('update', function (values) {
+                        var min = Math.round(values[0]);
+                        var max = Math.round(values[1]);
+
+                        $("#slider-range-value01").text(min + " m²");
+                        $("#slider-range-value02").text(max + " m²");
+
+                        $("#minSize").val(min);
+                        $("#maxSize").val(max);
                     });
-                    
-                    // Cập nhật giá trị hiển thị ban đầu
-                    setTimeout(function() {
-                        if (sizeSlider.noUiSlider) {
-                            var initialSizeValues = sizeSlider.noUiSlider.get();
-                            var val01El = document.getElementById("slider-range-value01");
-                            var val02El = document.getElementById("slider-range-value02");
-                            if (val01El) val01El.innerHTML = formatNumber(Math.round(initialSizeValues[0]));
-                            if (val02El) val02El.innerHTML = formatNumber(Math.round(initialSizeValues[1]));
-                        }
-                    }, 50);
                 }
             }
 
-            // Hàm khởi tạo slider cho tab Bán
+            /* =========================
+               SALE SLIDERS (BÁN)
+            ========================== */
+
             function initSaleSliders() {
-                if (typeof noUiSlider === 'undefined') return;
 
-                // Price range slider for Sale tab (Bán)
-                var priceSliderSale = document.getElementById("slider-range-sale");
-                if (priceSliderSale) {
-                    // Xóa slider cũ nếu đã tồn tại
-                    if (priceSliderSale.noUiSlider) {
-                        priceSliderSale.noUiSlider.destroy();
-                    }
+                var priceSlider = document.getElementById("slider-range-sale");
+                if (priceSlider) {
 
-                    var minPriceInputSale = document.getElementById("minPriceSale");
-                    var maxPriceInputSale = document.getElementById("maxPriceSale");
-                    
-                    // Lấy giá trị từ input, nếu không có hoặc = 0 thì dùng giá trị mặc định
-                    var minPriceValSale = 1000000000; // Mặc định 1 tỷ
-                    var maxPriceValSale = 50000000000; // Mặc định 50 tỷ
-                    
-                    if (minPriceInputSale && minPriceInputSale.value) {
-                        var parsedMin = parseValue(minPriceInputSale.value, null);
-                        if (parsedMin !== null && parsedMin > 0) {
-                            minPriceValSale = parsedMin;
-                        }
-                    }
-                    
-                    if (maxPriceInputSale && maxPriceInputSale.value) {
-                        var parsedMax = parseValue(maxPriceInputSale.value, null);
-                        if (parsedMax !== null && parsedMax > 0) {
-                            maxPriceValSale = parsedMax;
-                        }
-                    }
-                    
-                    // Đảm bảo giá trị trong khoảng hợp lệ (1 tỷ - 50 tỷ)
-                    minPriceValSale = Math.max(1000000000, Math.min(50000000000, Math.round(minPriceValSale)));
-                    maxPriceValSale = Math.max(1000000000, Math.min(50000000000, Math.round(maxPriceValSale)));
-                    if (minPriceValSale >= maxPriceValSale) {
-                        minPriceValSale = 1000000000;
-                        maxPriceValSale = 50000000000;
-                    }
-                    
-                    // Cập nhật giá trị input hidden để đảm bảo đúng
-                    if (minPriceInputSale) minPriceInputSale.value = minPriceValSale;
-                    if (maxPriceInputSale) maxPriceInputSale.value = maxPriceValSale;
-                    
-                    noUiSlider.create(priceSliderSale, {
-                        start: [minPriceValSale, maxPriceValSale],
+                    if (priceSlider.noUiSlider)
+                        priceSlider.noUiSlider.destroy();
+
+                    noUiSlider.create(priceSlider, {
+                        start: [1000000000, 20000000000],
                         connect: true,
                         range: {
-                            'min': 1000000000,
-                            'max': 50000000000
+                            min: 1000000000,
+                            max: 20000000000
                         },
-                        step: 100000000, // Bước nhảy 100 triệu
-                        format: {
-                            to: function(value) {
-                                return formatNumber(value);
-                            },
-                            from: function(value) {
-                                return parseValue(value, 1000000000);
-                            }
-                        }
+                        step: 100000000
                     });
-                    
-                    priceSliderSale.noUiSlider.on('update', function(values, handle) {
-                        var numericValue = Math.round(parseFloat(values[handle]));
-                        var formattedValue = formatPrice(numericValue);
-                        if (handle === 0) {
-                            document.getElementById("slider-range-value1-sale").innerHTML = formattedValue;
-                            document.getElementById("minPriceSale").value = numericValue;
-                        } else {
-                            document.getElementById("slider-range-value2-sale").innerHTML = formattedValue;
-                            document.getElementById("maxPriceSale").value = numericValue;
-                        }
+
+                    $("#slider-range-value1-sale").text(formatPrice(1000000000));
+                    $("#slider-range-value2-sale").text(formatPrice(20000000000));
+
+                    priceSlider.noUiSlider.on('update', function (values) {
+                        var min = Math.round(values[0]);
+                        var max = Math.round(values[1]);
+
+                        $("#slider-range-value1-sale").text(formatPrice(min));
+                        $("#slider-range-value2-sale").text(formatPrice(max));
+
+                        $("#minPriceSale").val(min);
+                        $("#maxPriceSale").val(max);
                     });
-                    
-                    // Cập nhật giá trị hiển thị ban đầu
-                    setTimeout(function() {
-                        if (priceSliderSale.noUiSlider) {
-                            var initialSaleValues = priceSliderSale.noUiSlider.get();
-                            var val1SaleEl = document.getElementById("slider-range-value1-sale");
-                            var val2SaleEl = document.getElementById("slider-range-value2-sale");
-                            if (val1SaleEl) val1SaleEl.innerHTML = formatPrice(Math.round(initialSaleValues[0]));
-                            if (val2SaleEl) val2SaleEl.innerHTML = formatPrice(Math.round(initialSaleValues[1]));
-                        }
-                    }, 50);
                 }
-                
-                // Size range slider for Sale tab (Bán)
-                var sizeSliderSale = document.getElementById("slider-range2-sale");
-                if (sizeSliderSale) {
-                    // Xóa slider cũ nếu đã tồn tại
-                    if (sizeSliderSale.noUiSlider) {
-                        sizeSliderSale.noUiSlider.destroy();
-                    }
 
-                    var minSizeInputSale = document.getElementById("minSizeSale");
-                    var maxSizeInputSale = document.getElementById("maxSizeSale");
-                    
-                    // Lấy giá trị từ input, nếu không có thì dùng giá trị mặc định
-                    var minSizeValSale = 0; // Mặc định 0
-                    var maxSizeValSale = 1000; // Mặc định 1000
-                    
-                    if (minSizeInputSale && minSizeInputSale.value !== null && minSizeInputSale.value !== '') {
-                        var parsedMin = parseValue(minSizeInputSale.value, null);
-                        if (parsedMin !== null) {
-                            minSizeValSale = parsedMin;
-                        }
-                    }
-                    
-                    if (maxSizeInputSale && maxSizeInputSale.value !== null && maxSizeInputSale.value !== '') {
-                        var parsedMax = parseValue(maxSizeInputSale.value, null);
-                        if (parsedMax !== null && parsedMax > 0) {
-                            maxSizeValSale = parsedMax;
-                        }
-                    }
-                    
-                    // Đảm bảo giá trị trong khoảng hợp lệ (0 - 1000)
-                    minSizeValSale = Math.max(0, Math.min(1000, Math.round(minSizeValSale)));
-                    maxSizeValSale = Math.max(0, Math.min(1000, Math.round(maxSizeValSale)));
-                    if (minSizeValSale >= maxSizeValSale) {
-                        minSizeValSale = 0;
-                        maxSizeValSale = 1000;
-                    }
-                    
-                    // Cập nhật giá trị input hidden để đảm bảo đúng
-                    if (minSizeInputSale) minSizeInputSale.value = minSizeValSale;
-                    if (maxSizeInputSale) maxSizeInputSale.value = maxSizeValSale;
-                    
-                    noUiSlider.create(sizeSliderSale, {
-                        start: [minSizeValSale, maxSizeValSale],
+                var sizeSlider = document.getElementById("slider-range2-sale");
+                if (sizeSlider) {
+
+                    if (sizeSlider.noUiSlider)
+                        sizeSlider.noUiSlider.destroy();
+
+                    noUiSlider.create(sizeSlider, {
+                        start: [0, 500],
                         connect: true,
                         range: {
-                            'min': 0,
-                            'max': 1000
+                            min: 0,
+                            max: 500
                         },
-                        step: 1,
-                        format: {
-                            to: function(value) {
-                                return formatNumber(value);
-                            },
-                            from: function(value) {
-                                return parseValue(value, 0);
-                            }
-                        }
+                        step: 1
                     });
-                    
-                    sizeSliderSale.noUiSlider.on('update', function(values, handle) {
-                        var numericValue = Math.round(parseFloat(values[handle]));
-                        var formattedValue = formatNumber(numericValue);
-                        if (handle === 0) {
-                            document.getElementById("slider-range-value01-sale").innerHTML = formattedValue;
-                            document.getElementById("minSizeSale").value = numericValue;
-                        } else {
-                            document.getElementById("slider-range-value02-sale").innerHTML = formattedValue;
-                            document.getElementById("maxSizeSale").value = numericValue;
-                        }
+
+                    $("#slider-range-value01-sale").text("0 m²");
+                    $("#slider-range-value02-sale").text("500 m²");
+
+                    sizeSlider.noUiSlider.on('update', function (values) {
+                        var min = Math.round(values[0]);
+                        var max = Math.round(values[1]);
+
+                        $("#slider-range-value01-sale").text(min + " m²");
+                        $("#slider-range-value02-sale").text(max + " m²");
+
+                        $("#minSizeSale").val(min);
+                        $("#maxSizeSale").val(max);
                     });
-                    
-                    // Cập nhật giá trị hiển thị ban đầu
-                    setTimeout(function() {
-                        if (sizeSliderSale.noUiSlider) {
-                            var initialSaleSizeValues = sizeSliderSale.noUiSlider.get();
-                            var val01SaleEl = document.getElementById("slider-range-value01-sale");
-                            var val02SaleEl = document.getElementById("slider-range-value02-sale");
-                            if (val01SaleEl) val01SaleEl.innerHTML = formatNumber(Math.round(initialSaleSizeValues[0]));
-                            if (val02SaleEl) val02SaleEl.innerHTML = formatNumber(Math.round(initialSaleSizeValues[1]));
-                        }
-                    }, 50);
                 }
             }
 
-            // Handle tab switching
+            /* =========================
+               TAB SWITCH
+            ========================== */
+
             $('a[data-bs-toggle="tab"][data-status-id]').on('shown.bs.tab', function (e) {
                 var statusId = $(e.target).data('status-id');
-                // Update hidden fields in both forms
-                $('#statusIdRent').val(statusId === 1 ? 1 : '');
-                $('#statusIdSale').val(statusId === 2 ? 2 : '');
-                
-                // Khởi tạo lại slider khi chuyển tab
-                setTimeout(function() {
-                    if (statusId === 1) {
-                        // Tab Cho Thuê
-                        initRentSliders();
-                    } else if (statusId === 2) {
-                        // Tab Bán
-                        initSaleSliders();
-                    }
-                }, 100);
+                if (statusId === 1) initRentSliders();
+                if (statusId === 2) initSaleSliders();
             });
 
-            // Đảm bảo giá trị từ slider được cập nhật trước khi submit form
-            $('#filterFormRent').on('submit', function(e) {
-                var priceSlider = document.getElementById("slider-range");
-                var sizeSlider = document.getElementById("slider-range2");
-                
-                if (priceSlider && priceSlider.noUiSlider) {
-                    var priceValues = priceSlider.noUiSlider.get();
-                    var minPriceVal = Math.round(priceValues[0]);
-                    var maxPriceVal = Math.round(priceValues[1]);
-                    
-                    // Chỉ gửi giá trị nếu không phải giá trị mặc định
-                    if (minPriceVal === 1000000000 && maxPriceVal === 50000000000) {
-                        $('#minPrice').val('');
-                        $('#maxPrice').val('');
-                    } else {
-                        $('#minPrice').val(minPriceVal);
-                        $('#maxPrice').val(maxPriceVal);
-                    }
-                }
-                
-                if (sizeSlider && sizeSlider.noUiSlider) {
-                    var sizeValues = sizeSlider.noUiSlider.get();
-                    var minSizeVal = Math.round(sizeValues[0]);
-                    var maxSizeVal = Math.round(sizeValues[1]);
-                    
-                    // Chỉ gửi giá trị nếu không phải giá trị mặc định
-                    if (minSizeVal === 0 && maxSizeVal === 1000) {
-                        $('#minSize').val('');
-                        $('#maxSize').val('');
-                    } else {
-                        $('#minSize').val(minSizeVal);
-                        $('#maxSize').val(maxSizeVal);
-                    }
-                }
-            });
+            /* =========================
+               INIT ON LOAD
+            ========================== */
 
-            $('#filterFormSale').on('submit', function(e) {
-                var priceSliderSale = document.getElementById("slider-range-sale");
-                var sizeSliderSale = document.getElementById("slider-range2-sale");
-                
-                if (priceSliderSale && priceSliderSale.noUiSlider) {
-                    var priceValues = priceSliderSale.noUiSlider.get();
-                    var minPriceVal = Math.round(priceValues[0]);
-                    var maxPriceVal = Math.round(priceValues[1]);
-                    
-                    // Chỉ gửi giá trị nếu không phải giá trị mặc định
-                    if (minPriceVal === 1000000000 && maxPriceVal === 50000000000) {
-                        $('#minPriceSale').val('');
-                        $('#maxPriceSale').val('');
-                    } else {
-                        $('#minPriceSale').val(minPriceVal);
-                        $('#maxPriceSale').val(maxPriceVal);
-                    }
-                }
-                
-                if (sizeSliderSale && sizeSliderSale.noUiSlider) {
-                    var sizeValues = sizeSliderSale.noUiSlider.get();
-                    var minSizeVal = Math.round(sizeValues[0]);
-                    var maxSizeVal = Math.round(sizeValues[1]);
-                    
-                    // Chỉ gửi giá trị nếu không phải giá trị mặc định
-                    if (minSizeVal === 0 && maxSizeVal === 1000) {
-                        $('#minSizeSale').val('');
-                        $('#maxSizeSale').val('');
-                    } else {
-                        $('#minSizeSale').val(minSizeVal);
-                        $('#maxSizeSale').val(maxSizeVal);
-                    }
-                }
-            });
-
-            // Khởi tạo slider khi trang load
-            if (typeof noUiSlider !== 'undefined') {
-                // Kiểm tra tab nào đang active và khởi tạo slider tương ứng
-                var activeTab = $('.nav-link-item.active[data-status-id]');
-                if (activeTab.length > 0) {
-                    var statusId = activeTab.data('status-id');
-                    if (statusId === 1) {
-                        initRentSliders();
-                    } else if (statusId === 2) {
-                        initSaleSliders();
-                    }
-                } else {
-                    // Mặc định khởi tạo tab Cho Thuê
-                    initRentSliders();
-                }
-            }
+            initRentSliders();
         });
     </script>
 }
+
