@@ -1,4 +1,4 @@
-@model IEnumerable<HomeLengo.Models.Menu>
+﻿@model IEnumerable<HomeLengo.Models.Menu>
 
 <nav class="main-menu show navbar-expand-md">
     <div class="navbar-collapse collapse clearfix" id="navbarSupportedContent">
@@ -6,6 +6,13 @@
 
             @foreach (var parent in Model.Where(m => m.ParentId == null).OrderBy(m => m.SortOrder))
             {
+                // 🚫 Nếu là "Bảng điều khiển" mà CHƯA đăng nhập → bỏ qua
+                if (parent.Title == "Bảng điều khiển"
+                && Context.Session.GetString("UserId") == null)
+                {
+                    continue;
+                }
+
                 var childs = Model.Where(m => m.ParentId == parent.MenuId)
                 .OrderBy(m => m.SortOrder)
                 .ToList();

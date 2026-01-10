@@ -1,0 +1,85 @@
+﻿@model HomeLengo.Models.AgentProfile
+
+<section class="container py-5" style="max-width:1100px">
+    <h2 class="fw-bold mb-4">Tạo hồ sơ môi giới</h2>
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <form asp-controller="AgentProfile"
+          asp-action="Create"
+          method="post"
+          enctype="multipart/form-data">
+
+
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ServiceRegisterId" />
+
+        <!-- AVATAR -->
+        <div class="mb-5">
+            <label class="form-label fw-semibold fs-5">
+                Ảnh đại diện
+            </label>
+
+            <div class="d-flex align-items-center gap-4 mt-3">
+                <img id="avatarPreview"
+                     src="@(Model.Avatar ?? "https://via.placeholder.com/140")"
+                     style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:1px solid #ddd;" />
+
+                <div>
+                    <input asp-for="AvatarFile"
+                           type="file"
+                           class="form-control"
+                           accept="image/*"
+                           onchange="previewAvatar(this)" />
+
+                    <small class="text-muted d-block mt-2">
+                        JPG, PNG. Dung lượng tối đa 5MB
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- DISPLAY NAME -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold fs-5">
+                Tên hiển thị
+            </label>
+
+            <input asp-for="DisplayName"
+                   class="form-control form-control-lg"
+                   placeholder="VD: Nguyễn Văn A - Môi giới BĐS" />
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="mb-5">
+            <label class="form-label fw-semibold fs-5">
+                Giới thiệu
+            </label>
+
+            <textarea asp-for="Description"
+                      class="form-control form-control-lg"
+                      rows="5"
+                      placeholder="Giới thiệu ngắn về kinh nghiệm, khu vực hoạt động..."></textarea>
+        </div>
+
+        <!-- SUBMIT -->
+        <div class="border-top pt-4 d-flex justify-content-end">
+            <button type="submit"
+                    class="btn btn-success btn-lg px-5">
+                Hoàn tất hồ sơ
+            </button>
+        </div>
+
+    </form>
+</section>
+
+<script>
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('avatarPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

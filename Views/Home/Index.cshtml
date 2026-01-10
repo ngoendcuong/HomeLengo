@@ -1,4 +1,8 @@
-﻿@* @{
+﻿@using HomeLengo.Models
+@{
+    var reviews = ViewBag.Reviews as List<Review>;
+}
+@* @{
     List<PropertyType> PropertyTypes = ViewBag.PropertyTypes;
 } *@
 
@@ -25,10 +29,10 @@
                     <div class="flat-tab flat-tab-form">
                         <ul class="nav-tab-form style-2" role="tablist">
                             <li class="nav-tab-item" role="presentation">
-                                <a href="home-02.html#forRent" class="nav-link-item active" data-bs-toggle="tab">For Rent</a>
+                                <a href="home-02.html#forRent" class="nav-link-item active" data-bs-toggle="tab">Cho thuê</a>
                             </li>
                             <li class="nav-tab-item" role="presentation">
-                                <a href="home-02.html#forSale" class="nav-link-item" data-bs-toggle="tab">For Sale</a>
+                                <a href="home-02.html#forSale" class="nav-link-item" data-bs-toggle="tab">Bán</a>
                             </li>
                         </ul>
                         <div class="tab-content">
@@ -38,16 +42,16 @@
                                         <div class="wd-find-select style-2">
                                             <div class="inner-group">
                                                 <div class="form-group-1 search-form form-style">
-                                                    <label>Type</label>
+                                                    <label>Loại hình</label>
                                                     <div class="group-select">
                                                         <div class="nice-select" tabindex="0">
-                                                            <span class="current">All</span>
+                                                            <span class="current">Tất cả</span>
                                                             <ul class="list">
-                                                                <li data-value class="option selected">All</li>
-                                                                <li data-value="villa" class="option">Villa</li>
-                                                                <li data-value="studio" class="option">Studio</li>
-                                                                <li data-value="office" class="option">Office</li>
-                                                                <li data-value="house" class="option">House</li>
+                                                                <li data-value class="option selected">Tất cả</li>
+                                                                <li data-value="villa" class="option">Biệt thự/li>
+                                                                <li data-value="studio" class="option">Căn hộ studio</li>
+                                                                <li data-value="office" class="option">Văn phòng</li>
+                                                                <li data-value="house" class="option">Nhà ở</li>
 
 
                                                             </ul>
@@ -56,29 +60,29 @@
 
                                                 </div>
                                                 <div class="form-group-2 form-style">
-                                                    <label>Location</label>
+                                                    <label>Địa điểm </label>
                                                     <div class="group-ip">
-                                                        <input type="text" class="form-control" placeholder="Search Location" value="" name="s" title="Search for" required="">
+                                                        <input type="text" class="form-control" placeholder="Tìm kiếm theo địa điểm" value="" name="s" title="Search for" required="">
                                                         <a href="home-02.html#" class="icon icon-location">
                                                         </a>
                                                     </div>
                                                 </div>
                                                 <div class="form-group-3 form-style">
-                                                    <label>Keyword</label>
-                                                    <input type="text" class="form-control" placeholder="Search Keyword." value="" name="s" title="Search for" required="">
+                                                    <label>Từ khóa</label>
+                                                    <input type="text" class="form-control" placeholder="Từ khóa tìm kiếm" value="" name="s" title="Search for" required="">
                                                 </div>
 
                                             </div>
                                             <div class="box-btn-advanced">
                                                 <div class="form-group-4 box-filter">
                                                     <a class="tf-btn btn-line filter-advanced pull-right">
-                                                        <span class="text-1">Advanced</span>
+                                                        <span class="text-1">Nâng cao</span>
                                                         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <path d="M5.5 12.375V3.4375M5.5 12.375C5.86467 12.375 6.21441 12.5199 6.47227 12.7777C6.73013 13.0356 6.875 13.3853 6.875 13.75C6.875 14.1147 6.73013 14.4644 6.47227 14.7223C6.21441 14.9801 5.86467 15.125 5.5 15.125M5.5 12.375C5.13533 12.375 4.78559 12.5199 4.52773 12.7777C4.26987 13.0356 4.125 13.3853 4.125 13.75C4.125 14.1147 4.26987 14.4644 4.52773 14.7223C4.78559 14.9801 5.13533 15.125 5.5 15.125M5.5 15.125V18.5625M16.5 12.375V3.4375M16.5 12.375C16.8647 12.375 17.2144 12.5199 17.4723 12.7777C17.7301 13.0356 17.875 13.3853 17.875 13.75C17.875 14.1147 17.7301 14.4644 17.4723 14.7223C17.2144 14.9801 16.8647 15.125 16.5 15.125M16.5 12.375C16.1353 12.375 15.7856 12.5199 15.5277 12.7777C15.2699 13.0356 15.125 13.3853 15.125 13.75C15.125 14.1147 15.2699 14.4644 15.5277 14.7223C15.7856 14.9801 16.1353 15.125 16.5 15.125M16.5 15.125V18.5625M11 6.875V3.4375M11 6.875C11.3647 6.875 11.7144 7.01987 11.9723 7.27773C12.2301 7.53559 12.375 7.88533 12.375 8.25C12.375 8.61467 12.2301 8.96441 11.9723 9.22227C11.7144 9.48013 11.3647 9.625 11 9.625M11 6.875C10.6353 6.875 10.2856 7.01987 10.0277 7.27773C9.76987 7.53559 9.625 7.88533 9.625 8.25C9.625 8.61467 9.76987 8.96441 10.0277 9.22227C10.2856 9.48013 10.6353 9.625 11 9.625M11 9.625V18.5625" stroke="#161E2D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                                                         </svg>
                                                     </a>
                                                 </div>
-                                                <button type="submit" class="tf-btn btn-search primary">Search <i class="icon icon-search"></i> </button>
+                                                <button type="submit" class="tf-btn btn-search primary">Tìm kiếm <i class="icon icon-search"></i> </button>
                                             </div>
 
                                         </div>
@@ -315,12 +319,12 @@
                         </div>
                     </div>
                     <div class="wrap-search-link">
-                        <p class="body-2">What are you looking for:</p>
+                        <p class="body-2">Bạn đang tìm kiếm gì?</p>
                         <div class="categories-list">
-                            <a href="home-02.html#"><i class="icon icon-house-fill"></i> Houses</a>
-                            <a href="home-02.html#"><i class="icon icon-villa-fill"></i> Villa</a>
-                            <a href="home-02.html#"><i class="icon icon-office-fill"></i> Office</a>
-                            <a href="home-02.html#"><i class="icon icon-apartment"></i> Apartments</a>
+                            <a href="home-02.html#"><i class="icon icon-house-fill"></i> Nhà ở</a>
+                            <a href="home-02.html#"><i class="icon icon-villa-fill"></i> Biệt thự</a>
+                            <a href="home-02.html#"><i class="icon icon-office-fill"></i> Văn phòng</a>
+                            <a href="home-02.html#"><i class="icon icon-apartment"></i> Căn hộ</a>
                         </div>
 
                     </div>
@@ -366,8 +370,8 @@
 <section class="flat-section flat-categories">
     <div class="container">
         <div class="box-title style-1 wow fadeInUp">
-            <div class="text-subtitle text-primary">Property Type</div>
-            <h3 class="title mt-4">Try Searching For</h3>
+            <div class="text-subtitle text-primary">Loại hình bất động sản</div>
+            <h3 class="title mt-4">Hãy thử tìm kiếm</h3>
         </div>
         <div class="wrap-categories-sw wow fadeInUp" data-wow-delay=".2s">
             <div dir="ltr" class="swiper tf-sw-categories sw-over" data-preview="6" data-tablet="4" data-mobile-sm="3" data-mobile="2" data-space="15" data-space-md="30" data-space-lg="30">
@@ -400,10 +404,9 @@
 <section class="flat-section flat-recommended pt-0">
     <div class="container">
         <div class="box-title text-center wow fadeInUp">
-            <div class="text-subtitle text-primary">Featured Properties</div>
+            <div class="text-subtitle text-primary">Bất động sản nổi bật</div>
             <h3 class="title mt-4">
-                Discover Homelengo's Finest Properties
-                for Your Dream Home
+                Khám phá những bất động sản tốt nhất của Homelengo cho ngôi nhà mơ ước của bạn
             </h3>
         </div>
         <div class="flat-tab-recommended flat-animate-tab wow fadeInUp" data-wow-delay=".2s">
@@ -439,7 +442,7 @@
                     </div>
                     <div class="text-center">
                         <a href="sidebar-grid.html" class="tf-btn btn-view primary size-1 hover-btn-view">
-                            View All Properties <span class="icon icon-arrow-right2"></span>
+                            Xem tất cả bất động sản <span class="icon icon-arrow-right2"></span>
                         </a>
                     </div>
                 </div>
@@ -451,7 +454,7 @@
                     </div>
                     <div class="text-center">
                         <a href="sidebar-grid.html" class="tf-btn btn-view primary size-1 hover-btn-view">
-                            View All Properties <span class="icon icon-arrow-right2"></span>
+                            Xem tất cả bất động sản <span class="icon icon-arrow-right2"></span>
                         </a>
                     </div>
                 </div>
@@ -463,7 +466,7 @@
                     </div>
                     <div class="text-center">
                         <a href="sidebar-grid.html" class="tf-btn btn-view primary size-1 hover-btn-view">
-                            View All Properties <span class="icon icon-arrow-right2"></span>
+                            Xem tất cả bất động sản <span class="icon icon-arrow-right2"></span>
                         </a>
                     </div>
                 </div>
@@ -475,7 +478,7 @@
                     </div>
                     <div class="text-center">
                         <a href="sidebar-grid.html" class="tf-btn btn-view primary size-1 hover-btn-view">
-                            View All Properties <span class="icon icon-arrow-right2"></span>
+                            Xem tất cả bất động sản <span class="icon icon-arrow-right2"></span>
                         </a>
                     </div>
                 </div>
@@ -487,7 +490,7 @@
                     </div>
                     <div class="text-center">
                         <a href="sidebar-grid.html" class="tf-btn btn-view primary size-1 hover-btn-view">
-                            View All Properties <span class="icon icon-arrow-right2"></span>
+                            Xem tất cả bất động sản <span class="icon icon-arrow-right2"></span>
                         </a>
                     </div>
                 </div>
@@ -499,7 +502,7 @@
                     </div>
                     <div class="text-center">
                         <a href="sidebar-grid.html" class="tf-btn btn-view primary size-1 hover-btn-view">
-                            View All Properties <span class="icon icon-arrow-right2"></span>
+                            Xem tất cả bất động sản <span class="icon icon-arrow-right2"></span>
                         </a>
                     </div>
                 </div>
@@ -511,7 +514,7 @@
                     </div>
                     <div class="text-center">
                         <a href="sidebar-grid.html" class="tf-btn btn-view primary size-1 hover-btn-view">
-                            View All Properties <span class="icon icon-arrow-right2"></span>
+                            Xem tất cả bất động sản <span class="icon icon-arrow-right2"></span>
                         </a>
                     </div>
                 </div>
@@ -532,7 +535,7 @@
                         </div>
                         <div class="tag-item ani5">
                             <i class="icon icon-check-circle"></i>
-                            <span>Proven Expertise</span>
+                            <span>Chuyên môn đã được khẳng định</span>
                         </div>
                     </div>
                     <div class="tf-image-wrap item-2">
@@ -541,11 +544,11 @@
                         </div>
                         <div class="tag-item tag-item-1 ani4">
                             <i class="icon icon-check-circle"></i>
-                            <span>Customized Solutions</span>
+                            <span>Giải pháp được cá nhân hóa</span>
                         </div>
                         <div class="tag-item tag-item-2 ani5">
                             <i class="icon icon-check-circle"></i>
-                            <span>Transparent Partnerships</span>
+                            <span>Hợp tác minh bạch</span>
                         </div>
                     </div>
                     <div class="tf-image-wrap item-3">
@@ -554,16 +557,17 @@
                         </div>
                         <div class="tag-item ani4">
                             <i class="icon icon-check-circle"></i>
-                            <span>Local Area Knowledge</span>
+                            <span>Am hiểu khu vực địa phương</span>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="content-right">
                 <div class="box-title wow fadeInUp">
-                    <div class="text-subtitle text-primary">Our Benifit</div>
-                    <h3 class="title mt-4">Discover what sets our Real Estate expertise apart</h3>
-                    <p class="desc text-variant-1">Our seasoned professionals, armed with extensive market knowledge, walk alongside you through every phase of your property endeavor.</p>
+                    <div class="text-subtitle text-primary">Lợi ích của chúng tôi</div>
+                    <h3 class="title mt-4">Khám phá điều gì làm nên sự khác biệt trong chuyên môn Bất động sản của chúng tôi</h3>
+                    <p class="desc text-variant-1">Đội ngũ chuyên gia giàu kinh nghiệm của chúng tôi, được trang bị kiến ​​thức thị trường sâu rộng,
+                        sẽ đồng hành cùng bạn trong mọi giai đoạn của quá trình giao dịch bất động sản.</p>
                 </div>
                 <div class="flat-service wow fadeInUp" data-wow-delay=".2s">
                     <a href="home-02.html#" class="box-benefit hover-btn-view">
@@ -584,9 +588,9 @@
                             </span>
                         </div>
                         <div class="content">
-                            <h5 class="title">Buy A New Home</h5>
-                            <p class="description">Explore diverse properties and expert guidance for a seamless buying experience.</p>
-                            <span class="btn-view style-1"><span class="text">Explore Now</span> <span class="icon icon-arrow-right2"></span> </span>
+                            <h5 class="title">Mua một ngôi nhà mới</h5>
+                            <p class="description">Khám phá nhiều lựa chọn bất động sản đa dạng và nhận hướng dẫn chuyên nghiệp để có trải nghiệm mua nhà suôn sẻ.</p>
+                            <span class="btn-view style-1"><span class="text">Khám phá ngay</span> <span class="icon icon-arrow-right2"></span> </span>
                         </div>
                     </a>
                     <a href="home-02.html#" class="box-benefit hover-btn-view">
@@ -608,36 +612,9 @@
                             </span>
                         </div>
                         <div class="content">
-                            <h5 class="title">Rent a home</h5>
-                            <p class="description">Explore a diverse variety of listings tailored precisely to suit your unique lifestyle needs.</p>
-                            <span class="btn-view style-1"><span class="text">Explore Now</span> <span class="icon icon-arrow-right2"></span> </span>
-
-                        </div>
-                    </a>
-                    <a href="home-02.html#" class="box-benefit hover-btn-view">
-                        <div class="icon-box">
-                            <span class="icon">
-                                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <g clip-path="url(#clip0_13434_4259)">
-                                        <path d="M47.3438 45.375V59.0625H5.625V39.1875M26.625 14.3438C26.3437 14.25 26.0625 14.3437 25.7812 14.5312L5.34375 35.0625C4.3125 36.0938 2.71875 36.0938 1.6875 35.0625C1.21875 34.5938 0.9375 33.9375 0.9375 33.2813C0.9375 32.625 1.21875 31.9687 1.6875 31.5L22.2188 10.9687C23.7188 9.46875 25.7812 8.90625 27.6562 9.375M0.9375 59.0625H52.0312" stroke="#1563DF" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M33.6563 51.75V44.0625C33.6563 42.0938 32.8125 40.3125 31.5 39C30.1875 37.6875 28.4062 36.8437 26.4375 36.8437C22.5 36.8437 19.2187 40.0312 19.2187 44.0625V51.75M36.8437 58.0313V59.0625H16.125V58.0313C16.125 56.625 17.25 55.5 18.6562 55.5H34.3125C35.7187 55.5 36.8437 56.625 36.8437 58.0313ZM59.0625 15.2812C59.0625 20.8125 51.9375 33.375 47.8125 40.4062C46.4062 42.6562 43.125 42.6562 41.7187 40.4062C37.5 33.4687 30.4687 20.9062 30.4687 15.2812C30.375 7.3125 36.8438 0.9375 44.7188 0.9375C52.5937 0.9375 59.0625 7.3125 59.0625 15.2812Z" stroke="#1563DF" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M44.7187 24.4688C49.7929 24.4688 53.9062 20.3554 53.9062 15.2812C53.9062 10.2071 49.7929 6.09375 44.7187 6.09375C39.6446 6.09375 35.5312 10.2071 35.5312 15.2812C35.5312 20.3554 39.6446 24.4688 44.7187 24.4688Z" stroke="#1563DF" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M22.6875 46.2188V48.0938V46.2188Z" fill="black" />
-                                        <path d="M22.6875 46.2188V48.0938" stroke="#1563DF" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                    </g>
-                                    <defs>
-                                        <clipPath id="clip0_13434_4259">
-                                            <rect width="60" height="60" fill="white" />
-                                        </clipPath>
-                                    </defs>
-                                </svg>
-
-                            </span>
-                        </div>
-                        <div class="content">
-                            <h5 class="title">Sell a home</h5>
-                            <p class="description">Showcasing your property's best features for a successful sale.</p>
-                            <span class="btn-view style-1"><span class="text">Explore Now</span> <span class="icon icon-arrow-right2"></span> </span>
+                            <h5 class="title">Thuê nhà</h5>
+                            <p class="description">Khám phá nhiều lựa chọn đa dạng được thiết kế riêng để phù hợp với lối sống độc đáo của bạn.</p>
+                            <span class="btn-view style-1"><span class="text">Khám phá ngay</span> <span class="icon icon-arrow-right2"></span> </span>
 
                         </div>
                     </a>
@@ -648,68 +625,35 @@
 </section>
 <!-- img with text -->
 <!-- Location -->
+@{
+    var cities = ViewBag.Cities;
+}
 <section class="flat-section flat-location-v2">
     <div class="container">
         <div class="box-title text-center wow fadeInUp">
-            <div class="text-subtitle text-primary">Explore Cities</div>
-            <h3 class="title mt-4">Our Location For You</h3>
+            <div class="text-subtitle text-primary">Khám phá các thành phố</div>
+            <h3 class="title mt-4">Vị trí của chúng tôi dành cho bạn</h3>
         </div>
-        <div class="grid-location wow fadeInUp" data-wow-delay=".2s">
-            <a href="topmap-grid.html" class="item-1 box-location-v2 hover-img">
-                <div class="box-img img-style">
-                    <img class="lazyload" data-src="~/assets/images/location/location-7.jpg" src="~/assets/images/location/location-7.jpg" alt="image-location">
-                </div>
-                <div class="content">
-                    <h6 class="link">Cape Town, South Africa</h6>
-                    <p class="mt-4 text-variant-1">221 Property</p>
-                </div>
 
-            </a>
-            <a href="topmap-grid.html" class="item-2 box-location-v2 hover-img">
-                <div class="box-img img-style">
-                    <img class="lazyload" data-src="~/assets/images/location/location-8.jpg" src="~/assets/images/location/location-8.jpg" alt="image-location">
-                </div>
-                <div class="content">
-                    <h6 class="link">Seoul, South Korea</h6>
-                    <p class="mt-4 text-variant-1">128 Property</p>
-                </div>
-            </a>
-            <a href="home-02.html#" class="item-3 box-location-v2 hover-img">
-                <div class="box-img img-style">
-                    <img class="lazyload" data-src="~/assets/images/location/location-9.jpg" src="~/assets/images/location/location-9.jpg" alt="image-location">
-                </div>
-                <div class="content">
-                    <h6 class="link">London, United Kingdom</h6>
-                    <p class="mt-4 text-variant-1">321 Property</p>
-                </div>
-            </a>
-            <a href="home-02.html#" class="item-4 box-location-v2 hover-img">
-                <div class="box-img img-style">
-                    <img class="lazyload" data-src="~/assets/images/location/location-10.jpg" src="~/assets/images/location/location-10.jpg" alt="image-location">
-                </div>
-                <div class="content">
-                    <h6 class="link">Connecticut, New England</h6>
-                    <p class="mt-4 text-variant-1">220 Property</p>
-                </div>
-            </a>
-            <a href="topmap-grid.html" class="item-5 box-location-v2 hover-img">
-                <div class="box-img img-style">
-                    <img class="lazyload" data-src="~/assets/images/location/location-11.jpg" src="~/assets/images/location/location-11.jpg" alt="image-location">
-                </div>
-                <div class="content">
-                    <h6 class="link">Sydney, Australia</h6>
-                    <p class="mt-4 text-variant-1">231 Property</p>
-                </div>
-            </a>
-            <a href="topmap-grid.html" class="item-6 box-location-v2 hover-img">
-                <div class="box-img img-style">
-                    <img class="lazyload" data-src="~/assets/images/location/location-12.jpg" src="~/assets/images/location/location-12.jpg" alt="image-location">
-                </div>
-                <div class="content">
-                    <h6 class="link">New Jersey, New York</h6>
-                    <p class="mt-4 text-variant-1">234 Property</p>
-                </div>
-            </a>
+        <div class="grid-location wow fadeInUp" data-wow-delay=".2s">
+            @foreach (var city in cities)
+            {
+                    <a href="/bat-dong-san?cityId=@city.CityId"
+                       class="box-location-v2 hover-img">
+
+                        <div class="box-img img-style">
+                        <img src="/assets/images/cities/@city.ImageUrl" alt="@city.Name">
+
+                        </div>
+
+                        <div class="content">
+                            <h6 class="link">@city.Name</h6>
+                            <p class="mt-4 text-variant-1">
+                            @city.PropertyCount Bất động sản
+                            </p>
+                        </div>
+                    </a>
+            }
         </div>
     </div>
 </section>
@@ -718,8 +662,8 @@
 <section class="flat-section bg-primary-new">
     <div class="container">
         <div class="box-title text-center wow fadeInUp">
-            <div class="text-subtitle text-primary">Top Properties</div>
-            <h3 class="title mt-4">Best Property Value</h3>
+            <div class="text-subtitle text-primary">Bất động sản hàng đầu</div>
+            <h3 class="title mt-4">Giá trị bất động sản tốt nhất</h3>
         </div>
         <div dir="ltr" class="swiper tf-sw-mobile" data-screen="991" data-preview="1" data-space="15">
             <div class="tf-layout-mobile-lg lg-col-2 swiper-wrapper">
@@ -735,8 +679,8 @@
 <section class="flat-section flat-agents">
     <div class="container">
         <div class="box-title text-center wow fadeInUp">
-            <div class="text-subtitle text-primary">Our Teams</div>
-            <h3 class="title mt-4">Meet Our Agents</h3>
+            <div class="text-subtitle text-primary">Đội ngũ của chúng tôi</div>
+            <h3 class="title mt-4">Gặp gỡ các chuyên viên môi giới</h3>
         </div>
         <div dir="ltr" class="swiper tf-sw-mobile-1" data-screen="575" data-preview="1" data-space="15">
             <div class="tf-layout-mobile-sm xl-col-4 sm-col-2 swiper-wrapper">
@@ -839,7 +783,7 @@
             </div>
             <div class="sw-pagination sw-pagination-mb-1 text-center d-sm-none d-block"></div>
         </div>
-        <p class="text-center desc body-2 text-variant-3">Become an agent and get the commission you deserve. <a href="contact.html" class="text-primary"> Contact us</a></p>
+        <p class="text-center desc body-2 text-variant-3">Trở thành môi giới và nhận mức hoa hồng xứng đáng. <a href="contact.html" class="text-primary"> Liên hệ với chúng tôi</a></p>
     </div>
 </section>
 <!-- End Agents -->
@@ -847,157 +791,52 @@
 <section class="flat-section bg-primary-new flat-testimonial">
     <div class="box-title px-15">
         <div class="text-center wow fadeInUp">
-            <div class="text-subtitle text-primary">Our Testimonials</div>
-            <h3 class="title mt-4">What’s people say’s</h3>
-            <p class="desc text-variant-1">Our seasoned team excels in real estate with years of successful market navigation, offering informed decisions and optimal results.</p>
+            <div class="text-subtitle text-primary">Đánh giá từ khách hàng</div>
+            <h3 class="title mt-4">Mọi người nói gì</h3>
+            <p class="desc text-variant-1">Đội ngũ giàu kinh nghiệm của chúng tôi xuất sắc trong lĩnh vực bất động sản với nhiều năm chinh chiến trên thị trường, 
+                mang đến những quyết định sáng suốt và kết quả tối ưu.</p>
         </div>
     </div>
     <div dir="ltr" class="swiper tf-sw-testimonial" data-preview="4.5" data-tablet="2" data-mobile-sm="2" data-mobile="1" data-space="15" data-space-md="30" data-space-lg="30" data-centered="true" data-loop="true">
         <div class="swiper-wrapper wow fadeInUp" data-wow-delay=".2s">
-            <div class="swiper-slide">
-                <div class="box-tes-item">
-                    <span class="icon icon-quote"></span>
-                    <p class="note body-2">
-                        "My experience with property management services has exceeded expectations. They efficiently manage properties with a professional and attentive approach in every situation. I feel reassured that any issue will be resolved promptly and effectively."
-                    </p>
-                    <div class="box-avt d-flex align-items-center gap-12">
-                        <div class="avatar avt-60 round">
-                            <img src="~/assets/images/avatar/avt-png1.png" alt="avatar">
-                        </div>
-                        <div class="info">
-                            <h6>Courtney Henry</h6>
-                            <p class="caption-2 text-variant-1 mt-4">CEO Themesflat</p>
-                            <ul class="list-star">
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-slide">
-                <div class="box-tes-item">
-                    <span class="icon icon-quote"></span>
-                    <p class="note body-2">
-                        "My experience with property management services has exceeded expectations. They efficiently manage properties with a professional and attentive approach in every situation. I feel reassured that any issue will be resolved promptly and effectively."
-                    </p>
-                    <div class="box-avt d-flex align-items-center gap-12">
-                        <div class="avatar avt-60 round">
-                            <img src="~/assets/images/avatar/avt-png2.png" alt="avatar">
-                        </div>
-                        <div class="info">
-                            <h6>Esther Howard</h6>
-                            <p class="caption-2 text-variant-1 mt-4">CEO Themesflat</p>
-                            <ul class="list-star">
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                            </ul>
+
+            @if (reviews != null && reviews.Any())
+            {
+                foreach (var r in reviews)
+                {
+                    <div class="swiper-slide">
+                        <div class="box-tes-item">
+                            <span class="icon icon-quote"></span>
+
+                            <p class="note body-2">
+                                "@r.Body"
+                            </p>
+
+                            <div class="box-avt d-flex align-items-center gap-12">
+                                <div class="avatar avt-60 round">
+                                    <img src="~/assets/images/avatar/avt-2.jpg" alt="avatar">
+                                </div>
+
+                                <div class="info">
+                                    <h6>@(r.User?.FullName ?? "Khách hàng")</h6>
+
+                                    <ul class="list-star">
+                                        @for (int i = 0; i < r.Rating; i++)
+                                        {
+                                            <li class="icon icon-star"></li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="swiper-slide">
-                <div class="box-tes-item">
-                    <span class="icon icon-quote"></span>
-                    <p class="note body-2">
-                        "My experience with property management services has exceeded expectations. They efficiently manage properties with a professional and attentive approach in every situation. I feel reassured that any issue will be resolved promptly and effectively."
-                    </p>
-                    <div class="box-avt d-flex align-items-center gap-12">
-                        <div class="avatar avt-60 round">
-                            <img src="~/assets/images/avatar/avt-png4.png" alt="avatar">
-                        </div>
-                        <div class="info">
-                            <h6>Annette Black</h6>
-                            <p class="caption-2 text-variant-1 mt-4">CEO Themesflat</p>
-                            <ul class="list-star">
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-slide">
-                <div class="box-tes-item">
-                    <span class="icon icon-quote"></span>
-                    <p class="note body-2">
-                        "My experience with property management services has exceeded expectations. They efficiently manage properties with a professional and attentive approach in every situation. I feel reassured that any issue will be resolved promptly and effectively."
-                    </p>
-                    <div class="box-avt d-flex align-items-center gap-12">
-                        <div class="avatar avt-60 round">
-                            <img src="~/assets/images/avatar/avt-png6.png" alt="avatar">
-                        </div>
-                        <div class="info">
-                            <h6>Bessie Cooper</h6>
-                            <p class="caption-2 text-variant-1 mt-4">CEO Themesflat</p>
-                            <ul class="list-star">
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-slide">
-                <div class="box-tes-item">
-                    <span class="icon icon-quote"></span>
-                    <p class="note body-2">
-                        "My experience with property management services has exceeded expectations. They efficiently manage properties with a professional and attentive approach in every situation. I feel reassured that any issue will be resolved promptly and effectively."
-                    </p>
-                    <div class="box-avt d-flex align-items-center gap-12">
-                        <div class="avatar avt-60 round">
-                            <img src="~/assets/images/avatar/avt-png3.png" alt="avatar">
-                        </div>
-                        <div class="info">
-                            <h6>Courtney Henry</h6>
-                            <p class="caption-2 text-variant-1 mt-4">CEO Themesflat</p>
-                            <ul class="list-star">
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="swiper-slide">
-                <div class="box-tes-item">
-                    <span class="icon icon-quote"></span>
-                    <p class="note body-2">
-                        "My experience with property management services has exceeded expectations. They efficiently manage properties with a professional and attentive approach in every situation. I feel reassured that any issue will be resolved promptly and effectively."
-                    </p>
-                    <div class="box-avt d-flex align-items-center gap-12">
-                        <div class="avatar avt-60 round">
-                            <img src="~/assets/images/avatar/avt-png5.png" alt="avatar">
-                        </div>
-                        <div class="info">
-                            <h6>Courtney Henry</h6>
-                            <p class="caption-2 text-variant-1 mt-4">CEO Themesflat</p>
-                            <ul class="list-star">
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                                <li class="icon icon-star"></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                }
+            }
+            else
+            {
+                <p style="color:red">KHÔNG CÓ REVIEW</p>
+            }
+
         </div>
         <div class="sw-pagination sw-pagination-testimonial text-center"></div>
     </div>
@@ -1008,7 +847,7 @@
     <div class="container">
         <div class="box-title text-center wow fadeInUp">
             <div class="text-subtitle text-primary">MỚI NHẤT</div>
-            <h3 class="title mt-4">Đến từ Blog của chúng tôi</h3>
+            <h3 class="title mt-4">Đến từ bài viết của chúng tôi</h3>
         </div>
         <div dir="ltr" class="swiper tf-sw-latest" data-preview="3" data-tablet="2" data-mobile-sm="2" data-mobile="1" data-space-lg="30" data-space-md="15" data-space="15">
             <div class="swiper-wrapper wow fadeInUp" data-wow-delay=".2s">

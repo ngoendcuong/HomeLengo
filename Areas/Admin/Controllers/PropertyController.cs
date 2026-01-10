@@ -4,12 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using HomeLengo.Models;
 using Microsoft.AspNetCore.Hosting;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HomeLengo.Areas.Admin.Controllers
 {
+ 
     [Area("Admin")]
     public class PropertyController : Controller
     {
+        
         private readonly HomeLengoContext _context;
         private readonly IWebHostEnvironment _environment;
 
@@ -18,7 +21,6 @@ namespace HomeLengo.Areas.Admin.Controllers
             _context = context;
             _environment = environment;
         }
-
         // GET: Admin/Property
         public async Task<IActionResult> Index(string searchString, int? statusId, int? propertyTypeId, int page = 1, int pageSize = 10)
         {

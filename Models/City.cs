@@ -11,6 +11,8 @@ public partial class City
 
     public string? Code { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public virtual ICollection<District> Districts { get; set; } = new List<District>();
 
     public virtual ICollection<Property> Properties { get; set; } = new List<Property>();

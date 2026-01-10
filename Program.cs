@@ -60,6 +60,11 @@ app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
 );
+app.MapControllerRoute(
+    name: "contactus",
+    pattern: "pages/ContactUs",
+    defaults: new { controller = "Contact", action = "Index" }
+);
 
 app.MapControllerRoute(
     name: "default",
