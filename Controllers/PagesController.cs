@@ -1,32 +1,51 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HomeLengo.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-public class PagesController : Controller
+namespace HomeLengo.Controllers
 {
-    public IActionResult AboutUs ()
+    public class PagesController : Controller
     {
-        return View();
-    }
+        private readonly HomeLengoContext _context;
 
-    public IActionResult OurServices ()
-    {
-        return View();
-    }
+        public PagesController(HomeLengoContext context)
+        {
+            _context = context;
+        }
 
-    public IActionResult Pricing ()
-    {
-        return View();
-    }
+        public IActionResult AboutUs()
+        {
+            return View();
+        }
 
-    public IActionResult ContactUs ()
-    {
-        return View();
-    }
-    public IActionResult  FAQs ()
-    {
-        return View();
-    }
-    public IActionResult PrivacyPolicy ()
-    {
-        return View();
+        public IActionResult OurServices()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> Pricing()
+        {
+            var plans = await _context.ServicePlans
+                .Include(p => p.ServicePlanFeatures)
+                .OrderBy(p => p.PlanId)
+                .ToListAsync();
+
+            return View(plans); 
+        }
+
+        public IActionResult ContactUs()
+        {
+            return View();
+        }
+
+        public IActionResult FAQs()
+        {
+            return View();
+        }
+
+        public IActionResult PrivacyPolicy()
+        {
+            return View();
+        }
     }
 }

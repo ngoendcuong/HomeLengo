@@ -11,9 +11,11 @@ public partial class ServicePlan
 
     public decimal Price { get; set; }
 
-    public bool? IsBroker { get; set; }
-
     public DateTime? CreatedAt { get; set; }
+
+    public int? MaxListings { get; set; }
+
+    public virtual ICollection<ServicePlanFeature> ServicePlanFeatures { get; set; } = new List<ServicePlanFeature>();
 
     public virtual ICollection<ServiceRegister> ServiceRegisters { get; set; } = new List<ServiceRegister>();
 }

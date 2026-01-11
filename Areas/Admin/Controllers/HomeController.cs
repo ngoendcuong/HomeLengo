@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeLengo.Models;
+using HomeLengo.Services;
 
 namespace HomeLengo.Areas.Admin.Controllers
 {
@@ -8,19 +9,27 @@ namespace HomeLengo.Areas.Admin.Controllers
     public class HomeController : Controller
     {
         private readonly HomeLengoContext _context;
+        private readonly ServicePackageService _packageService;
 
-        public HomeController(HomeLengoContext context)
+        public HomeController(HomeLengoContext context, ServicePackageService packageService)
         {
             _context = context;
+            _packageService = packageService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var userIdStr = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
+
+            // Lấy thông tin gói dịch vụ đang active (nếu có)
+            var activePackage = await _packageService.GetActivePackageAsync(userId);
+            var hasPackage = activePackage != null;
+            ViewBag.ActivePackage = activePackage;
+            ViewBag.HasPackage = hasPackage;
 
             // Lấy AgentId của user (nếu có)
             var agent = _context.Agents.FirstOrDefault(a => a.UserId == userId);
@@ -29,15 +38,15 @@ namespace HomeLengo.Areas.Admin.Controllers
             var pendingStatus = _context.PropertyStatuses.FirstOrDefault(s => s.Name.ToLower().Contains("pending"));
             var pendingStatusId = pendingStatus?.StatusId ?? 0;
 
-            // Filter properties theo AgentId
+            // Filter properties theo AgentId (chỉ hiển thị nếu có gói dịch vụ)
             var propertiesQuery = _context.Properties.AsQueryable();
-            if (agentId.HasValue)
+            if (hasPackage && agentId.HasValue)
             {
                 propertiesQuery = propertiesQuery.Where(p => p.AgentId == agentId.Value);
             }
             else
             {
-                // Nếu không phải agent, không có properties
+                // Nếu không có gói dịch vụ hoặc không phải agent, không có properties
                 propertiesQuery = propertiesQuery.Where(p => false);
             }
 
@@ -63,15 +72,16 @@ namespace HomeLengo.Areas.Admin.Controllers
                 inquiriesQuery = inquiriesQuery.Where(i => i.UserId == userId);
             }
 
-            // Filter reviews: của properties thuộc agent
+            // Filter reviews: của properties thuộc agent (nếu có gói) hoặc reviews của user
             var reviewsQuery = _context.Reviews.AsQueryable();
-            if (agentId.HasValue)
+            if (hasPackage && agentId.HasValue)
             {
                 reviewsQuery = reviewsQuery.Where(r => r.Property.AgentId == agentId);
             }
             else
             {
-                reviewsQuery = reviewsQuery.Where(r => false);
+                // Nếu không có gói, chỉ hiển thị reviews của chính user
+                reviewsQuery = reviewsQuery.Where(r => r.UserId == userId);
             }
 
             // Filter messages: từ hoặc đến user

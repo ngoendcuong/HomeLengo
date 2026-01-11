@@ -1,4 +1,8 @@
-﻿ <!-- Page Title -->
+﻿@model List<ServicePlan>
+@{
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("UserId"));
+}
+<!-- Page Title -->
 <section class="flat-title-page" style="background-image: url('/assets/images/banner/banner-property-12.jpg');">
     <div class="container">
         <div class="breadcrumb-content">
@@ -20,201 +24,39 @@
             <h3 class="title mt-4">Đăng ký của chúng tôi</h3>
         </div>
         <div class="row">
-            <div class="box col-lg-3 col-md-6 d-flex">
-                <div class="box-pricing d-flex flex-column">
-                    <div class="box price d-flex align-items-end">
-                        <h3>99.000đ</h3>
-                        <span class="body-2 text-variant-1">/tháng</span>
-                    </div>
-                    <div class="box box-title-price">
-                        <h5 class="title">Cơ bản</h5>
-                        <p class="desc">Tham gia và trải nghiệm cùng chúng tôi</p>
-                    </div>
-                    <ul class="box list-price">
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-                            Dành cho người mới, cá nhân thử đăng tin
+            @foreach (var plan in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="card h-100 shadow-sm rounded-4">
+                        <div class="card-body d-flex flex-column">
 
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-                           Đăng tối đa 10 tin/tháng
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
+                            <div class="mb-3">
+                                <h3 class="fw-bold mb-1">@plan.Price.ToString("N0")đ <small class="text-muted">/tháng</small></h3>
+                                <div class="fs-5 fw-semibold">@plan.Name</div>
+                            </div>
 
-                          Hiển thị tin ở mức cơ bản
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
+                            <ul class="list-unstyled flex-grow-1">
+                                @foreach (var f in plan.ServicePlanFeatures.OrderBy(x => x.DisplayOrder))
+                                {
+                                    <li class="d-flex gap-2 align-items-start mb-2 @(f.IsIncluded ? "" : "text-muted")">
+                                        <span>@(f.IsIncluded ? "✔" : "✖")</span>
+                                        <span>@f.FeatureText</span>
+                                    </li>
+                                }
+                            </ul>
 
-                            Quản lý tin đăng cá nhân
-                        </li>
-                    </ul>
-                    <div class="box">
-                        <a asp-controller="ServiceRegister"
-                           asp-action="Create"
-                           asp-route-planId="1"
-                           class="tf-btn btn-view primary size-1 hover-btn-view">
-                            Đăng ký ngay <span class="icon icon-arrow-right2"></span>
-                        </a>
-
+                            <a class="btn btn-primary rounded-pill mt-3 btn-buy-package"
+                               asp-area=""
+                               asp-controller="Payment"
+                               asp-action="Checkout"
+                               asp-route-planId="@plan.PlanId"
+                               data-plan-id="@plan.PlanId">
+                                Đăng ký ngay →
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="box col-lg-3 col-md-6 d-flex">
-                <div class="box-pricing d-flex flex-column">
-                    <div class="box price d-flex align-items-end">
-                        <h3>299.000đ</h3>
-                        <span class="body-2 text-variant-1">/tháng</span>
-                    </div>
-                    <div class="box box-title-price">
-                        <h5 class="title">Tiêu chuẩn</h5>
-                        <p class="desc">Tham gia cùng chúng tôi hàng tháng với mức giá rất hợp lý</p>
-                    </div>
-                    <ul class="box list-price">
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-                          Dành cho người bán/ cho thuê thường xuyên
-
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-                          Đăng tin tối đa 30 tin/tháng
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-
-                           Tin được ưu tiên hơn gói cơ bản
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-
-                          Gia hạn tin nhanh
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-
-                           Thống kế lượt xem tin
-                        </li>
-                       
-                    </ul>
-                    <div class="box">
-                        <a asp-controller="ServiceRegister"
-                           asp-action="Create"
-                           asp-route-planId="2"
-                           class="tf-btn btn-view primary size-1 hover-btn-view">
-                            Đăng ký ngay <span class="icon icon-arrow-right2"></span>
-                        </a>
-
-                    </div>
-                </div>
-            </div>
-            <div class="box col-lg-3 col-md-6 d-flex">
-                <div class="box-pricing d-flex flex-column">
-                    <div class="box price d-flex align-items-end">
-                        <h3>699.000đ</h3>
-                        <span class="body-2 text-variant-1">/tháng</span>
-                    </div>
-                    <div class="box box-title-price">
-                        <h5 class="title">Nâng cao</h5>
-                        <p class="desc">Tham gia cùng chúng tôi hàng tháng với mức giá rất hợp lý</p>
-                    </div>
-                    <ul class="box list-price">
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-                            Dành cho cá nhân bán chuyên/ đội nhóm nhỏ
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-
-
-                           Đăng tin không giới hạn
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-
-                            Ghim tin nổi bật
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-
-                           Thống kê chi tiết hiểu quả tin 
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-
-                           Hỗ trợ kỹ thuật
-                        </li>
-                    </ul>
-                    <div class="box">
-                        <a asp-controller="ServiceRegister"
-                           asp-action="Create"
-                           asp-route-planId="3"
-                           class="tf-btn btn-view primary size-1 hover-btn-view">
-                            Đăng ký ngay <span class="icon icon-arrow-right2"></span>
-                        </a>
-
-                    </div>
-                </div>
-            </div>
-            <div class="box col-lg-3 col-md-6 d-flex">
-                <div class="box-pricing d-flex flex-column">
-                    <div class="box price d-flex align-items-end">
-                        <h3>1.999.000đ</h3>
-                        <span class="body-2 text-variant-1">/tháng</span>
-                    </div>
-                    <div class="box box-title-price">
-                        <h5 class="title">Môi giới</h5>
-                        <p class="desc">Tham gia cùng chúng tôi để trở thành một nhà môi giới</p>
-                    </div>
-                    <ul class="box list-price">
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-                           Dành cho người đăng ký làm môi giới trên hệ thống
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-                            Đăng tin không giới hạn
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2"></span>
-
-                            Hồ sơ môi giới riêng 
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-
-                           Nhận khách hàng từ hệ thống
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-
-                            Tham gia chia hoa hồng giao dịch
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-
-                            Hỗ trợ kỹ thuật
-                        </li>
-                        <li class="item">
-                            <span class="check-icon icon-tick2 disable"></span>
-
-                          Ưu tiên hiển thị cao nhất
-                        </li>
-                    </ul>
-                    <div class="box">
-                        <a asp-controller="ServiceRegister"
-                           asp-action="Create"
-                           asp-route-planId="4"
-                           class="tf-btn btn-view primary size-1 hover-btn-view">
-                            Đăng ký ngay <span class="icon icon-arrow-right2"></span>
-                        </a>
-
-                    </div>
-                </div>
-            </div>
-
+            }
         </div>
     </div>
 </section>
@@ -233,3 +75,19 @@
         margin-top: auto;
     }
 </style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var isLoggedIn = @(isLoggedIn ? "true" : "false");
+            $('.btn-buy-package').on('click', function(e) {
+                if (!isLoggedIn) {
+                    e.preventDefault();
+                    alert('Vui lòng đăng nhập để mua gói dịch vụ!');
+                    window.location.href = '/Account/Login';
+                    return false;
+                }
+            });
+        });
+    </script>
+}

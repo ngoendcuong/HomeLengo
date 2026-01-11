@@ -5,6 +5,7 @@ using HomeLengo.Models;
 using Microsoft.AspNetCore.Hosting;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
+using HomeLengo.Services;
 
 namespace HomeLengo.Areas.Admin.Controllers
 {
@@ -15,11 +16,13 @@ namespace HomeLengo.Areas.Admin.Controllers
         
         private readonly HomeLengoContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly ServicePackageService _packageService;
 
-        public PropertyController(HomeLengoContext context, IWebHostEnvironment environment)
+        public PropertyController(HomeLengoContext context, IWebHostEnvironment environment, ServicePackageService packageService)
         {
             _context = context;
             _environment = environment;
+            _packageService = packageService;
         }
         // GET: Admin/Property
         public async Task<IActionResult> Index(string searchString, int? statusId, int? propertyTypeId, int page = 1, int pageSize = 10)
@@ -28,6 +31,23 @@ namespace HomeLengo.Areas.Admin.Controllers
             if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
             {
                 return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
+            // Kiểm tra user có gói dịch vụ không (chức năng đăng tin yêu cầu gói)
+            var hasPackage = await _packageService.HasActivePackageAsync(userId);
+            if (!hasPackage)
+            {
+                TempData["InfoMessage"] = "Bạn cần mua gói dịch vụ để đăng tin. Vui lòng truy cập trang gói dịch vụ để đăng ký.";
+                ViewBag.Statuses = new SelectList(_context.PropertyStatuses, "StatusId", "Name", statusId);
+                ViewBag.PropertyTypes = new SelectList(_context.PropertyTypes, "PropertyTypeId", "Name", propertyTypeId);
+                ViewBag.SearchString = searchString;
+                ViewBag.StatusId = statusId;
+                ViewBag.PropertyTypeId = propertyTypeId;
+                ViewBag.CurrentPage = 1;
+                ViewBag.TotalPages = 0;
+                ViewBag.TotalCount = 0;
+                ViewBag.HasPackage = false;
+                return View(new List<Property>());
             }
 
             // Lấy AgentId của user
@@ -43,6 +63,7 @@ namespace HomeLengo.Areas.Admin.Controllers
                 ViewBag.CurrentPage = 1;
                 ViewBag.TotalPages = 0;
                 ViewBag.TotalCount = 0;
+                ViewBag.HasPackage = true;
                 return View(new List<Property>());
             }
 
@@ -105,7 +126,7 @@ namespace HomeLengo.Areas.Admin.Controllers
         }
 
         // GET: Admin/Property/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var userIdStr = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
@@ -119,6 +140,22 @@ namespace HomeLengo.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Kiểm tra user đã mua gói dịch vụ chưa
+            var hasPackage = await _packageService.HasActivePackageAsync(userId);
+            if (!hasPackage)
+            {
+                TempData["ErrorMessage"] = "Bạn cần mua gói dịch vụ để đăng tin. Vui lòng truy cập trang gói dịch vụ để đăng ký.";
+                return RedirectToAction("Pricing", "Pages", new { area = "" });
+            }
+
+            // Kiểm tra giới hạn số lượng đăng bài
+            var (canPost, maxListings, currentListings, message) = await _packageService.CanPostListingAsync(userId, agent.AgentId);
+            if (!canPost)
+            {
+                TempData["ErrorMessage"] = message;
+                return RedirectToAction("Index");
+            }
+
             ViewBag.PropertyTypes = new SelectList(_context.PropertyTypes, "PropertyTypeId", "Name");
             ViewBag.Statuses = new SelectList(_context.PropertyStatuses, "StatusId", "Name");
             ViewBag.Cities = new SelectList(_context.Cities, "CityId", "Name");
@@ -127,6 +164,8 @@ namespace HomeLengo.Areas.Admin.Controllers
             ViewBag.AgentId = agent.AgentId; // Tự động gán agent
             ViewBag.Amenities = _context.Amenities.ToList();
             ViewBag.Features = _context.Features.ToList();
+            ViewBag.MaxListings = maxListings;
+            ViewBag.CurrentListings = currentListings;
             return View();
         }
 
@@ -145,6 +184,22 @@ namespace HomeLengo.Areas.Admin.Controllers
             var agent = _context.Agents.FirstOrDefault(a => a.UserId == userId);
             if (agent == null)
             {
+                return RedirectToAction("Index");
+            }
+
+            // Kiểm tra user đã mua gói dịch vụ chưa
+            var hasPackage = await _packageService.HasActivePackageAsync(userId);
+            if (!hasPackage)
+            {
+                TempData["ErrorMessage"] = "Bạn cần mua gói dịch vụ để đăng tin. Vui lòng truy cập trang gói dịch vụ để đăng ký.";
+                return RedirectToAction("Pricing", "Pages", new { area = "" });
+            }
+
+            // Kiểm tra giới hạn số lượng đăng bài
+            var (canPost, maxListings, currentListings, message) = await _packageService.CanPostListingAsync(userId, agent.AgentId);
+            if (!canPost)
+            {
+                TempData["ErrorMessage"] = message;
                 return RedirectToAction("Index");
             }
 

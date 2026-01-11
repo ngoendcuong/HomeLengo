@@ -377,21 +377,24 @@
             <div dir="ltr" class="swiper tf-sw-categories sw-over" data-preview="6" data-tablet="4" data-mobile-sm="3" data-mobile="2" data-space="15" data-space-md="30" data-space-lg="30">
                 <div class="swiper-wrapper">
                     @{
-                        var PropertyTypes = ViewBag.PropertyTypes;
+                        var PropertyTypes = ViewBag.PropertyTypes as IEnumerable<PropertyTypeViewModel>;
                     }
-                    @foreach (var type in PropertyTypes)
+                    @if (PropertyTypes != null)
                     {
-                        <div class="swiper-slide">
-                            <a href="#" class="homelengo-categories">
-                                <div class="icon-box">
-                                    <span class="icon @type.IconClass"></span>
-                                </div>
-                                <div class="content text-center">
-                                    <h6>@type.Name</h6>
-                                    <p class="mt-4 text-variant-1">@type.PropertyCount Property</p>
-                                </div>
-                            </a>
-                        </div>
+                        @foreach (var type in PropertyTypes)
+                        {
+                            <div class="swiper-slide">
+                                <a href="#" class="homelengo-categories">
+                                    <div class="icon-box">
+                                        <span class="icon @type.IconClass"></span>
+                                    </div>
+                                    <div class="content text-center">
+                                        <h6>@type.Name</h6>
+                                        <p class="mt-4 text-variant-1">@type.PropertyCount Property</p>
+                                    </div>
+                                </a>
+                            </div>
+                        }
                     }
                 </div>
                 <div class="sw-pagination sw-pagination-category text-center"></div>
@@ -638,21 +641,37 @@
         <div class="grid-location wow fadeInUp" data-wow-delay=".2s">
             @foreach (var city in cities)
             {
-                    <a href="/bat-dong-san?cityId=@city.CityId"
-                       class="box-location-v2 hover-img">
+                string img;
+                if (string.IsNullOrEmpty(city.ImageUrl))
+                {
+                    img = "/assets/images/banner/banner-property-12.jpg";
+                }
+                else
+                {
+                    // Convert /images/cities/ to /assets/images/cities/
+                    img = city.ImageUrl.Replace("/images/cities/", "/assets/images/cities/");
+                    // Ensure it starts with /assets/images/cities/ if it's a relative path
+                    if (!img.StartsWith("/assets/images/cities/") && img.Contains("cities/"))
+                    {
+                        var fileName = System.IO.Path.GetFileName(img);
+                        img = $"/assets/images/cities/{fileName}";
+                    }
+                }
 
-                        <div class="box-img img-style">
-                        <img src="/assets/images/cities/@city.ImageUrl" alt="@city.Name">
+                <a href="/Property?cityId=@city.CityId" class="box-location-v2 hover-img">
+                    <div class="box-img img-style">
+                        <img src="@Url.Content(img)"
+                             alt="@city.Name"
+                             onerror="this.src='/assets/images/banner/banner-property-12.jpg';" />
+                    </div>
 
-                        </div>
-
-                        <div class="content">
-                            <h6 class="link">@city.Name</h6>
-                            <p class="mt-4 text-variant-1">
+                    <div class="content">
+                        <h6 class="link">@city.Name</h6>
+                        <p class="mt-4 text-variant-1">
                             @city.PropertyCount Bất động sản
-                            </p>
-                        </div>
-                    </a>
+                        </p>
+                    </div>
+                </a>
             }
         </div>
     </div>

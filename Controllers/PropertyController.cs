@@ -21,6 +21,18 @@ namespace HomeLengo.Controllers
             return RedirectToAction("Index");
         }
 
+        // Route handler cho URL /bat-dong-san (tương thích với link từ trang chủ)
+        [Route("bat-dong-san")]
+        public IActionResult IndexBatDongSan(int? cityId)
+        {
+            // Redirect đến trang danh sách với cityId nếu có
+            if (cityId.HasValue && cityId.Value > 0)
+            {
+                return RedirectToAction("Index", new { cityId = cityId.Value });
+            }
+            return RedirectToAction("Index");
+        }
+
         // Route handler cho slug-based URLs (ví dụ: /listing/can-ho)
         [Route("listing/{slug}")]
         public async Task<IActionResult> IndexBySlug(string slug)
@@ -67,6 +79,7 @@ namespace HomeLengo.Controllers
             int? statusId,
             string? keyword,
             string? location,
+            int? cityId,
             int? bedrooms,
             int? bathrooms,
             decimal? minPrice,
@@ -108,6 +121,12 @@ namespace HomeLengo.Controllers
             {
                 // Mặc định: hiển thị tất cả trừ đã bán
                 query = query.Where(p => p.StatusId != 3);
+            }
+
+            // Filter theo cityId
+            if (cityId.HasValue && cityId.Value > 0)
+            {
+                query = query.Where(p => p.CityId == cityId.Value);
             }
 
             // Filter theo location
@@ -249,6 +268,7 @@ namespace HomeLengo.Controllers
             // Lưu các filter values để hiển thị lại
             ViewBag.Keyword = keyword;
             ViewBag.Location = location;
+            ViewBag.CityId = cityId;
             ViewBag.StatusId = statusId;
             ViewBag.Bedrooms = bedrooms;
             ViewBag.Bathrooms = bathrooms;
@@ -257,6 +277,13 @@ namespace HomeLengo.Controllers
             ViewBag.MinSize = minSize;
             ViewBag.MaxSize = maxSize;
             ViewBag.SelectedAmenities = amenities ?? Array.Empty<int>();
+            
+            // Lấy thông tin thành phố nếu có cityId
+            if (cityId.HasValue && cityId.Value > 0)
+            {
+                var selectedCity = await _context.Cities.FirstOrDefaultAsync(c => c.CityId == cityId.Value);
+                ViewBag.SelectedCityName = selectedCity?.Name ?? "";
+            }
 
             return View(properties);
         }

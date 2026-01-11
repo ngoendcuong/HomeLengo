@@ -1,0 +1,77 @@
+@{
+    ViewData["Title"] = "Kết quả thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    var success = ViewBag.Success as bool? ?? false;
+    var message = ViewBag.Message as string ?? "";
+    var serviceRegisterId = ViewBag.ServiceRegisterId as int?;
+    var transactionId = ViewBag.TransactionId as int?;
+}
+
+<!-- Page Title -->
+<section class="flat-title-page" style="background-image: url('/assets/images/banner/banner-property-12.jpg');">
+    <div class="container">
+        <div class="breadcrumb-content">
+            <ul class="breadcrumb">
+                <li><a href="/" class="text-white">Trang Chủ</a></li>
+                <li class="text-white">/ Kết quả thanh toán</li>
+            </ul>
+            <h1 class="text-center text-white title">Kết quả thanh toán</h1>
+        </div>
+    </div>
+</section>
+<!-- End Page Title -->
+
+<section class="flat-section" style="padding: 60px 0;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body text-center" style="padding: 40px;">
+                        @if (success)
+                        {
+                            <div class="mb-4">
+                                <i class="fas fa-check-circle" style="font-size: 80px; color: #28a745;"></i>
+                            </div>
+                            <h3 class="text-success mb-3">Thanh toán thành công!</h3>
+                            <p class="mb-4">@message</p>
+                            @if (serviceRegisterId.HasValue)
+                            {
+                                <p class="text-muted mb-4">
+                                    Mã đơn đăng ký: <strong>#@serviceRegisterId</strong>
+                                </p>
+                            }
+                            @if (transactionId.HasValue)
+                            {
+                                <p class="text-muted mb-4">
+                                    Mã giao dịch: <strong>#@transactionId</strong>
+                                </p>
+                            }
+                            <div class="mt-4">
+                                <a href="/" class="btn btn-primary me-2">Về trang chủ</a>
+                                <a href="/pages/Pricing" class="btn btn-outline-primary">Xem các gói dịch vụ</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-4">
+                                <i class="fas fa-times-circle" style="font-size: 80px; color: #dc3545;"></i>
+                            </div>
+                            <h3 class="text-danger mb-3">Thanh toán thất bại</h3>
+                            <p class="mb-4">@message</p>
+                            <div class="mt-4">
+                                <a href="/pages/Pricing" class="btn btn-primary me-2">Thử lại</a>
+                                <a href="/" class="btn btn-outline-secondary">Về trang chủ</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+

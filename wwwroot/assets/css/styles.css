@@ -5677,9 +5677,13 @@ label {
 
 .grid-location {
   display: grid;
-  grid-template-areas: "item1 item2 item3 item4" "item5 item5 item6 item6";
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
-  grid-template-columns: repeat(4, 1fr);
+}
+@media (min-width: 768px) {
+  .grid-location {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 .grid-location .item-1 {
   grid-area: item1;
@@ -5700,11 +5704,43 @@ label {
   grid-area: item6;
 }
 
+.box-location-v2 {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #ffffff;
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
 .box-location-v2 .box-img {
   border-radius: 16px;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  flex-shrink: 0;
+}
+.box-location-v2 .box-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .box-location-v2 .content {
-  padding-top: 20px;
+  padding: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.box-location-v2 .content h6 {
+  margin: 0;
+  margin-bottom: 8px;
+}
+.box-location-v2 .content p {
+  margin: 0;
 }
 
 .grid-location-v2 {
@@ -11087,9 +11123,8 @@ tr {
   }
 
   .grid-location {
-    grid-template-areas: "item1 item2" "item3 item4" "item5 item5" "item6 item6";
-    grid-gap: 15px;
     grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
 
   .grid-location-v2 {

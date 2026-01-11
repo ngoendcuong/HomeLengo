@@ -7,6 +7,8 @@ public partial class ServiceRegister
 {
     public int Id { get; set; }
 
+    public int UserId { get; set; }
+
     public string FullName { get; set; } = null!;
 
     public string Phone { get; set; } = null!;
@@ -17,7 +19,11 @@ public partial class ServiceRegister
 
     public DateTime? CreatedAt { get; set; }
 
+    public bool IsPaid { get; set; }
+
+    public DateTime? PaidAt { get; set; }
+
     public virtual ServicePlan Plan { get; set; } = null!;
 
-    public virtual ICollection<AgentProfile> AgentProfiles { get; set; } = new List<AgentProfile>();
+    public virtual User User { get; set; } = null!;
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeLengo.Models;
+using HomeLengo.Services;
 
 namespace HomeLengo.Areas.Admin.Controllers
 {
@@ -8,10 +9,12 @@ namespace HomeLengo.Areas.Admin.Controllers
     public class ReviewController : Controller
     {
         private readonly HomeLengoContext _context;
+        private readonly ServicePackageService _packageService;
 
-        public ReviewController(HomeLengoContext context)
+        public ReviewController(HomeLengoContext context, ServicePackageService packageService)
         {
             _context = context;
+            _packageService = packageService;
         }
 
         // GET: Admin/Review
@@ -23,6 +26,8 @@ namespace HomeLengo.Areas.Admin.Controllers
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
 
+            // Kiểm tra user có gói dịch vụ không (để hiển thị reviews của properties nếu có)
+            var hasPackage = await _packageService.HasActivePackageAsync(userId);
             var agent = _context.Agents.FirstOrDefault(a => a.UserId == userId);
             var agentId = agent?.AgentId;
 
@@ -31,14 +36,15 @@ namespace HomeLengo.Areas.Admin.Controllers
                 .Include(r => r.Property)
                 .AsQueryable();
 
-            // Filter: reviews của properties thuộc agent
-            if (agentId.HasValue)
+            // Filter: nếu có gói và là agent, hiển thị reviews của properties thuộc agent
+            // Nếu không có gói hoặc không phải agent, chỉ hiển thị reviews của chính user
+            if (hasPackage && agentId.HasValue)
             {
                 query = query.Where(r => r.Property.AgentId == agentId);
             }
             else
             {
-                // Nếu không phải agent, chỉ hiển thị reviews của user
+                // Hiển thị reviews của chính user (chức năng cơ bản)
                 query = query.Where(r => r.UserId == userId);
             }
 
@@ -196,6 +202,8 @@ namespace HomeLengo.Areas.Admin.Controllers
         }
     }
 }
+
+
 
 
 

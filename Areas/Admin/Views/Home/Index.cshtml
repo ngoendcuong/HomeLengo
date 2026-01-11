@@ -4,6 +4,7 @@
     var recentProperties = new List<Property>();
     var recentMessages = new List<Message>();
     var recentReviews = new List<Review>();
+    var activePackage = ViewBag.ActivePackage as UserServicePackage;
     
     // Lấy các giá trị stats an toàn với try-catch
     int totalProperties = 0;
@@ -58,6 +59,52 @@
         <div class="button-show-hide show-mb">
             <span class="body-1">Hiển thị Bảng điều khiển</span>
         </div>
+        
+        @{
+            var hasPackage = ViewBag.HasPackage as bool? ?? false;
+        }
+        
+        @if (activePackage != null)
+        {
+            <div class="widget-box-2 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="title mb-2">Gói dịch vụ đang sử dụng</h5>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-primary fs-6">@activePackage.Plan.Name</span>
+                            <span class="text-muted">Giá: @activePackage.Plan.Price.ToString("N0")đ/tháng</span>
+                            <span class="text-muted">Bắt đầu: @activePackage.StartDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        @if (activePackage.Plan.MaxListings.HasValue && activePackage.Plan.MaxListings.Value > 0)
+                        {
+                            <div class="mt-2">
+                                <small class="text-muted">Giới hạn đăng tin: @activePackage.Plan.MaxListings.Value tin</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mt-2">
+                                <small class="text-success">Không giới hạn số lượng đăng tin</small>
+                            </div>
+                        }
+                    </div>
+                    <a href="/pages/Pricing" class="btn btn-outline-primary">Nâng cấp gói</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="widget-box-2 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="title mb-2">Bạn chưa có gói dịch vụ</h5>
+                        <p class="text-muted mb-0">Mua gói dịch vụ để sử dụng các chức năng đăng tin và xem thống kê chi tiết.</p>
+                    </div>
+                    <a href="/pages/Pricing" class="btn btn-primary">Mua gói ngay</a>
+                </div>
+            </div>
+        }
+        
         <div class="flat-counter-v2 tf-counter">
             <div class="counter-box">
                 <div class="box-icon">

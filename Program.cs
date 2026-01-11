@@ -1,7 +1,7 @@
 ﻿// Program.cs
 using HomeLengo.Hubs;
 using HomeLengo.Models;
-//using HomeLengo.Services;
+using HomeLengo.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +35,8 @@ builder.Services.AddMemoryCache();
 // 3. Đăng ký các Service ta vừa viết
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IGeminiService, GeminiService>();
+builder.Services.AddScoped<VNPayService>();
+builder.Services.AddScoped<ServicePackageService>();
 
 var app = builder.Build();
 

@@ -19,8 +19,6 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<Agent> Agents { get; set; }
 
-    public virtual DbSet<AgentProfile> AgentProfiles { get; set; }
-
     public virtual DbSet<Amenity> Amenities { get; set; }
 
     public virtual DbSet<Blog> Blogs { get; set; }
@@ -83,7 +81,11 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<ServicePlan> ServicePlans { get; set; }
 
+    public virtual DbSet<ServicePlanFeature> ServicePlanFeatures { get; set; }
+
     public virtual DbSet<ServiceRegister> ServiceRegisters { get; set; }
+
+    public virtual DbSet<UserServicePackage> UserServicePackages { get; set; }
 
     public virtual DbSet<Setting> Settings { get; set; }
 
@@ -128,22 +130,6 @@ public partial class HomeLengoContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Agents)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Agents_Users");
-        });
-
-        modelBuilder.Entity<AgentProfile>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__AgentPro__3214EC072B269E37");
-
-            entity.Property(e => e.Avatar).HasMaxLength(255);
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.DisplayName).HasMaxLength(150);
-
-            entity.HasOne(d => d.ServiceRegister).WithMany(p => p.AgentProfiles)
-                .HasForeignKey(d => d.ServiceRegisterId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_AgentProfile_Register");
         });
 
         modelBuilder.Entity<Amenity>(entity =>
@@ -633,9 +619,23 @@ public partial class HomeLengoContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.IsBroker).HasDefaultValue(false);
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 0)");
+        });
+
+        modelBuilder.Entity<ServicePlanFeature>(entity =>
+        {
+            entity.HasKey(e => e.FeatureId).HasName("PK__ServiceP__82230BC9ED74418F");
+
+            entity.HasIndex(e => new { e.PlanId, e.DisplayOrder }, "IX_ServicePlanFeatures_PlanId_DisplayOrder");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.FeatureText).HasMaxLength(255);
+            entity.Property(e => e.IsIncluded).HasDefaultValue(true);
+
+            entity.HasOne(d => d.Plan).WithMany(p => p.ServicePlanFeatures)
+                .HasForeignKey(d => d.PlanId)
+                .HasConstraintName("FK_ServicePlanFeatures_ServicePlans");
         });
 
         modelBuilder.Entity<ServiceRegister>(entity =>
@@ -647,12 +647,49 @@ public partial class HomeLengoContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.Email).HasMaxLength(150);
             entity.Property(e => e.FullName).HasMaxLength(150);
+            entity.Property(e => e.PaidAt).HasColumnType("datetime");
             entity.Property(e => e.Phone).HasMaxLength(20);
 
             entity.HasOne(d => d.Plan).WithMany(p => p.ServiceRegisters)
                 .HasForeignKey(d => d.PlanId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ServiceRegisters_Plan");
+
+            entity.HasOne(d => d.User).WithMany(u => u.ServiceRegisters)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ServiceRegisters_User");
+        });
+
+        modelBuilder.Entity<UserServicePackage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__UserServicePackages__Id");
+
+            entity.ToTable("UserServicePackages");
+
+            entity.Property(e => e.StartDate)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getdate())");
+
+            entity.Property(e => e.EndDate)
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getdate())");
+
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+
+            entity.HasOne(d => d.User).WithMany(u => u.UserServicePackages)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserServicePackages_User");
+
+            entity.HasOne(d => d.Plan).WithMany()
+                .HasForeignKey(d => d.PlanId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserServicePackages_Plan");
         });
 
         modelBuilder.Entity<Setting>(entity =>

@@ -9,6 +9,7 @@
     var latestProperties = ViewBag.LatestProperties as IEnumerable<HomeLengo.Models.Property> ?? new List<HomeLengo.Models.Property>();
     var keyword = ViewBag.Keyword as string ?? "";
     var location = ViewBag.Location as string ?? "";
+    var cityId = ViewBag.CityId as int?;
     var bedrooms = ViewBag.Bedrooms as int?;
     var bathrooms = ViewBag.Bathrooms as int?;
     var bedroomsValue = bedrooms ?? 0;
@@ -56,6 +57,7 @@
                     var filterQueryParams = new System.Text.StringBuilder();
                     if (!string.IsNullOrEmpty(keyword)) filterQueryParams.Append($"&keyword={Uri.EscapeDataString(keyword)}");
                     if (!string.IsNullOrEmpty(location)) filterQueryParams.Append($"&location={Uri.EscapeDataString(location)}");
+                    if (cityId.HasValue) filterQueryParams.Append($"&cityId={cityId.Value}");
                     if (statusId.HasValue) filterQueryParams.Append($"&statusId={statusId.Value}");
                     if (selectedPropertyTypeId.HasValue) filterQueryParams.Append($"&propertyTypeId={selectedPropertyTypeId.Value}");
                     if (bedrooms.HasValue) filterQueryParams.Append($"&bedrooms={bedrooms.Value}");
@@ -123,6 +125,10 @@
                                     <form method="get" action="/Property">
                                         <input type="hidden" name="page" value="1" />
                                         <input type="hidden" name="statusId" value="2" />
+                                        @if (cityId.HasValue)
+                                        {
+                                            <input type="hidden" name="cityId" value="@cityId.Value" />
+                                        }
                                         <div class="wd-filter-select">
                                             <div class="inner-group">
                                                 <div class="box">
@@ -267,9 +273,13 @@
                                  id="forSale" role="tabpanel">
 
                                 <div class="form-sl">
-                                    <form method="get" action="/Property">
+<form method="get" action="/Property">
                                         <input type="hidden" name="page" value="1" />
                                         <input type="hidden" name="statusId" value="1" />
+                                        @if (cityId.HasValue)
+                                        {
+                                            <input type="hidden" name="cityId" value="@cityId.Value" />
+                                        }
                                         <div class="wd-filter-select">
                                             <div class="inner-group">
                                                 <div class="box">
@@ -654,6 +664,7 @@
                             var queryParams = new System.Text.StringBuilder();
                             if (!string.IsNullOrEmpty(keyword)) queryParams.Append($"&keyword={Uri.EscapeDataString(keyword)}");
                             if (!string.IsNullOrEmpty(location)) queryParams.Append($"&location={Uri.EscapeDataString(location)}");
+                            if (cityId.HasValue) queryParams.Append($"&cityId={cityId.Value}");
                             if (statusId.HasValue) queryParams.Append($"&statusId={statusId.Value}");
                             if (selectedPropertyTypeId.HasValue) queryParams.Append($"&propertyTypeId={selectedPropertyTypeId.Value}");
                             if (bedrooms.HasValue) queryParams.Append($"&bedrooms={bedrooms.Value}");

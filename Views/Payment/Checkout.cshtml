@@ -1,0 +1,167 @@
+@{
+    ViewData["Title"] = "Thanh toán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    var userPackage = ViewBag.UserPackage as HomeLengo.Models.UserServicePackage;
+    var totalAmount = ViewBag.TotalAmount as decimal? ?? 0;
+    var userPackageId = ViewBag.UserPackageId as int? ?? 0;
+    var user = userPackage?.User;
+}
+
+<!-- Page Title -->
+<section class="flat-title-page" style="background-image: url('/assets/images/banner/banner-property-12.jpg');">
+    <div class="container">
+        <div class="breadcrumb-content">
+            <ul class="breadcrumb">
+                <li><a href="/" class="text-white">Trang Chủ</a></li>
+                <li class="text-white">/ Thanh toán</li>
+            </ul>
+            <h1 class="text-center text-white title">Thanh toán dịch vụ</h1>
+        </div>
+    </div>
+</section>
+<!-- End Page Title -->
+
+<section class="flat-section" style="padding: 60px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Thông tin đơn hàng</h4>
+                    </div>
+                    <div class="card-body">
+                        @if (userPackage != null && user != null)
+                        {
+                            <div class="row mb-3">
+                                <div class="col-md-4"><strong>Họ và tên:</strong></div>
+                                <div class="col-md-8">@(user.FullName ?? user.Username)</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4"><strong>Email:</strong></div>
+                                <div class="col-md-8">@user.Email</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4"><strong>Số điện thoại:</strong></div>
+                                <div class="col-md-8">@(user.Phone ?? "Chưa cập nhật")</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4"><strong>Gói dịch vụ:</strong></div>
+                                <div class="col-md-8">@userPackage.Plan.Name</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4"><strong>Ngày đăng ký:</strong></div>
+                                <div class="col-md-8">@userPackage.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Tổng thanh toán</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Gói dịch vụ:</span>
+                            <span>@totalAmount.ToString("N0") đ</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Tổng cộng:</strong>
+                            <strong class="text-danger" style="font-size: 1.2em;">@totalAmount.ToString("N0") đ</strong>
+                        </div>
+                        <button id="btnPayVNPay" class="btn btn-primary w-100" style="padding: 12px;">
+                            <i class="fas fa-credit-card"></i> Thanh toán bằng VNPay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#btnPayVNPay').click(function() {
+                var btn = $(this);
+                btn.prop('disabled', true);
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...');
+
+                // Kiểm tra userPackageId
+                var userPackageId = @userPackageId;
+                if (!userPackageId || userPackageId <= 0) {
+                    alert('Mã gói dịch vụ không hợp lệ. Vui lòng thử lại.');
+                    btn.prop('disabled', false);
+                    btn.html('<i class="fas fa-credit-card"></i> Thanh toán bằng VNPay');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/Payment/CreatePaymentUrl',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: {
+                        userPackageId: userPackageId
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Response:', response);
+                        if (response && response.success) {
+                            // Chuyển hướng đến trang thanh toán VNPay
+                            if (response.paymentUrl) {
+                                window.location.href = response.paymentUrl;
+                            } else {
+                                alert('Không nhận được URL thanh toán từ server');
+                                btn.prop('disabled', false);
+                                btn.html('<i class="fas fa-credit-card"></i> Thanh toán bằng VNPay');
+                            }
+                        } else {
+                            var errorMsg = response && response.message ? response.message : 'Có lỗi xảy ra khi tạo URL thanh toán';
+                            alert(errorMsg);
+                            btn.prop('disabled', false);
+                            btn.html('<i class="fas fa-credit-card"></i> Thanh toán bằng VNPay');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', {
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            responseText: xhr.responseText,
+                            error: error
+                        });
+                        
+                        var errorMessage = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+                        
+                        if (xhr.status === 0) {
+                            errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+                        } else if (xhr.status === 500) {
+                            errorMessage = 'Lỗi server. Vui lòng thử lại sau.';
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                if (response && response.message) {
+                                    errorMessage = response.message;
+                                }
+                            } catch (e) {
+                                console.error('Parse error:', e);
+                            }
+                        }
+                        
+                        alert(errorMessage);
+                        btn.prop('disabled', false);
+                        btn.html('<i class="fas fa-credit-card"></i> Thanh toán bằng VNPay');
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+
