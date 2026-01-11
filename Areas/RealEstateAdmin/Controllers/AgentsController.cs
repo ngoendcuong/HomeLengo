@@ -6,7 +6,7 @@ using HomeLengo.Models;
 namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 {
     [Area("RealEstateAdmin")]
-    public class AgentsController : Controller
+    public class AgentsController : BaseController
     {
         private readonly HomeLengoContext _context;
 
@@ -17,6 +17,12 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 
         public IActionResult Index()
         {
+            // Chỉ Admin mới được truy cập
+            if (!IsAdmin())
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
             var agents = _context.Agents
                 .Include(a => a.User)
                 .Include(a => a.Properties)

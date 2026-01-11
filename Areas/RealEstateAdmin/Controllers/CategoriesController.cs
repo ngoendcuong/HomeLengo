@@ -5,7 +5,7 @@ using HomeLengo.Models;
 namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 {
     [Area("RealEstateAdmin")]
-    public class CategoriesController : Controller
+    public class CategoriesController : BaseController
     {
         private readonly HomeLengoContext _context;
 
@@ -17,6 +17,12 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         // Trang chính - Danh mục
         public IActionResult Index()
         {
+            // Chỉ Admin mới được truy cập
+            if (!IsAdmin())
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
             return View();
         }
 

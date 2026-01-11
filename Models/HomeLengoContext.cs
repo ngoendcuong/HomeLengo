@@ -33,6 +33,8 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<ContactU> ContactUs { get; set; }
 
+    public virtual DbSet<FAQ> FAQs { get; set; }
+
     public virtual DbSet<District> Districts { get; set; }
 
     public virtual DbSet<Favorite> Favorites { get; set; }
@@ -240,6 +242,20 @@ public partial class HomeLengoContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("Chưa xử lý");
+        });
+
+        modelBuilder.Entity<FAQ>(entity =>
+        {
+            entity.HasKey(e => e.FaqId).HasName("PK__FAQs__F6C1B8E5");
+
+            entity.ToTable("FAQs");
+
+            entity.Property(e => e.Question).HasMaxLength(500);
+            entity.Property(e => e.Category).HasMaxLength(100);
+            entity.Property(e => e.SortOrder).HasDefaultValue(0);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysutcdatetime())");
         });
 
         modelBuilder.Entity<District>(entity =>

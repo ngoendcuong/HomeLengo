@@ -442,8 +442,12 @@
                             if (sessionStorage.getItem('pendingMessage')) {
                                 sessionStorage.setItem('shouldSendPendingMessage', 'true');
                             }
+                            // Kiểm tra redirectUrl từ server (cho Admin)
+                            if (data.redirectUrl) {
+                                window.location.href = data.redirectUrl;
+                            }
                             // Kiểm tra xem có cần điều hướng đến trang add property không
-                            if (sessionStorage.getItem('shouldRedirectToAddProperty') === 'true') {
+                            else if (sessionStorage.getItem('shouldRedirectToAddProperty') === 'true') {
                                 sessionStorage.removeItem('shouldRedirectToAddProperty');
                                 window.location.href = '/Admin/Property/Create';
                             } else {

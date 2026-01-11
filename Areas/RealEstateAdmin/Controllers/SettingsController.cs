@@ -4,17 +4,29 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 {
     [Area("RealEstateAdmin")]
-    public class SettingsController : Controller
+    public class SettingsController : BaseController
     {
         // Trang tổng hợp cấu hình
         public IActionResult Index()
         {
+            // Chỉ Admin mới được truy cập
+            if (!IsAdmin())
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
             return View();
         }
 
         // Cấu hình chung
         public IActionResult General()
         {
+            // Chỉ Admin mới được truy cập
+            if (!IsAdmin())
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
             ViewBag.WebsiteName = "HomeLengo - Bất động sản uy tín";
             ViewBag.Slogan = "Nơi kết nối mọi giao dịch";
             ViewBag.Email = "contact@homelengo.vn";

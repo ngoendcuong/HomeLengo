@@ -22,13 +22,12 @@
                 <i class="far fa-user"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <a href="#" class="dropdown-item">
-                    <i class="fas fa-user mr-2"></i> Hồ sơ
-                </a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
-                    <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
-                </a>
+                <form action="/Account/Logout" method="post" style="margin:0;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item" style="background:none; border:none; width:100%; text-align:left; cursor:pointer; color:inherit;">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
+                    </button>
+                </form>
             </div>
         </li>
     </ul>

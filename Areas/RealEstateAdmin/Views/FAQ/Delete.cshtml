@@ -1,0 +1,77 @@
+@model HomeLengo.Models.FAQ
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Xóa Câu hỏi thường gặp";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Xóa Câu hỏi thường gặp</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/Dashboard">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/FAQ">Câu hỏi thường gặp</a></li>
+                    <li class="breadcrumb-item active">Xóa</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Xác nhận xóa</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h5><i class="icon fas fa-exclamation-triangle"></i> Cảnh báo!</h5>
+                    Bạn có chắc chắn muốn xóa câu hỏi này? Hành động này không thể hoàn tác.
+                </div>
+
+                <dl class="row">
+                    <dt class="col-sm-3">Câu hỏi:</dt>
+                    <dd class="col-sm-9">@Model.Question</dd>
+
+                    <dt class="col-sm-3">Câu trả lời:</dt>
+                    <dd class="col-sm-9">@Model.Answer</dd>
+
+                    <dt class="col-sm-3">Danh mục:</dt>
+                    <dd class="col-sm-9">@(Model.Category ?? "-")</dd>
+
+                    <dt class="col-sm-3">Thứ tự:</dt>
+                    <dd class="col-sm-9">@Model.SortOrder</dd>
+
+                    <dt class="col-sm-3">Trạng thái:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge badge-success">Hiển thị</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary">Ẩn</span>
+                        }
+                    </dd>
+                </dl>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="FaqId" />
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                        <a href="/RealEstateAdmin/FAQ" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+

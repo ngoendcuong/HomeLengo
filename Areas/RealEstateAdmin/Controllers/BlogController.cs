@@ -6,7 +6,7 @@ using HomeLengo.Models;
 namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 {
     [Area("RealEstateAdmin")]
-    public class BlogController : Controller
+    public class BlogController : BaseController
     {
         private readonly HomeLengoContext _context;
 

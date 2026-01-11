@@ -6,7 +6,7 @@ using HomeLengo.Models;
 namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 {
     [Area("RealEstateAdmin")]
-    public class PackagesController : Controller
+    public class PackagesController : BaseController
     {
         private readonly HomeLengoContext _context;
 
@@ -17,6 +17,11 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 
         public IActionResult Index()
         {
+            // Chỉ Admin mới được truy cập
+            if (!IsAdmin())
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
             // Packages có thể được lưu trong Settings hoặc tạo model Package riêng
             // Hiện tại sử dụng dữ liệu từ Settings hoặc hardcode với khả năng mở rộng
             var packages = new List<dynamic>

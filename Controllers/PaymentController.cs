@@ -338,11 +338,35 @@ namespace HomeLengo.Controllers
                         userPackage.IsActive = true;
                         userPackage.StartDate = DateTime.Now;
                         
+                        // Tính EndDate = StartDate + 30 ngày (1 tháng)
+                        userPackage.EndDate = userPackage.StartDate.AddDays(30);
+                        
+                        // Cập nhật RoleId = 2 (Agent) cho user khi mua gói thành công
+                        // Xóa tất cả UserRole cũ của user này để tránh duplicate
+                        var existingUserRoles = await _context.UserRoles
+                            .Where(ur => ur.UserId == userPackage.UserId)
+                            .ToListAsync();
+                        
+                        if (existingUserRoles.Any())
+                        {
+                            _context.UserRoles.RemoveRange(existingUserRoles);
+                        }
+                        
+                        // Tạo UserRole mới với RoleId = 2 (Agent)
+                        var newUserRole = new UserRole
+                        {
+                            UserId = userPackage.UserId,
+                            RoleId = 2, // Agent
+                            AssignedAt = DateTime.UtcNow
+                        };
+                        _context.UserRoles.Add(newUserRole);
+                        
                         // Đảm bảo lưu vào database
                         await _context.SaveChangesAsync();
                         
                         Console.WriteLine($"UserServicePackage #{userPackageId} đã được kích hoạt và lưu vào database.");
-                        Console.WriteLine($"UserId: {userPackage.UserId}, Plan: {userPackage.Plan?.Name}, IsActive: {userPackage.IsActive}, StartDate: {userPackage.StartDate}");
+                        Console.WriteLine($"UserId: {userPackage.UserId}, Plan: {userPackage.Plan?.Name}, IsActive: {userPackage.IsActive}, StartDate: {userPackage.StartDate}, EndDate: {userPackage.EndDate}");
+                        Console.WriteLine($"RoleId đã được cập nhật thành 2 (Agent) cho UserId: {userPackage.UserId}");
                     }
                     else
                     {

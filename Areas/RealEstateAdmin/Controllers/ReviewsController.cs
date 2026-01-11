@@ -1,18 +1,43 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using HomeLengo.Models;
 
 namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 {
     [Area("RealEstateAdmin")]
-    public class ReviewsController : Controller
+    public class ReviewsController : BaseController
     {
-        public IActionResult Index()
+        private readonly HomeLengoContext _context;
+
+        public ReviewsController(HomeLengoContext context)
         {
-            var reviews = new List<dynamic>
-            {
-                new { Id = 1, User = "Nguyễn Văn A", Property = "Căn hộ Vinhomes Q7", Agent = "Môi giới A", Rating = 5, Comment = "Rất hài lòng với dịch vụ, nhân viên tư vấn nhiệt tình", Status = "Đã duyệt", CreatedDate = "15/01/2025 14:30" },
-                new { Id = 2, User = "Trần Thị B", Property = "Nhà phố Thảo Điền", Agent = "Môi giới B", Rating = 4, Comment = "Tốt, nhưng cần cải thiện thời gian phản hồi", Status = "Chờ duyệt", CreatedDate = "14/01/2025 10:15" },
-                new { Id = 3, User = "Lê Văn C", Property = "Biệt thự Quận 2", Agent = "Môi giới C", Rating = 3, Comment = "Bình thường", Status = "Đã ẩn", CreatedDate = "13/01/2025 16:20" }
-            };
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var reviews = await _context.Reviews
+                .Include(r => r.User)
+                .Include(r => r.Property)
+                    .ThenInclude(p => p.Agent)
+                        .ThenInclude(a => a.User)
+                .Select(r => new
+                {
+                    Id = r.ReviewId,
+                    User = r.User != null ? (r.User.FullName ?? r.User.Username) : "N/A",
+                    Property = r.Property != null ? r.Property.Title : "N/A",
+                    Agent = r.Property != null && r.Property.Agent != null && r.Property.Agent.User != null
+                        ? (r.Property.Agent.User.FullName ?? r.Property.Agent.User.Username)
+                        : "N/A",
+                    Rating = (int)r.Rating,
+                    Comment = r.Body ?? "",
+                    Status = r.IsApproved == true ? "Đã duyệt" : "Chờ duyệt",
+                    CreatedDate = r.CreatedAt.HasValue
+                        ? r.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                        : ""
+                })
+                .OrderByDescending(r => r.CreatedDate)
+                .ToListAsync();
 
             return View(reviews);
         }

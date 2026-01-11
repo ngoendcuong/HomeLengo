@@ -1,0 +1,159 @@
+@model IEnumerable<HomeLengo.Models.FAQ>
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Quản lý Câu hỏi thường gặp";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Quản lý Câu hỏi thường gặp</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/Dashboard">Home</a></li>
+                    <li class="breadcrumb-item active">Câu hỏi thường gặp</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Danh sách Câu hỏi thường gặp</h3>
+                <div class="card-tools">
+                    <a href="/RealEstateAdmin/FAQ/Create" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Thêm câu hỏi
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="bg-light">
+                            <tr>
+                                <th width="5%">STT</th>
+                                <th width="30%">Câu hỏi</th>
+                                <th width="40%">Câu trả lời</th>
+                                <th width="10%">Danh mục</th>
+                                <th width="5%">Thứ tự</th>
+                                <th width="5%">Trạng thái</th>
+                                <th width="15%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int index = 1;
+                            }
+                            @foreach (var faq in Model)
+                            {
+                                <tr>
+                                    <td>@index</td>
+                                    <td>
+                                        <strong>@faq.Question</strong>
+                                    </td>
+                                    <td>
+                                        @if (faq.Answer.Length > 100)
+                                        {
+                                            <span>@faq.Answer.Substring(0, 100)...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@faq.Answer</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(faq.Category))
+                                        {
+                                            <span class="badge badge-info">@faq.Category</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>@faq.SortOrder</td>
+                                    <td>
+                                        <button class="btn btn-sm @(faq.IsActive ? "btn-success" : "btn-secondary") toggle-status" 
+                                                data-id="@faq.FaqId" 
+                                                data-active="@faq.IsActive.ToString().ToLower()">
+                                            @(faq.IsActive ? "Hiển thị" : "Ẩn")
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="/RealEstateAdmin/FAQ/Edit/@faq.FaqId" class="btn btn-sm btn-warning" title="Sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form asp-action="Delete" asp-route-id="@faq.FaqId" method="post" style="display:inline;" 
+                                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này?');">
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                            @if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Chưa có câu hỏi nào. <a href="/RealEstateAdmin/FAQ/Create">Thêm câu hỏi đầu tiên</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.toggle-status').click(function(e) {
+                e.preventDefault();
+                var btn = $(this);
+                var faqId = btn.data('id');
+                var isActive = btn.data('active') === 'true';
+
+                $.ajax({
+                    url: '/RealEstateAdmin/FAQ/ToggleStatus',
+                    type: 'POST',
+                    data: { id: faqId },
+                    success: function(response) {
+                        if (response.success) {
+                            btn.data('active', response.isActive.toString().toLowerCase());
+                            if (response.isActive) {
+                                btn.removeClass('btn-secondary').addClass('btn-success').text('Hiển thị');
+                            } else {
+                                btn.removeClass('btn-success').addClass('btn-secondary').text('Ẩn');
+                            }
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi cập nhật trạng thái');
+                    }
+                });
+            });
+        });
+    </script>
+}
+

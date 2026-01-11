@@ -1,0 +1,88 @@
+@model HomeLengo.Models.FAQ
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Thêm Câu hỏi thường gặp";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Thêm Câu hỏi thường gặp</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/Dashboard">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/FAQ">Câu hỏi thường gặp</a></li>
+                    <li class="breadcrumb-item active">Thêm mới</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Thông tin câu hỏi</h3>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="form-group">
+                        <label asp-for="Question" class="control-label">Câu hỏi <span class="text-danger">*</span></label>
+                        <input asp-for="Question" class="form-control" placeholder="Nhập câu hỏi..." />
+                        <span asp-validation-for="Question" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Answer" class="control-label">Câu trả lời <span class="text-danger">*</span></label>
+                        <textarea asp-for="Answer" class="form-control" rows="5" placeholder="Nhập câu trả lời..."></textarea>
+                        <span asp-validation-for="Answer" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Category" class="control-label">Danh mục</label>
+                                <input asp-for="Category" class="form-control" placeholder="Ví dụ: Tổng quan, Chi phí, An toàn..." />
+                                <small class="form-text text-muted">Phân loại câu hỏi để dễ quản lý</small>
+                                <span asp-validation-for="Category" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="SortOrder" class="control-label">Thứ tự hiển thị</label>
+                                <input asp-for="SortOrder" type="number" class="form-control" value="0" />
+                                <small class="form-text text-muted">Số nhỏ hơn sẽ hiển thị trước</small>
+                                <span asp-validation-for="SortOrder" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                            <label asp-for="IsActive" class="form-check-label">Hiển thị câu hỏi này</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                    <a href="/RealEstateAdmin/FAQ" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

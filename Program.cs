@@ -37,6 +37,10 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IGeminiService, GeminiService>();
 builder.Services.AddScoped<VNPayService>();
 builder.Services.AddScoped<ServicePackageService>();
+builder.Services.AddScoped<PackageExpirationService>();
+
+// 4. Đăng ký Background Service để kiểm tra gói hết hạn
+builder.Services.AddHostedService<PackageExpirationBackgroundService>();
 
 var app = builder.Build();
 

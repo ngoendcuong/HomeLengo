@@ -2,16 +2,19 @@ using HomeLengo.Models;
 using HomeLengo.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HomeLengo.Controllers;
 
 public class AccountController : Controller
 {
     private readonly HomeLengoContext _context;
+    private readonly IServiceProvider _serviceProvider;
 
-    public AccountController(HomeLengoContext context)
+    public AccountController(HomeLengoContext context, IServiceProvider serviceProvider)
     {
         _context = context;
+        _serviceProvider = serviceProvider;
     }
 
     [HttpGet]
@@ -60,15 +63,31 @@ public class AccountController : Controller
             HttpContext.Session.SetString("Email", user.Email);
             HttpContext.Session.SetString("Avatar", user.Avatar ?? "avatarMacDinh.jpg");
 
-            // Lấy role của user
+            // Lấy role của user (lấy role mới nhất nếu có nhiều)
             var userRole = await _context.UserRoles
                 .Include(ur => ur.Role)
-                .FirstOrDefaultAsync(ur => ur.UserId == user.UserId);
+                .Where(ur => ur.UserId == user.UserId)
+                .OrderByDescending(ur => ur.AssignedAt)
+                .FirstOrDefaultAsync();
             
+            string redirectUrl = null;
             if (userRole != null)
             {
-                HttpContext.Session.SetString("RoleId", userRole.RoleId.ToString());
+                var roleId = userRole.RoleId;
+                HttpContext.Session.SetString("RoleId", roleId.ToString());
                 HttpContext.Session.SetString("RoleName", userRole.Role.RoleName);
+                
+                // Chỉ redirect đến RealEstateAdmin nếu là Admin (role=1) hoặc Người kiểm duyệt (role=4)
+                // KHÔNG redirect nếu là Agent (role=2) - Agent sẽ vào trang Admin thông thường
+                if (roleId == 1) // Admin
+                {
+                    redirectUrl = "/RealEstateAdmin/Dashboard";
+                }
+                else if (roleId == 4) // Người kiểm duyệt
+                {
+                    redirectUrl = "/RealEstateAdmin/Dashboard";
+                }
+                // RoleId = 2 (Agent) không redirect đến RealEstateAdmin, sẽ ở trang chủ hoặc Admin area
             }
 
             // Lấy AgentId nếu user là agent
@@ -78,7 +97,23 @@ public class AccountController : Controller
                 HttpContext.Session.SetString("AgentId", agent.AgentId.ToString());
             }
 
-            return Json(new { success = true, message = "Đăng nhập thành công" });
+            // Kiểm tra gói dịch vụ hết hạn khi đăng nhập (chạy ngầm, không block)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var scope = _serviceProvider.CreateScope();
+                    var expirationService = scope.ServiceProvider.GetRequiredService<PackageExpirationService>();
+                    await expirationService.ProcessExpiredPackageForUserAsync(user.UserId);
+                }
+                catch (Exception ex)
+                {
+                    // Log lỗi nhưng không ảnh hưởng đến quá trình đăng nhập
+                    Console.WriteLine($"Lỗi khi kiểm tra gói hết hạn cho user {user.UserId}: {ex.Message}");
+                }
+            });
+
+            return Json(new { success = true, message = "Đăng nhập thành công", redirectUrl = redirectUrl });
         }
         catch (Exception ex)
         {
@@ -151,11 +186,11 @@ public class AccountController : Controller
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Gán role mặc định (RoleId = 1)
+            // Gán role mặc định (RoleId = 3 - User thường)
             var userRole = new UserRole
             {
                 UserId = user.UserId,
-                RoleId = 1, // Role mặc định
+                RoleId = 3, // Role mặc định là User thường
                 AssignedAt = DateTime.UtcNow
             };
 
