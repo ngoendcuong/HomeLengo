@@ -1,5 +1,5 @@
 ﻿@* Areas/RealEstateAdmin/Views/Contacts/FormContacts.cshtml *@
-@model IEnumerable<dynamic>
+@model IEnumerable<HomeLengo.Models.ContactU>
 @{
     Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Form liên hệ";
@@ -27,6 +27,24 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Danh sách Form liên hệ</h3>
+                <div class="card-tools">
+                    <form method="get" class="form-inline">
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm..." value="@ViewBag.SearchString">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-default">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <select name="status" class="form-control form-control-sm ml-2" onchange="this.form.submit()">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Chưa xử lý" selected="@(ViewBag.Status == "Chưa xử lý")">Chưa xử lý</option>
+                            <option value="Đã xử lý" selected="@(ViewBag.Status == "Đã xử lý")">Đã xử lý</option>
+                            <option value="Đang xử lý" selected="@(ViewBag.Status == "Đang xử lý")">Đang xử lý</option>
+                        </select>
+                    </form>
+                </div>
             </div>
 
             <div class="card-body">
@@ -37,50 +55,75 @@
                                 <th width="5%">ID</th>
                                 <th width="18%">Họ tên</th>
                                 <th width="15%">Liên hệ</th>
-                                <th width="20%">Tiêu đề</th>
+                                <th width="20%">Thông tin</th>
                                 <th width="12%">Trạng thái</th>
                                 <th width="15%">Thời gian</th>
                                 <th width="15%">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var form in Model)
+                            @if (Model != null && Model.Any())
                             {
-                                <tr class="@(form.Status == "Chưa đọc" ? "table-warning" : "")">
-                                    <td>@form.Id</td>
-                                    <td><strong>@form.Name</strong></td>
-                                    <td>
-                                        <small>
-                                            <i class="fas fa-phone"></i> @form.Phone<br>
-                                            <i class="fas fa-envelope"></i> @form.Email
-                                        </small>
-                                    </td>
-                                    <td>@form.Subject</td>
-                                    <td>
-                                        @if (form.Status == "Chưa đọc")
-                                        {
-                                            <span class="badge badge-warning">
-                                                <i class="fas fa-envelope"></i> Chưa đọc
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-success">
-                                                <i class="fas fa-envelope-open"></i> Đã đọc
-                                            </span>
-                                        }
-                                    </td>
-                                    <td><small>@form.CreatedDate</small></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info"
-                                                data-toggle="modal"
-                                                data-target="#formDetailModal">
-                                            <i class="fas fa-eye"></i> Xem
-                                        </button>
-                                        <button class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
+                                @foreach (var contact in Model)
+                                {
+                                    <tr class="@(contact.Status == "Chưa xử lý" || contact.Status == null ? "table-warning" : "")">
+                                        <td>@contact.ContactId</td>
+                                        <td><strong>@contact.FullName</strong></td>
+                                        <td>
+                                            <small>
+                                                @if (!string.IsNullOrEmpty(contact.Phone))
+                                                {
+                                                    <i class="fas fa-phone"></i> @contact.Phone<br>
+                                                }
+                                                <i class="fas fa-envelope"></i> @contact.Email
+                                            </small>
+                                        </td>
+                                        <td>@(string.IsNullOrEmpty(contact.Information) ? "-" : contact.Information)</td>
+                                        <td>
+                                            @if (contact.Status == "Chưa xử lý" || contact.Status == null)
+                                            {
+                                                <span class="badge badge-warning">
+                                                    <i class="fas fa-envelope"></i> Chưa xử lý
+                                                </span>
+                                            }
+                                            else if (contact.Status == "Đã xử lý")
+                                            {
+                                                <span class="badge badge-success">
+                                                    <i class="fas fa-check-circle"></i> Đã xử lý
+                                                </span>
+                                            }
+                                            else if (contact.Status == "Đang xử lý")
+                                            {
+                                                <span class="badge badge-info">
+                                                    <i class="fas fa-spinner"></i> Đang xử lý
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary">@contact.Status</span>
+                                            }
+                                        </td>
+                                        <td><small>@(contact.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</small></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info view-contact"
+                                                    data-id="@contact.ContactId"
+                                                    data-toggle="modal"
+                                                    data-target="#formDetailModal">
+                                                <i class="fas fa-eye"></i> Xem
+                                            </button>
+                                            <button class="btn btn-sm btn-danger delete-contact" 
+                                                    data-id="@contact.ContactId"
+                                                    data-name="@contact.FullName">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center">Không có dữ liệu</td>
                                 </tr>
                             }
                         </tbody>
@@ -99,43 +142,108 @@
                 <h4 class="modal-title">Chi tiết Liên hệ</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Họ tên:</strong> Hoàng Văn E</p>
-                        <p><strong>Email:</strong> hoangvane@email.com</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Số điện thoại:</strong> 0911888999</p>
-                        <p><strong>Thời gian:</strong> 15/01/2025 10:00</p>
-                    </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-12">
-                        <p><strong>Tiêu đề:</strong> Hỏi về dịch vụ</p>
-                        <div class="callout callout-info">
-                            <p>Công ty có tư vấn pháp lý không? Tôi cần hỗ trợ về thủ tục mua bán.</p>
-                        </div>
-                    </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-12">
-                        <label><strong>Trả lời:</strong></label>
-                        <textarea class="form-control" rows="4" placeholder="Nhập nội dung trả lời..."></textarea>
-                    </div>
+            <div class="modal-body" id="contactDetailContent">
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">
-                    <i class="fas fa-reply"></i> Gửi trả lời
-                </button>
-                <button type="button" class="btn btn-success">
-                    <i class="fas fa-check"></i> Đánh dấu đã đọc
+                <button type="button" class="btn btn-success" id="markProcessedBtn">
+                    <i class="fas fa-check"></i> Đánh dấu đã xử lý
                 </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        let currentContactId = null;
+
+        // Xem chi tiết liên hệ
+        $('.view-contact').on('click', function() {
+            const contactId = $(this).data('id');
+            currentContactId = contactId;
+            
+            $.ajax({
+                url: '/RealEstateAdmin/Contacts/GetContactDetail',
+                type: 'GET',
+                data: { id: contactId },
+                success: function(data) {
+                    if (data.error) {
+                        $('#contactDetailContent').html('<div class="alert alert-danger">' + data.error + '</div>');
+                    } else {
+                        let html = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Họ tên:</strong> ${data.fullName || 'N/A'}</p>
+                                    <p><strong>Email:</strong> ${data.email || '-'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Số điện thoại:</strong> ${data.phone || '-'}</p>
+                                    <p><strong>Thời gian:</strong> ${data.createdAt || '-'}</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-12">
+                                    <p><strong>Thông tin:</strong> ${data.information || '-'}</p>
+                                    <div class="callout callout-info">
+                                        <p><strong>Nội dung:</strong></p>
+                                        <p>${data.message || '-'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        $('#contactDetailContent').html(html);
+                    }
+                },
+                error: function() {
+                    $('#contactDetailContent').html('<div class="alert alert-danger">Lỗi khi tải dữ liệu</div>');
+                }
+            });
+        });
+
+        // Đánh dấu đã xử lý
+        $('#markProcessedBtn').on('click', function() {
+            if (currentContactId) {
+                $.ajax({
+                    url: '/RealEstateAdmin/Contacts/UpdateContactStatus',
+                    type: 'POST',
+                    data: {
+                        id: currentContactId,
+                        status: 'Đã xử lý'
+                    },
+                    success: function() {
+                        $('#formDetailModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function() {
+                        alert('Lỗi khi cập nhật trạng thái');
+                    }
+                });
+            }
+        });
+
+        // Xóa liên hệ
+        $('.delete-contact').on('click', function() {
+            const contactId = $(this).data('id');
+            const contactName = $(this).data('name');
+            
+            if (confirm('Bạn có chắc chắn muốn xóa liên hệ của ' + contactName + '?')) {
+                $.ajax({
+                    url: '/RealEstateAdmin/Contacts/DeleteContact',
+                    type: 'POST',
+                    data: { id: contactId },
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function() {
+                        alert('Lỗi khi xóa liên hệ');
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -68,3 +68,4 @@ PRINT '  - EndDate: Ngày kết thúc (nullable)';
 PRINT '  - IsActive: Trạng thái active';
 PRINT '  - CreatedAt: Ngày tạo';
 
+

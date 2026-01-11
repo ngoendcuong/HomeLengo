@@ -35,20 +35,51 @@
             </div>
             
             <div class="card-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                }
+
                 <!-- Filter -->
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" placeholder="Tìm kiếm bài viết...">
+                <form method="get" action="/RealEstateAdmin/Blog" id="filterForm" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm bài viết..." value="@ViewBag.SearchString">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="categoryId" class="form-control" onchange="document.getElementById('filterForm').submit();">
+                                <option value="">Tất cả danh mục</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    @foreach (var cat in ViewBag.Categories)
+                                    {
+                                        <option value="@cat.CategoryId" selected="@(ViewBag.CategoryId == cat.CategoryId)">@cat.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="status" class="form-control" onchange="document.getElementById('filterForm').submit();">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="published" selected="@(ViewBag.Status == "published")">Công khai</option>
+                                <option value="draft" selected="@(ViewBag.Status == "draft")">Nháp</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-info"><i class="fas fa-search"></i> Tìm</button>
+                            @if (!string.IsNullOrEmpty(ViewBag.SearchString) || ViewBag.CategoryId != null || !string.IsNullOrEmpty(ViewBag.Status))
+                            {
+                                <a href="/RealEstateAdmin/Blog" class="btn btn-secondary ml-1"><i class="fas fa-times"></i> Xóa bộ lọc</a>
+                            }
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <select class="form-control">
-                            <option>Tất cả danh mục</option>
-                            <option>Tin thị trường</option>
-                            <option>Kiến thức BĐS</option>
-                            <option>Phong thủy</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
+                </form>
+                    @* <div class="col-md-2">
                         <select class="form-control">
                             <option>Tất cả trạng thái</option>
                             <option>Công khai</option>
@@ -57,7 +88,7 @@
                     </div>
                     <div class="col-md-2">
                         <button class="btn btn-info"><i class="fas fa-search"></i> Tìm</button>
-                    </div>
+                    </div> *@
                 </div>
 
                 <!-- Table -->

@@ -92,11 +92,44 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         }
 
         // Danh sách bài viết
-        public IActionResult Index()
+        public IActionResult Index(string searchString, int? categoryId, string status)
         {
-            var posts = _context.Blogs
+            var query = _context.Blogs
                 .Include(b => b.Category)
                 .Include(b => b.Author)
+                .AsQueryable();
+
+            // Tìm kiếm
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(b => 
+                    (b.Title != null && b.Title.Contains(searchString)) ||
+                    (b.Content != null && b.Content.Contains(searchString)) ||
+                    (b.Author != null && ((b.Author.FullName != null && b.Author.FullName.Contains(searchString)) ||
+                                         (b.Author.Username != null && b.Author.Username.Contains(searchString)))));
+            }
+
+            // Filter theo category
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(b => b.CategoryId == categoryId.Value);
+            }
+
+            // Filter theo trạng thái
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (status == "published")
+                {
+                    query = query.Where(b => b.IsPublished == true);
+                }
+                else if (status == "draft")
+                {
+                    query = query.Where(b => b.IsPublished != true);
+                }
+            }
+
+            var posts = query
+                .ToList()
                 .Select(b => new
                 {
                     Id = b.BlogId,
@@ -108,10 +141,15 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                     CreatedDate = b.CreatedAt.HasValue 
                         ? b.CreatedAt.Value.ToString("dd/MM/yyyy") 
                         : "",
-                    Image = b.Thumbnail ?? "https://via.placeholder.com/100x80"
+                    Image = b.Thumbnail ?? "/assets/images/default-blog.jpg"
                 })
                 .OrderByDescending(b => b.CreatedDate)
                 .ToList();
+
+            ViewBag.SearchString = searchString;
+            ViewBag.CategoryId = categoryId;
+            ViewBag.Status = status;
+            ViewBag.Categories = _context.BlogCategories.Select(c => new { c.CategoryId, c.Name }).ToList();
 
             return View(posts);
         }

@@ -53,7 +53,5 @@ public partial class User
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 
-    public virtual ICollection<ServiceRegister> ServiceRegisters { get; set; } = new List<ServiceRegister>();
-
     public virtual ICollection<UserServicePackage> UserServicePackages { get; set; } = new List<UserServicePackage>();
 }

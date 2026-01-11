@@ -17,7 +17,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         // GET: RealEstateAdmin/FAQ
         public async Task<IActionResult> Index()
         {
-            var faqs = await _context.FAQs
+            var faqs = await _context.Faqs
                 .OrderBy(f => f.SortOrder)
                 .ThenBy(f => f.FaqId)
                 .ToListAsync();
@@ -34,7 +34,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         // POST: RealEstateAdmin/FAQ/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(FAQ faq)
+        public async Task<IActionResult> Create(Faq faq)
         {
             if (ModelState.IsValid)
             {
@@ -56,7 +56,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 return NotFound();
             }
 
-            var faq = await _context.FAQs.FindAsync(id);
+            var faq = await _context.Faqs.FindAsync(id);
             if (faq == null)
             {
                 return NotFound();
@@ -68,7 +68,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         // POST: RealEstateAdmin/FAQ/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, FAQ faq)
+        public async Task<IActionResult> Edit(int id, Faq faq)
         {
             if (id != faq.FaqId)
             {
@@ -108,7 +108,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 return NotFound();
             }
 
-            var faq = await _context.FAQs
+            var faq = await _context.Faqs
                 .FirstOrDefaultAsync(m => m.FaqId == id);
             if (faq == null)
             {
@@ -123,10 +123,10 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var faq = await _context.FAQs.FindAsync(id);
+            var faq = await _context.Faqs.FindAsync(id);
             if (faq != null)
             {
-                _context.FAQs.Remove(faq);
+                _context.Faqs.Remove(faq);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Xóa câu hỏi thường gặp thành công!";
             }
@@ -138,7 +138,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         [HttpPost]
         public async Task<IActionResult> ToggleStatus(int id)
         {
-            var faq = await _context.FAQs.FindAsync(id);
+            var faq = await _context.Faqs.FindAsync(id);
             if (faq == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy câu hỏi" });
@@ -153,7 +153,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 
         private bool FAQExists(int id)
         {
-            return _context.FAQs.Any(e => e.FaqId == id);
+            return _context.Faqs.Any(e => e.FaqId == id);
         }
     }
 }

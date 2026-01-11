@@ -1,28 +1,23 @@
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
 namespace HomeLengo.Models;
 
-public partial class FAQ
+public partial class Faq
 {
     public int FaqId { get; set; }
 
-    [Required]
-    [MaxLength(500)]
     public string Question { get; set; } = null!;
 
-    [Required]
     public string Answer { get; set; } = null!;
 
-    [MaxLength(100)]
     public string? Category { get; set; }
 
-    public int SortOrder { get; set; } = 0;
+    public int SortOrder { get; set; }
 
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 }
-

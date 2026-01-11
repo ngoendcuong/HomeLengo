@@ -103,6 +103,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         public IActionResult PropertyStatus()
         {
             var statuses = _context.PropertyStatuses
+                .ToList()
                 .Select(ps => new
                 {
                     Id = ps.StatusId,
@@ -191,15 +192,24 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAmenity(Amenity amenity)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAmenity(string Name)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(Name))
             {
-                _context.Add(amenity);
-                await _context.SaveChangesAsync();
+                TempData["ErrorMessage"] = "Tên tiện ích không được để trống!";
                 return RedirectToAction(nameof(Amenities));
             }
-            return View(amenity);
+
+            var amenity = new Amenity
+            {
+                Name = Name.Trim()
+            };
+
+            _context.Add(amenity);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Đã thêm tiện ích thành công!";
+            return RedirectToAction(nameof(Amenities));
         }
 
         [HttpPost]
@@ -245,7 +255,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             return RedirectToAction(nameof(Amenities));
         }
 
-        private string GetStatusColor(string statusName)
+        private static string GetStatusColor(string statusName)
         {
             return statusName.ToLower() switch
             {

@@ -17,5 +17,5 @@ public partial class ServicePlan
 
     public virtual ICollection<ServicePlanFeature> ServicePlanFeatures { get; set; } = new List<ServicePlanFeature>();
 
-    public virtual ICollection<ServiceRegister> ServiceRegisters { get; set; } = new List<ServiceRegister>();
+    public virtual ICollection<UserServicePackage> UserServicePackages { get; set; } = new List<UserServicePackage>();
 }

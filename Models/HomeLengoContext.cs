@@ -33,9 +33,9 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<ContactU> ContactUs { get; set; }
 
-    public virtual DbSet<FAQ> FAQs { get; set; }
-
     public virtual DbSet<District> Districts { get; set; }
+
+    public virtual DbSet<Faq> Faqs { get; set; }
 
     public virtual DbSet<Favorite> Favorites { get; set; }
 
@@ -85,10 +85,6 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<ServicePlanFeature> ServicePlanFeatures { get; set; }
 
-    public virtual DbSet<ServiceRegister> ServiceRegisters { get; set; }
-
-    public virtual DbSet<UserServicePackage> UserServicePackages { get; set; }
-
     public virtual DbSet<Setting> Settings { get; set; }
 
     public virtual DbSet<Tag> Tags { get; set; }
@@ -99,10 +95,9 @@ public partial class HomeLengoContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("data source= NGOENDCUONG\\SQLEXPRESS; initial catalog=HomeLengo; integrated security=True; TrustServerCertificate=True;");
+    public virtual DbSet<UserServicePackage> UserServicePackages { get; set; }
 
+  
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AdminAudit>(entity =>
@@ -244,20 +239,6 @@ public partial class HomeLengoContext : DbContext
                 .HasDefaultValue("Chưa xử lý");
         });
 
-        modelBuilder.Entity<FAQ>(entity =>
-        {
-            entity.HasKey(e => e.FaqId).HasName("PK__FAQs__F6C1B8E5");
-
-            entity.ToTable("FAQs");
-
-            entity.Property(e => e.Question).HasMaxLength(500);
-            entity.Property(e => e.Category).HasMaxLength(100);
-            entity.Property(e => e.SortOrder).HasDefaultValue(0);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysutcdatetime())");
-        });
-
         modelBuilder.Entity<District>(entity =>
         {
             entity.HasKey(e => e.DistrictId).HasName("PK__District__85FDA4C673A57B63");
@@ -267,6 +248,19 @@ public partial class HomeLengoContext : DbContext
             entity.HasOne(d => d.City).WithMany(p => p.Districts)
                 .HasForeignKey(d => d.CityId)
                 .HasConstraintName("FK_Districts_Cities");
+        });
+
+        modelBuilder.Entity<Faq>(entity =>
+        {
+            entity.HasKey(e => e.FaqId).HasName("PK__FAQs__F6C1B8E5");
+
+            entity.ToTable("FAQs");
+
+            entity.Property(e => e.Category).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Question).HasMaxLength(500);
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getutcdate())");
         });
 
         modelBuilder.Entity<Favorite>(entity =>
@@ -654,60 +648,6 @@ public partial class HomeLengoContext : DbContext
                 .HasConstraintName("FK_ServicePlanFeatures_ServicePlans");
         });
 
-        modelBuilder.Entity<ServiceRegister>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__ServiceR__3214EC071E8440E2");
-
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Email).HasMaxLength(150);
-            entity.Property(e => e.FullName).HasMaxLength(150);
-            entity.Property(e => e.PaidAt).HasColumnType("datetime");
-            entity.Property(e => e.Phone).HasMaxLength(20);
-
-            entity.HasOne(d => d.Plan).WithMany(p => p.ServiceRegisters)
-                .HasForeignKey(d => d.PlanId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ServiceRegisters_Plan");
-
-            entity.HasOne(d => d.User).WithMany(u => u.ServiceRegisters)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ServiceRegisters_User");
-        });
-
-        modelBuilder.Entity<UserServicePackage>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__UserServicePackages__Id");
-
-            entity.ToTable("UserServicePackages");
-
-            entity.Property(e => e.StartDate)
-                .HasColumnType("datetime")
-                .HasDefaultValueSql("(getdate())");
-
-            entity.Property(e => e.EndDate)
-                .HasColumnType("datetime");
-
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("datetime")
-                .HasDefaultValueSql("(getdate())");
-
-            entity.Property(e => e.IsActive)
-                .HasDefaultValue(true);
-
-            entity.HasOne(d => d.User).WithMany(u => u.UserServicePackages)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserServicePackages_User");
-
-            entity.HasOne(d => d.Plan).WithMany()
-                .HasForeignKey(d => d.PlanId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserServicePackages_Plan");
-        });
-
         modelBuilder.Entity<Setting>(entity =>
         {
             entity.HasKey(e => e.SettingKey).HasName("PK__Settings__01E719AC6AFBC78A");
@@ -782,6 +722,34 @@ public partial class HomeLengoContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_UserRoles_Users");
+        });
+
+        modelBuilder.Entity<UserServicePackage>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__UserServicePackages__Id");
+
+            entity.HasIndex(e => e.IsActive, "IX_UserServicePackages_IsActive");
+
+            entity.HasIndex(e => e.UserId, "IX_UserServicePackages_UserId");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.StartDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Plan).WithMany(p => p.UserServicePackages)
+                .HasForeignKey(d => d.PlanId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserServicePackages_Plan");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserServicePackages)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserServicePackages_User");
         });
 
         OnModelCreatingPartial(modelBuilder);

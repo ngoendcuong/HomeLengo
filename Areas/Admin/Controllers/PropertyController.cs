@@ -231,9 +231,25 @@ namespace HomeLengo.Areas.Admin.Controllers
             {
                 try
                 {
+                    // Tìm trạng thái "Chờ duyệt"
+                    var pendingStatus = await _context.PropertyStatuses
+                        .FirstOrDefaultAsync(s => s.Name.Contains("Chờ duyệt") || s.Name.Contains("Pending") || s.Name.Contains("Chờ"));
+                    
+                    // Nếu tìm thấy trạng thái "Chờ duyệt", set làm mặc định
+                    if (pendingStatus != null)
+                    {
+                        property.StatusId = pendingStatus.StatusId;
+                        // Khi ở trạng thái "Chờ duyệt", IsFeatured phải là false
+                        property.IsFeatured = false;
+                    }
+                    else
+                    {
+                        // Nếu không có trạng thái "Chờ duyệt", giữ nguyên giá trị IsFeatured từ form
+                        property.IsFeatured = IsFeatured ?? false;
+                    }
+                    
                     property.AgentId = agent.AgentId; // Tự động gán agent
                     property.CreatedAt = DateTime.UtcNow;
-                    property.IsFeatured = IsFeatured ?? false;
                     property.Views = property.Views ?? 0;
                     _context.Add(property);
                     await _context.SaveChangesAsync();

@@ -30,7 +30,7 @@
                     <span class="info-box-icon"><i class="fas fa-comments"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Tổng đánh giá</span>
-                        <span class="info-box-number">156</span>
+                        <span class="info-box-number">@ViewBag.TotalReviews</span>
                     </div>
                 </div>
             </div>
@@ -39,7 +39,7 @@
                     <span class="info-box-icon"><i class="fas fa-check"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Đã duyệt</span>
-                        <span class="info-box-number">128</span>
+                        <span class="info-box-number">@ViewBag.ApprovedReviews</span>
                     </div>
                 </div>
             </div>
@@ -48,7 +48,7 @@
                     <span class="info-box-icon"><i class="fas fa-clock"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Chờ duyệt</span>
-                        <span class="info-box-number">25</span>
+                        <span class="info-box-number">@ViewBag.PendingReviews</span>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                     <span class="info-box-icon"><i class="fas fa-star"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Đánh giá TB</span>
-                        <span class="info-box-number">4.6/5</span>
+                        <span class="info-box-number">@ViewBag.AvgRating/5</span>
                     </div>
                 </div>
             </div>
@@ -69,33 +69,48 @@
             </div>
 
             <div class="card-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                }
+
                 <!-- Filter -->
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                <form method="get" action="/RealEstateAdmin/Reviews" id="filterForm">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm..." value="@ViewBag.SearchString">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="status" class="form-control" onchange="document.getElementById('filterForm').submit();">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="approved" selected="@(ViewBag.Status == "approved")">Đã duyệt</option>
+                                <option value="pending" selected="@(ViewBag.Status == "pending")">Chờ duyệt</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="rating" class="form-control" onchange="document.getElementById('filterForm').submit();">
+                                <option value="">Tất cả rating</option>
+                                <option value="5" selected="@(ViewBag.Rating == 5)">⭐⭐⭐⭐⭐ 5 sao</option>
+                                <option value="4" selected="@(ViewBag.Rating == 4)">⭐⭐⭐⭐ 4 sao</option>
+                                <option value="3" selected="@(ViewBag.Rating == 3)">⭐⭐⭐ 3 sao</option>
+                                <option value="2" selected="@(ViewBag.Rating == 2)">⭐⭐ 2 sao</option>
+                                <option value="1" selected="@(ViewBag.Rating == 1)">⭐ 1 sao</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-info"><i class="fas fa-search"></i> Tìm</button>
+                            @if (!string.IsNullOrEmpty(ViewBag.SearchString) || !string.IsNullOrEmpty(ViewBag.Status) || ViewBag.Rating != null)
+                            {
+                                <a href="/RealEstateAdmin/Reviews" class="btn btn-secondary ml-1"><i class="fas fa-times"></i> Xóa bộ lọc</a>
+                            }
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <select class="form-control">
-                            <option>Tất cả trạng thái</option>
-                            <option>Đã duyệt</option>
-                            <option>Chờ duyệt</option>
-                            <option>Đã ẩn</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-control">
-                            <option>Tất cả rating</option>
-                            <option>⭐⭐⭐⭐⭐ 5 sao</option>
-                            <option>⭐⭐⭐⭐ 4 sao</option>
-                            <option>⭐⭐⭐ 3 sao</option>
-                            <option>⭐⭐ 2 sao</option>
-                            <option>⭐ 1 sao</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-info"><i class="fas fa-search"></i> Tìm</button>
-                    </div>
-                </div>
+                </form>
 
                 <!-- Table -->
                 <div class="table-responsive">
@@ -132,7 +147,14 @@
                                         <small class="text-muted">@review.CreatedDate</small>
                                     </td>
                                     <td>
-                                        <a href="#" class="text-primary">@review.Property</a>
+                                        @if (review.PropertyId > 0)
+                                        {
+                                            <a href="/Property/Details/@review.PropertyId" target="_blank" class="text-primary">@review.Property</a>
+                                        }
+                                        else
+                                        {
+                                            <span>@review.Property</span>
+                                        }
                                     </td>
                                     <td>@review.Agent</td>
                                     <td class="text-center">
@@ -170,30 +192,29 @@
                                     <td>
                                         @if (review.Status == "Chờ duyệt")
                                         {
-                                            <button class="btn btn-sm btn-success btn-block mb-1" title="Duyệt">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger btn-block" title="Từ chối">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        }
-                                        else if (review.Status == "Đã duyệt")
-                                        {
-                                            <button class="btn btn-sm btn-secondary btn-block mb-1" title="Ẩn">
-                                                <i class="fas fa-eye-slash"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger btn-block" title="Xóa">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <form asp-action="Approve" asp-route-id="@review.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn duyệt đánh giá này?');">
+                                                <button type="submit" class="btn btn-sm btn-success btn-block mb-1" title="Duyệt">
+                                                    <i class="fas fa-check"></i> Duyệt
+                                                </button>
+                                            </form>
+                                            <form asp-action="Reject" asp-route-id="@review.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn từ chối đánh giá này?');">
+                                                <button type="submit" class="btn btn-sm btn-danger btn-block" title="Từ chối">
+                                                    <i class="fas fa-times"></i> Từ chối
+                                                </button>
+                                            </form>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-sm btn-success btn-block mb-1" title="Hiện">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger btn-block" title="Xóa">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <form asp-action="Reject" asp-route-id="@review.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn ẩn đánh giá này?');">
+                                                <button type="submit" class="btn btn-sm btn-secondary btn-block mb-1" title="Ẩn">
+                                                    <i class="fas fa-eye-slash"></i> Ẩn
+                                                </button>
+                                            </form>
+                                            <form asp-action="Delete" asp-route-id="@review.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');">
+                                                <button type="submit" class="btn btn-sm btn-danger btn-block" title="Xóa">
+                                                    <i class="fas fa-trash"></i> Xóa
+                                                </button>
+                                            </form>
                                         }
                                     </td>
                                 </tr>

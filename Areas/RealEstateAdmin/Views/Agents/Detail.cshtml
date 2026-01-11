@@ -30,7 +30,18 @@
                 <div class="card card-primary card-outline">
                     <div class="card-body box-profile">
                         <div class="text-center">
-                            <img class="profile-user-img img-fluid img-circle" src="@Model.Avatar" alt="User profile picture">
+                            @{
+                                var avatarPath = Model.Avatar;
+                                if (string.IsNullOrEmpty(avatarPath))
+                                {
+                                    avatarPath = "/assets/images/avatar/avatarMacDinh.jpg";
+                                }
+                                else if (!avatarPath.StartsWith("http://") && !avatarPath.StartsWith("https://") && !avatarPath.StartsWith("/"))
+                                {
+                                    avatarPath = "/assets/images/avatar/" + avatarPath.TrimStart('/');
+                                }
+                            }
+                            <img class="profile-user-img img-fluid img-circle" src="@avatarPath" alt="User profile picture" onerror="this.src='/assets/images/avatar/avatarMacDinh.jpg'">
                         </div>
                         <h3 class=" profile-username text-center">@Model.Name</h3>
                         <p class="text-muted text-center">Môi giới bất động sản</p>
@@ -41,13 +52,17 @@
                                 {
                                     <i class="fas fa-star text-warning"></i>
                                 }
+                                else if (i - 0.5 <= Model.Rating)
+                                {
+                                    <i class="fas fa-star-half-alt text-warning"></i>
+                                }
                                 else
                                 {
                                     <i class="far fa-star text-warning"></i>
                                 }
                             }
                             <br>
-                            <strong>@Model.Rating/5</strong> (@Model.Reviews đánh giá)
+                            <strong>@Model.Rating</strong> (@Model.Reviews đánh giá)
                         </div>
 
                         <ul class="list-group list-group-unbordered mb-3">
@@ -57,13 +72,7 @@
                             <li class="list-group-item">
                                 <b>Lượt xem</b> <a class="float-right">@Model.TotalViews</a>
                             </li>
-                            <li class="list-group-item">
-                                <b>Lead nhận được</b> <a class="float-right">@Model.TotalLeads</a>
-                            </li>
                         </ul>
-
-                        <button class="btn btn-primary btn-block"><i class="fas fa-envelope"></i> Gửi tin nhắn</button>
-                        <button class="btn btn-success btn-block"><i class="fas fa-list"></i> Xem tin đăng</button>
                     </div>
                 </div>
 
@@ -116,16 +125,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="info-box">
-                            <span class="info-box-icon bg-warning"><i class="fas fa-phone"></i></span>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Lead</span>
-                                <span class="info-box-number">@Model.TotalLeads</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="info-box">
                             <span class="info-box-icon bg-danger"><i class="fas fa-star"></i></span>
                             <div class="info-box-content">
@@ -142,30 +142,59 @@
                         <h3 class="card-title">Tin đăng gần đây</h3>
                     </div>
                     <div class="card-body p-0">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Tiêu đề</th>
-                                    <th>Giá</th>
-                                    <th>Lượt xem</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Căn hộ cao cấp Q7...</td>
-                                    <td>3.2 tỷ</td>
-                                    <td>245</td>
-                                    <td><span class="badge badge-success">Đang bán</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Nhà phố mặt tiền...</td>
-                                    <td>15 tỷ</td>
-                                    <td>189</td>
-                                    <td><span class="badge badge-success">Đang bán</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        @{
+                            var properties = Model.Properties as IEnumerable<dynamic>;
+                        }
+                        @if (properties != null && properties.Any())
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Tiêu đề</th>
+                                        <th>Giá</th>
+                                        <th>Lượt xem</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var property in properties)
+                                    {
+                                        <tr style="cursor: pointer;" onclick="showPropertyDetails(@property.Id)">
+                                            <td>@property.Title</td>
+                                            <td>@string.Format("{0:N0}", property.Price) @property.Currency</td>
+                                            <td>@property.Views</td>
+                                            <td>
+                                                @{
+                                                    var status = property.Status?.ToString() ?? "N/A";
+                                                }
+                                                @if (status == "Đang bán")
+                                                {
+                                                    <span class="badge badge-success">@status</span>
+                                                }
+                                                else if (status == "Chờ duyệt")
+                                                {
+                                                    <span class="badge badge-warning">@status</span>
+                                                }
+                                                else if (status == "Cho thuê")
+                                                {
+                                                    <span class="badge badge-info">@status</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-secondary">@status</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="p-3 text-center text-muted">
+                                <p>Chưa có tin đăng nào.</p>
+                            </div>
+                        }
                     </div>
                 </div>
 
@@ -211,4 +240,113 @@
         </div>
     </div>
 </section>
+
+<!-- Modal for Property Details -->
+<div class="modal fade" id="propertyDetailsModal" tabindex="-1" role="dialog" aria-labelledby="propertyDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="propertyDetailsModalLabel">Chi tiết Bất động sản</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="propertyDetailsContent">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showPropertyDetails(propertyId) {
+            $('#propertyDetailsModal').modal('show');
+            $('#propertyDetailsContent').html('<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Đang tải...</span></div></div>');
+            
+            $.ajax({
+                url: '/RealEstateAdmin/Properties/GetPropertyDetails',
+                type: 'GET',
+                data: { id: propertyId },
+                success: function(data) {
+                    var imagePath = data.image;
+                    if (imagePath && imagePath.startsWith('~/')) {
+                        imagePath = imagePath.replace('~/', '/');
+                    }
+                    if (!imagePath || imagePath === 'https://via.placeholder.com/100x80') {
+                        imagePath = '/assets/images/banner/banner-property-12.jpg';
+                    }
+                    
+                    var html = `
+                        <div class="row">
+                            <div class="col-md-4">
+                                <img src="${imagePath}" alt="${data.title}" class="img-fluid rounded" onerror="this.src='/assets/images/banner/banner-property-12.jpg'">
+                            </div>
+                            <div class="col-md-8">
+                                <h4 class="mb-3">${data.title}</h4>
+                                <div class="mb-2">
+                                    <strong>Giá:</strong> 
+                                    <span class="text-danger font-weight-bold">${formatNumber(data.price)} ${data.currency}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Loại:</strong> ${data.type}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Trạng thái:</strong> 
+                                    <span class="badge badge-${getStatusBadgeClass(data.status)}">${data.status}</span>
+                                    ${data.isVip ? '<span class="badge badge-danger ml-2"><i class="fas fa-star"></i> VIP</span>' : ''}
+                                </div>
+                                ${data.area ? `<div class="mb-2"><strong>Diện tích:</strong> ${formatNumber(data.area)} m²</div>` : ''}
+                                ${data.bedrooms ? `<div class="mb-2"><strong>Phòng ngủ:</strong> ${data.bedrooms}</div>` : ''}
+                                ${data.bathrooms ? `<div class="mb-2"><strong>Phòng tắm:</strong> ${data.bathrooms}</div>` : ''}
+                                ${data.lotSize ? `<div class="mb-2"><strong>Diện tích đất:</strong> ${formatNumber(data.lotSize)} m²</div>` : ''}
+                                <div class="mb-2">
+                                    <strong>Địa chỉ:</strong> ${data.address}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Khu vực:</strong> ${data.neighborhood !== 'N/A' ? data.neighborhood + ', ' : ''}${data.district !== 'N/A' ? data.district + ', ' : ''}${data.city}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Người đăng:</strong> ${data.agentName}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Lượt xem:</strong> ${data.views}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Ngày tạo:</strong> ${data.createdAt}
+                                </div>
+                                <div class="mt-3">
+                                    <strong>Mô tả:</strong>
+                                    <p class="text-muted">${data.description}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $('#propertyDetailsContent').html(html);
+                },
+                error: function() {
+                    $('#propertyDetailsContent').html('<div class="alert alert-danger">Không thể tải thông tin bất động sản. Vui lòng thử lại sau.</div>');
+                }
+            });
+        }
+        
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        function getStatusBadgeClass(status) {
+            if (status.includes('Đang bán') || status.includes('bán')) return 'success';
+            if (status.includes('Chờ duyệt') || status.includes('duyệt')) return 'warning';
+            if (status.includes('Cho thuê') || status.includes('thuê')) return 'info';
+            return 'secondary';
+        }
+    </script>
+}
 

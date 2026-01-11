@@ -78,3 +78,4 @@ SELECT TOP 5 * FROM [dbo].[ContactUs] ORDER BY [CreatedAt] DESC;
 
 PRINT 'Hoàn tất kiểm tra bảng ContactUs!';
 
+

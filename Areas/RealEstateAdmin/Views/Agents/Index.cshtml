@@ -27,43 +27,65 @@
             <div class="card-header">
                 <h3 class="card-title">Danh sách Môi giới</h3>
                 <div class="card-tools">
-                    <button class="btn btn-primary btn-sm">
+                    @* <button class="btn btn-primary btn-sm">
                         <i class="fas fa-user-plus"></i> Thêm môi giới
-                    </button>
+                    </button> *@
                 </div>
             </div>
 
             <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" placeholder="Tìm kiếm môi giới...">
+                <form method="get" action="/RealEstateAdmin/Agents" id="filterForm">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <input type="text" name="searchString" class="form-control" placeholder="Tìm kiếm môi giới..." value="@ViewBag.SearchString">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="status" class="form-control" onchange="document.getElementById('filterForm').submit();">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="Active" selected="@(ViewBag.Status == "Active")">Active</option>
+                                <option value="Inactive" selected="@(ViewBag.Status == "Inactive")">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select name="sortBy" class="form-control" onchange="document.getElementById('filterForm').submit();">
+                                <option value="">Sắp xếp theo</option>
+                                <option value="properties" selected="@(ViewBag.SortBy == "properties")">Nhiều tin nhất</option>
+                                <option value="rating" selected="@(ViewBag.SortBy == "rating")">Rating cao nhất</option>
+                                <option value="newest" selected="@(ViewBag.SortBy == "newest")">Mới nhất</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-info"><i class="fas fa-search"></i> Tìm</button>
+                            @if (!string.IsNullOrEmpty(ViewBag.SearchString) || !string.IsNullOrEmpty(ViewBag.Status) || !string.IsNullOrEmpty(ViewBag.SortBy))
+                            {
+                                <a href="/RealEstateAdmin/Agents" class="btn btn-secondary ml-1"><i class="fas fa-times"></i> Xóa bộ lọc</a>
+                            }
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <select class="form-control">
-                            <option>Tất cả trạng thái</option>
-                            <option>Active</option>
-                            <option>Inactive</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-control">
-                            <option>Sắp xếp theo</option>
-                            <option>Nhiều tin nhất</option>
-                            <option>Rating cao nhất</option>
-                            <option>Mới nhất</option>
-                        </select>
-                    </div>
-                </div>
+                </form>
 
-                <div class="row">
-                    @foreach (var agent in Model)
-                    {
+                @if (Model != null && Model.Any())
+                {
+                    <div class="row">
+                        @foreach (var agent in Model)
+                        {
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-3 text-center">
-                                            <img src="@agent.Avatar" alt="Avatar" class="img-circle" style="width: 80px; height: 80px;">
+                                            @{
+                                                var avatarPath = agent.Avatar;
+                                                if (string.IsNullOrEmpty(avatarPath))
+                                                {
+                                                    avatarPath = "/assets/images/avatar/avatarMacDinh.jpg";
+                                                }
+                                                else if (!avatarPath.StartsWith("http://") && !avatarPath.StartsWith("https://") && !avatarPath.StartsWith("/"))
+                                                {
+                                                    avatarPath = "/assets/images/avatar/" + avatarPath.TrimStart('/');
+                                                }
+                                            }
+                                            <img src="@avatarPath" alt="Avatar" class="img-circle" style="width: 80px; height: 80px; object-fit: cover;" onerror="this.src='/assets/images/avatar/avatarMacDinh.jpg'">
                                         </div>
                                         <div class="col-md-9">
                                             <h5><strong>@agent.Name</strong></h5>
@@ -117,9 +139,6 @@
                                                 <a href="/RealEstateAdmin/agents/detail/@agent.Id" class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye"></i> Xem chi tiết
                                                 </a>
-                                                <button class="btn btn-sm btn-warning">
-                                                    <i class="fas fa-edit"></i> Sửa
-                                                </button>
                                                 <form asp-action="Delete" asp-route-id="@agent.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa môi giới này?');">
                                                     <button type="submit" class="btn btn-sm btn-danger">
                                                         <i class="fas fa-trash"></i> Xóa
@@ -131,8 +150,15 @@
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Không tìm thấy môi giới nào.
+                    </div>
+                }
             </div>
         </div>
     </div>

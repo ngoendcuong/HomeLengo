@@ -14,18 +14,53 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string status, int? rating)
         {
-            var reviews = await _context.Reviews
+            var query = _context.Reviews
                 .Include(r => r.User)
                 .Include(r => r.Property)
                     .ThenInclude(p => p.Agent)
                         .ThenInclude(a => a.User)
+                .AsQueryable();
+
+            // Tìm kiếm
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(r => 
+                    (r.User != null && ((r.User.FullName != null && r.User.FullName.Contains(searchString)) ||
+                                       (r.User.Username != null && r.User.Username.Contains(searchString)))) ||
+                    (r.Property != null && r.Property.Title != null && r.Property.Title.Contains(searchString)) ||
+                    (r.Body != null && r.Body.Contains(searchString)));
+            }
+
+            // Filter theo trạng thái
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (status == "approved")
+                {
+                    query = query.Where(r => r.IsApproved == true);
+                }
+                else if (status == "pending")
+                {
+                    query = query.Where(r => r.IsApproved != true);
+                }
+            }
+
+            // Filter theo rating
+            if (rating.HasValue && rating.Value > 0)
+            {
+                query = query.Where(r => r.Rating == rating.Value);
+            }
+
+            var reviews = await query.ToListAsync();
+            
+            var reviewsList = reviews
                 .Select(r => new
                 {
                     Id = r.ReviewId,
                     User = r.User != null ? (r.User.FullName ?? r.User.Username) : "N/A",
                     Property = r.Property != null ? r.Property.Title : "N/A",
+                    PropertyId = r.PropertyId,
                     Agent = r.Property != null && r.Property.Agent != null && r.Property.Agent.User != null
                         ? (r.Property.Agent.User.FullName ?? r.Property.Agent.User.Username)
                         : "N/A",
@@ -37,9 +72,64 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                         : ""
                 })
                 .OrderByDescending(r => r.CreatedDate)
-                .ToListAsync();
+                .ToList();
 
-            return View(reviews);
+            // Thống kê
+            var totalReviews = await _context.Reviews.CountAsync();
+            var approvedReviews = await _context.Reviews.CountAsync(r => r.IsApproved == true);
+            var pendingReviews = await _context.Reviews.CountAsync(r => r.IsApproved != true);
+            var avgRating = await _context.Reviews
+                .Where(r => r.IsApproved == true)
+                .AverageAsync(r => (double?)r.Rating) ?? 0.0;
+
+            ViewBag.TotalReviews = totalReviews;
+            ViewBag.ApprovedReviews = approvedReviews;
+            ViewBag.PendingReviews = pendingReviews;
+            ViewBag.AvgRating = Math.Round(avgRating, 1);
+            ViewBag.SearchString = searchString;
+            ViewBag.Status = status;
+            ViewBag.Rating = rating;
+
+            return View(reviewsList);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+            if (review != null)
+            {
+                review.IsApproved = true;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã duyệt đánh giá thành công!";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Reject(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+            if (review != null)
+            {
+                review.IsApproved = false;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã từ chối đánh giá!";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+            if (review != null)
+            {
+                _context.Reviews.Remove(review);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã xóa đánh giá thành công!";
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -57,12 +57,18 @@
                                     </span>
                                 </div>
                                 <div class="info-box-footer">
-                                    <button class="btn btn-xs btn-warning mr-1">
+                                    <button class="btn btn-xs btn-warning mr-1 btn-edit-amenity" 
+                                            data-id="@amenity.Id" 
+                                            data-name="@amenity.Name"
+                                            data-toggle="modal" 
+                                            data-target="#editAmenityModal">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-xs btn-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <form asp-action="DeleteAmenity" asp-route-id="@amenity.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tiện ích này?');">
+                                        <button type="submit" class="btn btn-xs btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -82,35 +88,17 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <form>
+                <form asp-action="CreateAmenity" method="post">
+                    @Html.AntiForgeryToken()
                     <div class="form-group">
                         <label>Tên tiện ích <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" placeholder="VD: Hồ bơi">
+                        <input type="text" name="Name" class="form-control" placeholder="VD: Hồ bơi" required>
                     </div>
-                    <div class="form-group">
-                        <label>Slug</label>
-                        <input type="text" class="form-control" placeholder="ho-boi">
-                    </div>
-                    <div class="form-group">
-                        <label>Icon (FontAwesome)</label>
-                        <input type="text" class="form-control" placeholder="fa-swimming-pool">
-                        <small class="text-muted">Tìm icon tại: <a href="https://fontawesome.com/icons" target="_blank">fontawesome.com</a></small>
-                    </div>
-                    <div class="form-group">
-                        <label>Thứ tự</label>
-                        <input type="number" class="form-control" value="1">
-                    </div>
-                    <div class="form-group">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="amenityActive" checked>
-                            <label class="custom-control-label" for="amenityActive">Kích hoạt</label>
-                        </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
                     </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary">Lưu</button>
             </div>
         </div>
     </div>

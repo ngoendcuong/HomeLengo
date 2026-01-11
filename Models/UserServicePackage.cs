@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace HomeLengo.Models;
@@ -23,4 +23,3 @@ public partial class UserServicePackage
 
     public virtual User User { get; set; } = null!;
 }
-
