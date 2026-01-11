@@ -1,0 +1,260 @@
+﻿@* Areas/RealEstateAdmin/Views/Settings/Banners.cshtml *@
+@model IEnumerable<dynamic>
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Banner & Slider";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Quản lý Banner & Slider</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
+                    <li class="breadcrumb-item">Cấu hình</li>
+                    <li class="breadcrumb-item active">Banner & Slider</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Danh sách Banner</h3>
+                <div class="card-tools">
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addBannerModal">
+                        <i class="fas fa-plus"></i> Thêm Banner
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var banner in Model)
+                    {
+                        <div class="col-md-4 mb-3">
+                            <div class="card @(banner.IsActive ? "border-success" : "border-secondary")">
+                                <img src="@banner.Image" class="card-img-top" alt="Banner">
+                                <div class="card-body">
+                                    <h5 class="card-title">@banner.Title</h5>
+                                    <p class="card-text">
+                                        <small class="text-muted">Thứ tự: @banner.Order</small>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            @if (banner.IsActive)
+                                            {
+                                                <span class="badge badge-success">Đang hiển thị</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary">Đã ẩn</span>
+                                            }
+                                        </div>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-warning" title="Sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            @if (banner.IsActive)
+                                            {
+                                                <button class="btn btn-sm btn-secondary" title="Ẩn">
+                                                    <i class="fas fa-eye-slash"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-success" title="Hiện">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            }
+                                            <button class="btn btn-sm btn-danger" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Vị trí Banner -->
+        <div class="card">
+            <div class="card-header bg-info">
+                <h3 class="card-title">Vị trí Banner trên Website</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="info-box bg-gradient-primary">
+                            <span class="info-box-icon"><i class="fas fa-desktop"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Banner Trang chủ</span>
+                                <span class="info-box-number">Slider chính</span>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 100%"></div>
+                                </div>
+                                <span class="progress-description">
+                                    Kích thước: 1920x600px
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box bg-gradient-success">
+                            <span class="info-box-icon"><i class="fas fa-columns"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Banner Sidebar</span>
+                                <span class="info-box-number">Cột bên phải</span>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 100%"></div>
+                                </div>
+                                <span class="progress-description">
+                                    Kích thước: 300x600px
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="info-box bg-gradient-warning">
+                            <span class="info-box-icon"><i class="fas fa-rectangle-ad"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Banner Giữa trang</span>
+                                <span class="info-box-number">Content middle</span>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: 100%"></div>
+                                </div>
+                                <span class="progress-description">
+                                    Kích thước: 728x90px
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i> <strong>Lưu ý:</strong>
+                    Tất cả banner nên được tối ưu dung lượng (dưới 500KB) để website load nhanh hơn.
+                    Sử dụng định dạng WebP hoặc JPEG để giảm kích thước file.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Thêm Banner -->
+<div class="modal fade" id="addBannerModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h4 class="modal-title">Thêm Banner mới</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>Tiêu đề <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="VD: Banner trang chủ 1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mô tả / Alt text</label>
+                        <input type="text" class="form-control" placeholder="Mô tả ngắn gọn về banner">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Hình ảnh <span class="text-danger">*</span></label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="bannerImage">
+                            <label class="custom-file-label" for="bannerImage">Chọn file...</label>
+                        </div>
+                        <small class="text-muted">Khuyến nghị: 1920x600px cho slider trang chủ</small>
+                        <div class="mt-2">
+                            <img id="bannerPreview" src="https://via.placeholder.com/600x200?text=Preview" class="img-fluid">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Link đích (URL)</label>
+                        <input type="url" class="form-control" placeholder="https://homelengo.vn/du-an-abc">
+                        <small class="text-muted">Để trống nếu không cần link</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Vị trí</label>
+                                <select class="form-control">
+                                    <option>Banner trang chủ (Slider)</option>
+                                    <option>Banner sidebar</option>
+                                    <option>Banner giữa trang</option>
+                                    <option>Banner footer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Thứ tự hiển thị</label>
+                                <input type="number" class="form-control" value="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ngày bắt đầu</label>
+                        <input type="datetime-local" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ngày kết thúc</label>
+                        <input type="datetime-local" class="form-control">
+                        <small class="text-muted">Banner sẽ tự động ẩn sau ngày này</small>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="openNewTab" checked>
+                            <label class="custom-control-label" for="openNewTab">Mở link trong tab mới</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="bannerActive" checked>
+                            <label class="custom-control-label" for="bannerActive">Kích hoạt ngay</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Lưu Banner
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Preview ảnh banner
+        $('#bannerImage').change(function() {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#bannerPreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(this.files[0]);
+        });
+    </script>
+}

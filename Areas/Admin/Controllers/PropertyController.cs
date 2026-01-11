@@ -92,49 +92,16 @@ namespace HomeLengo.Areas.Admin.Controllers
         }
 
         // GET: Admin/Property/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // Redirect to root Property/Details to use the shared view
+        public IActionResult Details(int? id)
         {
-            var userIdStr = HttpContext.Session.GetString("UserId");
-            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
-            {
-                return RedirectToAction("Index", "Home", new { area = "" });
-            }
-
-            var agent = _context.Agents.FirstOrDefault(a => a.UserId == userId);
-            if (agent == null)
-            {
-                return NotFound();
-            }
-
             if (id == null)
             {
                 return NotFound();
             }
-
-            var property = await _context.Properties
-                .Where(p => p.AgentId == agent.AgentId)
-                .Include(p => p.Status)
-                .Include(p => p.PropertyType)
-                .Include(p => p.City)
-                .Include(p => p.District)
-                .Include(p => p.Neighborhood)
-                .Include(p => p.Agent)
-                    .ThenInclude(a => a.User)
-                .Include(p => p.PropertyPhotos.OrderBy(pp => pp.SortOrder))
-                .Include(p => p.PropertyVideos.OrderBy(pv => pv.SortOrder))
-                .Include(p => p.PropertyFloorPlans.OrderBy(pfp => pfp.SortOrder))
-                .Include(p => p.PropertyAmenities)
-                    .ThenInclude(pa => pa.Amenity)
-                .Include(p => p.PropertyFeatures)
-                    .ThenInclude(pf => pf.Feature)
-                .FirstOrDefaultAsync(m => m.PropertyId == id);
-
-            if (property == null)
-            {
-                return NotFound();
-            }
-
-            return View(property);
+            
+            // Redirect to root Property controller Details action
+            return RedirectToAction("Details", "Property", new { id = id, area = "" });
         }
 
         // GET: Admin/Property/Create

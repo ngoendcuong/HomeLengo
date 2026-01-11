@@ -1,0 +1,117 @@
+﻿@* Areas/RealEstateAdmin/Views/Categories/Amenities.cshtml *@
+@model IEnumerable<dynamic>
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Tiện ích";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Quản lý Tiện ích</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
+                    <li class="breadcrumb-item">Danh mục</li>
+                    <li class="breadcrumb-item active">Tiện ích</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Danh sách Tiện ích</h3>
+                <div class="card-tools">
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addAmenityModal">
+                        <i class="fas fa-plus"></i> Thêm tiện ích
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var amenity in Model)
+                    {
+                        <div class="col-md-3 col-sm-6">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info">
+                                    <i class="fas @amenity.Icon"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">@amenity.Name</span>
+                                    <span class="info-box-number">
+                                        @if (amenity.IsActive)
+                                        {
+                                            <span class="badge badge-success">Kích hoạt</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">Ẩn</span>
+                                        }
+                                    </span>
+                                </div>
+                                <div class="info-box-footer">
+                                    <button class="btn btn-xs btn-warning mr-1">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-xs btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Thêm -->
+<div class="modal fade" id="addAmenityModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h4 class="modal-title">Thêm Tiện ích</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>Tên tiện ích <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="VD: Hồ bơi">
+                    </div>
+                    <div class="form-group">
+                        <label>Slug</label>
+                        <input type="text" class="form-control" placeholder="ho-boi">
+                    </div>
+                    <div class="form-group">
+                        <label>Icon (FontAwesome)</label>
+                        <input type="text" class="form-control" placeholder="fa-swimming-pool">
+                        <small class="text-muted">Tìm icon tại: <a href="https://fontawesome.com/icons" target="_blank">fontawesome.com</a></small>
+                    </div>
+                    <div class="form-group">
+                        <label>Thứ tự</label>
+                        <input type="number" class="form-control" value="1">
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="amenityActive" checked>
+                            <label class="custom-control-label" for="amenityActive">Kích hoạt</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>

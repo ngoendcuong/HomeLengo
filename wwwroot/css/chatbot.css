@@ -1,0 +1,231 @@
+﻿:root {
+    --hl-blue: #1f7df7;
+    --hl-bg: #f4f6f8;
+    --hl-text: #111827;
+    --hl-muted: #6b7280;
+    --hl-border: rgba(17,24,39,.08);
+    --hl-shadow: 0 16px 40px rgba(0,0,0,.18);
+    --hl-radius: 18px;
+}
+
+/* Nút mở chat (floating) */
+.hl-open-chat {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 56px;
+    height: 56px;
+    border: none;
+    border-radius: 50%;
+    background: var(--hl-blue);
+    color: #fff;
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 10px 24px rgba(31,125,247,.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Popup */
+.hl-chat {
+    position: fixed;
+    right: 20px;
+    bottom: 90px;
+    width: 360px;
+    height: 520px;
+    background: var(--hl-bg);
+    border-radius: 22px;
+    box-shadow: var(--hl-shadow);
+    overflow: hidden;
+    z-index: 9999;
+    display: none; /* toggle */
+    border: 1px solid rgba(255,255,255,.35);
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+}
+
+/* Header */
+.hl-chat__header {
+    height: 64px;
+    background: var(--hl-blue);
+    color: #fff;
+    padding: 12px 12px 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: visible;
+}
+
+.hl-chat__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.hl-chat__logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+}
+
+.hl-chat__logo img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+
+.hl-chat__name {
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hl-chat__actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hl-chat__iconbtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 0;
+    background: rgba(255,255,255,.18);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+    .hl-chat__iconbtn:hover {
+        background: rgba(255,255,255,.26);
+    }
+
+/* Body */
+.hl-chat__body {
+    height: calc(520px - 58px - 150px);
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Bubble chung */
+.hl-msg {
+    max-width: 82%;
+    padding: 10px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.35;
+    word-break: break-word;
+    position: relative;
+}
+
+/* Bot bubble: trắng, giống ảnh */
+.hl-msg--bot {
+    align-self: flex-start;
+    background: #fff;
+    color: var(--hl-text);
+    border: 1px solid var(--hl-border);
+    border-top-left-radius: 10px;
+}
+
+/* User bubble: xanh (đẹp, dễ nhìn) */
+.hl-msg--user {
+    align-self: flex-end;
+    background: var(--hl-blue);
+    color: #fff;
+    border-top-right-radius: 10px;
+}
+
+/* Footer */
+.hl-chat__footer {
+    padding: 12px 12px 14px 12px;
+    background: transparent;
+}
+
+.hl-chat__inputwrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid var(--hl-border);
+    border-radius: 18px;
+    padding: 10px 10px 10px 12px;
+    box-shadow: 0 8px 18px rgba(0,0,0,.06);
+}
+
+.hl-chat__input {
+    flex: 1;
+    border: 0;
+    outline: none;
+    font-size: 14px;
+    color: var(--hl-text);
+    background: transparent;
+}
+
+    .hl-chat__input::placeholder {
+        color: #9ca3af;
+    }
+
+.hl-chat__send {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: var(--hl-blue);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    box-shadow: 0 10px 22px rgba(31,125,247,.30);
+}
+
+    .hl-chat__send:hover {
+        filter: brightness(.98);
+    }
+
+.hl-chat__disclaimer {
+    margin-top: 10px;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--hl-muted);
+    padding: 0 4px;
+}
+
+/* Scrollbar đẹp (Chrome/Edge) */
+.hl-chat__body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.hl-chat__body::-webkit-scrollbar-thumb {
+    background: rgba(17,24,39,.14);
+    border-radius: 10px;
+    border: 3px solid rgba(0,0,0,0);
+    background-clip: padding-box;
+}
+
+/* Mobile nhỏ thì co */
+@media (max-width: 420px) {
+    .hl-chat {
+        width: calc(100vw - 24px);
+        right: 12px;
+    }
+
+    .hl-open-chat {
+        right: 12px;
+    }
+}

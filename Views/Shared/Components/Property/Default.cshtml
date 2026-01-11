@@ -1,19 +1,122 @@
 ﻿@model IEnumerable<HomeLengo.Models.Property>
 
+<style>
+    .property-grid-equal-height {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .property-grid-equal-height > div {
+        display: flex;
+    }
+    
+    .property-grid-equal-height .homelengo-box {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .property-grid-equal-height .homelengo-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    
+    .property-grid-equal-height .archive-top {
+        flex-shrink: 0;
+    }
+    
+    .property-grid-equal-height .images-style {
+        width: 100%;
+        height: 280px;
+        overflow: hidden;
+    }
+    
+    .property-grid-equal-height .images-style img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .property-grid-equal-height .homelengo-box:hover .images-style img {
+        transform: scale(1.05);
+    }
+    
+    .property-grid-equal-height .archive-bottom {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+    }
+    
+    .property-grid-equal-height .content-top {
+        flex: 1;
+    }
+    
+    .property-grid-equal-height .content-top h6 {
+        margin-bottom: 12px;
+        line-height: 1.4;
+        min-height: 2.8em;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .property-grid-equal-height .content-bottom {
+        margin-top: auto;
+        padding-top: 15px;
+    }
+</style>
+
+<div class="row property-grid-equal-height">
 @foreach (var item in Model.Take(6))    
 {
     var primaryPhoto = item.PropertyPhotos?
-    .FirstOrDefault(p => p.AltText != null && p.AltText.Contains("Hình 1"))
+    .OrderByDescending(p => p.IsPrimary == true)
+    .ThenBy(p => p.SortOrder ?? 0)
+    .FirstOrDefault()
+    ?? item.PropertyPhotos?.FirstOrDefault(p => p.AltText != null && p.AltText.Contains("Hình 1"))
     ?? item.PropertyPhotos?.FirstOrDefault();
 
-    <div class="col-xl-4 col-lg-6 col-md-6">
+    <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
         <div class="homelengo-box">
             <div class="archive-top">
                 <a href="/Property/Details/@item.PropertyId" class="images-group">
                     <div class="images-style">
+                        @{
+                            string GetImagePath(PropertyPhoto photo)
+                            {
+                                if (photo == null || string.IsNullOrEmpty(photo.FilePath))
+                                    return "~/assets/images/banner/banner-property-12.jpg";
+                                
+                                var filePath = photo.FilePath.Trim();
+                                if (filePath.StartsWith("~/"))
+                                    return filePath;
+                                if (filePath.StartsWith("/"))
+                                    return "~" + filePath;
+                                if (filePath.Contains("assets/images/property/"))
+                                    // Tin mới: assets/images/property/xxx.jpg
+                                    return "~/" + filePath.TrimStart('/');
+                                if (filePath.Contains("assets/images/home/"))
+                                    // Tin cũ: assets/images/home/xxx.jpg
+                                    return "~/" + filePath.TrimStart('/');
+                                if (filePath.Contains("assets/"))
+                                    return "~/" + filePath.TrimStart('/');
+                                // Chỉ là tên file, mặc định là tin cũ (home)
+                                return $"~/assets/images/home/{filePath.TrimStart('/')}";
+                            }
+                            var imagePath = GetImagePath(primaryPhoto);
+                        }
                         <img class="lazyload"
-                             data-src="~/assets/images/home/@primaryPhoto?.FilePath"
-                             src="~/assets/images/home/@primaryPhoto?.FilePath"
+                             data-src="@Url.Content(imagePath)"
+                             src="@Url.Content(imagePath)"
                              alt="@item.Title" />
                     </div>
 
@@ -95,3 +198,4 @@
         </div>
     </div>
 }
+</div>

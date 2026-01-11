@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace HomeLengo.Models;
 
@@ -16,6 +18,9 @@ public partial class AgentProfile
     public string? Description { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    [NotMapped]
+    public IFormFile? AvatarFile { get; set; }
 
     public virtual ServiceRegister ServiceRegister { get; set; } = null!;
 }

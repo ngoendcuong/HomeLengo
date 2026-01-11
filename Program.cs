@@ -1,4 +1,5 @@
-﻿using HomeLengo.Hubs;
+﻿// Program.cs
+using HomeLengo.Hubs;
 using HomeLengo.Models;
 //using HomeLengo.Services;
 using Microsoft.EntityFrameworkCore;
@@ -24,12 +25,12 @@ builder.Services.AddSession(options =>
 });
 
 // --- ĐĂNG KÝ SERVICE TẠI ĐÂY ---
-
 // 1. SignalR
 builder.Services.AddSignalR();
 
 // 2. HttpClient (để gọi API Gemini)
 builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
 
 // 3. Đăng ký các Service ta vừa viết
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -41,7 +42,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -54,8 +54,23 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 // --- ĐỊNH TUYẾN HUB ---
-app.MapHub<ChatHub>("/chatHub"); // Đường dẫn này để JS kết nối
+app.MapHub<ChatHub>("/chatHub");
 
+// --- ROUTE CHO ADMIN 1: Admin Area ---
+app.MapControllerRoute(
+    name: "admin_area",
+    pattern: "admin/{controller=Dashboard}/{action=Index}/{id?}",
+    defaults: new { area = "Admin" }
+);
+
+// --- ROUTE CHO ADMIN 2: RealEstateAdmin Area ---
+app.MapControllerRoute(
+    name: "realestate_admin_area",
+    pattern: "RealEstateAdmin/{controller=Dashboard}/{action=Index}/{id?}",
+    defaults: new { area = "RealEstateAdmin" }
+);
+
+// --- ROUTE MẶC ĐỊNH CHO AREAS KHÁC ---
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
@@ -66,10 +81,10 @@ app.MapControllerRoute(
     defaults: new { controller = "Contact", action = "Index" }
 );
 
+// --- ROUTE MẶC ĐỊNH ---
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

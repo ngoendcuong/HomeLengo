@@ -9,7 +9,33 @@
     <div class="container">
         <div class="header-property-detail">
             <div class="content-top d-flex justify-content-between align-items-center">
-                <h3 class="title link fw-8">@Model.Title</h3>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <h3 class="title link fw-8 mb-0">@Model.Title</h3>
+                    @{
+                        // Xác định loại: Đăng bán hoặc Cho thuê
+                        string statusBadgeText = "";
+                        string statusBadgeClass = "";
+                        if (Model.StatusId == 1 || (Model.Status?.Name != null && (Model.Status.Name.Contains("Bán") || Model.Status.Name.Contains("bán"))))
+                        {
+                            statusBadgeText = "Đăng bán";
+                            statusBadgeClass = "status-badge-sale";
+                        }
+                        else if (Model.StatusId == 2 || (Model.Status?.Name != null && (Model.Status.Name.Contains("Thuê") || Model.Status.Name.Contains("thuê"))))
+                        {
+                            statusBadgeText = "Cho thuê";
+                            statusBadgeClass = "status-badge-rent";
+                        }
+                        else if (Model.Status != null)
+                        {
+                            statusBadgeText = Model.Status.Name;
+                            statusBadgeClass = "status-badge-default";
+                        }
+                    }
+                    @if (!string.IsNullOrEmpty(statusBadgeText))
+                    {
+                        <span class="status-badge @statusBadgeClass">@statusBadgeText</span>
+                    }
+                </div>
                 <div class="box-price d-flex align-items-end">
                     <h3 class="fw-8">@Model.Price.ToString("N0")</h3>
                     <span class="body-1 text-variant-1">@(Model.Currency ?? "VND")</span>
@@ -120,6 +146,7 @@
         : new List<PropertyPhoto>();
     
     // Hàm helper để lấy đường dẫn ảnh đúng
+    // Phân biệt tin cũ (home) và tin mới (property)
     string GetImagePath(string filePath)
     {
         if (string.IsNullOrEmpty(filePath))
@@ -135,11 +162,23 @@
         if (filePath.StartsWith("/"))
             return "~" + filePath;
         
-        // Nếu FilePath đã chứa "assets/", thêm ~/ vào đầu
+        // Nếu FilePath đã chứa đường dẫn đầy đủ, thêm ~/ vào đầu
         if (filePath.Contains("assets/"))
+        {
+            // Tin mới: assets/images/property/xxx.jpg
+            if (filePath.Contains("assets/images/property/"))
+                return "~/" + filePath.TrimStart('/');
+            
+            // Tin cũ: assets/images/home/xxx.jpg
+            if (filePath.Contains("assets/images/home/"))
+                return "~/" + filePath.TrimStart('/');
+            
+            // Nếu có assets/ nhưng không rõ property hay home, giữ nguyên
             return "~/" + filePath.TrimStart('/');
+        }
         
-        // Nếu chỉ là tên file, thêm đường dẫn mặc định (giống như trong Property component)
+        // Nếu chỉ là tên file (không có đường dẫn), mặc định là tin cũ (home)
+        // Để giữ nguyên logic ban đầu cho tin cũ
         return "~/assets/images/home/" + filePath.TrimStart('/');
     }
 }
@@ -529,50 +568,6 @@
                     </div>
                 }
                 
-                @* File Attachments Section *@
-                <div class="single-property-element single-property-attachments">
-                    <h6 class="title fw-6">Tệp đính kèm</h6>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <a href="#" target="_blank" class="attachments-item">
-                                <div class="box-icon w-60">
-                                    <img src="@Url.Content("~/assets/images/home/file-1.png")" alt="file">
-                                </div>
-                                <span>Tài liệu bất động sản.pdf</span>
-                                <i class="icon icon-download"></i>
-                            </a>
-                        </div>
-                        <div class="col-sm-6">
-                            <a href="#" target="_blank" class="attachments-item">
-                                <div class="box-icon w-60">
-                                    <img src="@Url.Content("~/assets/images/home/file-2.png")" alt="file">
-                                </div>
-                                <span>Tài liệu bất động sản.pdf</span>
-                                <i class="icon icon-download"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                @* Explore Property (360 View) Section *@
-                <div class="single-property-element single-property-explore">
-                    <h5 class="title fw-6">Khám phá bất động sản</h5>
-                    <div class="box-img">
-                        @if (photos.Any())
-                        {
-                            var exploreImage = GetImagePath(photos.First().FilePath);
-                            <img src="@Url.Content(exploreImage)" alt="@Model.Title">
-                        }
-                        else
-                        {
-                            <img src="@Url.Content("~/assets/images/banner/banner-property-12.jpg")" alt="@Model.Title">
-                        }
-                        <div class="box-icon">
-                            <span class="icon icon-360"></span>
-                        </div>
-                    </div>
-                </div>
-                
                 @* Loan Calculator - Moved to main content *@
                 <div class="single-property-element single-property-loan">
                     <h5 class="title fw-6">Máy tính vay</h5>
@@ -604,55 +599,7 @@
                             </div>
                     </form>
                 </div>
-                
-                @* What's Nearby Section *@
-                <div class="single-property-element single-property-nearby">
-                    <h5 class="title fw-6">Xung quanh có gì?</h5>
-                    <p>Khám phá các tiện ích gần đây để xác định chính xác vị trí bất động sản của bạn và xác định các tiện ích xung quanh, cung cấp cái nhìn tổng quan về môi trường sống và sự tiện lợi của bất động sản.</p>
-                    <div class="row box-nearby">
-                        <div class="col-md-5">
-                            <ul class="box-left">
-                                <li class="item-nearby">
-                                    <span class="label">Trường học:</span>
-                                    <span class="fw-7">0.7 km</span>
-                                </li>
-                                <li class="item-nearby">
-                                    <span class="label">Đại học:</span>
-                                    <span class="fw-7">1.3 km</span>
-                                </li>
-                                <li class="item-nearby">
-                                    <span class="label">Trung tâm mua sắm:</span>
-                                    <span class="fw-7">0.6 km</span>
-                                </li>
-                                <li class="item-nearby">
-                                    <span class="label">Chợ:</span>
-                                    <span class="fw-7">1.1 km</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-5">
-                            <ul class="box-right">
-                                <li class="item-nearby">
-                                    <span class="label">Bệnh viện:</span>
-                                    <span class="fw-7">0.4 km</span>
-                                </li>
-                                <li class="item-nearby">
-                                    <span class="label">Trạm tàu điện ngầm:</span>
-                                    <span class="fw-7">1.8 km</span>
-                                </li>
-                                <li class="item-nearby">
-                                    <span class="label">Phòng tập, chăm sóc sức khỏe:</span>
-                                    <span class="fw-7">1.3 km</span>
-                                </li>
-                                <li class="item-nearby">
-                                    <span class="label">Sông:</span>
-                                    <span class="fw-7">2.1 km</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
+
                 @* Guest Reviews Section *@
                 <div class="single-property-element single-wrapper-review">
                     <h5 class="title fw-6">Đánh giá của khách</h5>
@@ -720,7 +667,7 @@
                         }
                         <div id="comments" class="comments">
                             <div class="respond-comment">
-                                <form class="comment-form form-submit" id="reviewForm" asp-action="SubmitReview" asp-controller="Property" method="post">
+                                <form class="comment-form form-submit" id="reviewForm" asp-action="SubmitReview" asp-controller="Property" asp-area="" method="post">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="propertyId" value="@Model.PropertyId" />
                                     <div class="form-wg group-ip">
@@ -773,12 +720,12 @@
                         <h5 class="title fw-6">Liên hệ người bán</h5>
                         @if (Model.Agent != null && Model.Agent.User != null)
                         {
-                            <div class="box-avatar">
+                            <a href="@Url.Action("Profile", "Agent", new { id = Model.Agent.AgentId, area = "" })" class="box-avatar clickable-avatar" title="Xem hồ sơ người bán/thuê">
                                 <div class="avatar avt-100 round">
                                     <img src="@Url.Content($"~/assets/images/avatar/{(Model.Agent.User.Avatar ?? "avatarMacDinh.jpg")}")" alt="@Model.Agent.User.FullName">
                                 </div>
                                 <div class="info">
-                                    <h6 class="name">@Model.Agent.User.FullName</h6>
+                                    <h6 class="name">@Model.Agent.User.FullName <i class="icon icon-arrow-right2" style="font-size: 14px; margin-left: 4px;"></i></h6>
                                     <ul class="list">
                                         <li class="d-flex align-items-center gap-4 text-variant-1">
                                             <i class="icon icon-phone"></i>@(Model.Agent.User.Phone ?? "N/A")
@@ -788,7 +735,7 @@
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
+                            </a>
                         }
                         else
                         {
@@ -802,19 +749,21 @@
                             </div>
                         }
                         <form action="#" class="contact-form" id="contactForm">
+                            <input type="hidden" name="propertyId" value="@Model.PropertyId" />
+                            <div id="contactFormMessage" style="display: none; margin-bottom: 15px; padding: 12px; border-radius: 8px;"></div>
                             <div class="ip-group">
-                                <input type="text" name="name" placeholder="Tên của bạn" class="form-control" required>
+                                <input type="text" name="name" id="contactName" placeholder="Tên của bạn" class="form-control" required>
                             </div>
                             <div class="ip-group">
-                                <input type="tel" name="phone" placeholder="vd 0123456789" class="form-control" required>
+                                <input type="tel" name="phone" id="contactPhone" placeholder="vd 0123456789" class="form-control" required>
                             </div>
                             <div class="ip-group">
-                                <input type="email" name="email" placeholder="email@example.com" class="form-control" required>
+                                <input type="email" name="email" id="contactEmail" placeholder="email@example.com" class="form-control" required>
                             </div>
                             <div class="ip-group">
-                                <textarea name="message" rows="4" tabindex="4" placeholder="Tin nhắn" aria-required="true" required></textarea>
+                                <textarea name="message" id="contactMessage" rows="4" tabindex="4" placeholder="Tin nhắn" aria-required="true" required></textarea>
                             </div>
-                            <button type="submit" class="tf-btn btn-view primary hover-btn-view w-100">
+                            <button type="submit" class="tf-btn btn-view primary hover-btn-view w-100" id="contactSubmitBtn">
                                 Gửi tin nhắn <span class="icon icon-arrow-right2"></span>
                             </button>
                         </form>
@@ -871,8 +820,15 @@
                                         return filePath;
                                     if (filePath.StartsWith("/"))
                                         return "~" + filePath;
+                                    if (filePath.Contains("assets/images/property/"))
+                                        // Tin mới: assets/images/property/xxx.jpg
+                                        return "~/" + filePath.TrimStart('/');
+                                    if (filePath.Contains("assets/images/home/"))
+                                        // Tin cũ: assets/images/home/xxx.jpg
+                                        return "~/" + filePath.TrimStart('/');
                                     if (filePath.Contains("assets/"))
                                         return "~/" + filePath.TrimStart('/');
+                                    // Chỉ là tên file, mặc định là tin cũ (home)
                                     return "~/assets/images/home/" + filePath.TrimStart('/');
                                 }
                                 return "~/assets/images/banner/banner-property-12.jpg";
@@ -1048,6 +1004,74 @@
     .favorite-btn:hover .favorite-icon path {
         stroke: #FF6B6B;
     }
+    
+    /* Status Badge Styles */
+    .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        line-height: 1.2;
+    }
+    
+    .status-badge-sale {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #90caf9;
+    }
+    
+    .status-badge-rent {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+        border: 1px solid #ce93d8;
+    }
+    
+    .status-badge-default {
+        background-color: #f5f5f5;
+        color: #616161;
+        border: 1px solid #e0e0e0;
+    }
+    
+    /* Box Avatar Clickable Styles */
+    .box-avatar.clickable-avatar {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-radius: 8px;
+        padding: 8px;
+        margin: -8px;
+    }
+    
+    .box-avatar.clickable-avatar:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .box-avatar.clickable-avatar .name {
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+    }
+    
+    .box-avatar.clickable-avatar:hover .name {
+        color: #007bff;
+    }
+    
+    .box-avatar.clickable-avatar .name i {
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.2s;
+        transform: translateX(-4px);
+    }
+    
+    .box-avatar.clickable-avatar:hover .name i {
+        opacity: 1;
+        transform: translateX(0);
+    }
 </style>
 
 @* Loan Calculator JavaScript *@
@@ -1080,9 +1104,183 @@
     // Contact Form Handler
     document.getElementById('contactForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Cảm ơn tin nhắn của bạn! Chúng tôi sẽ liên hệ sớm.');
-        this.reset();
+        
+        var form = this;
+        var messageDiv = document.getElementById('contactFormMessage');
+        var submitBtn = document.getElementById('contactSubmitBtn');
+        var propertyId = form.querySelector('input[name="propertyId"]').value;
+        var name = document.getElementById('contactName').value.trim();
+        var phone = document.getElementById('contactPhone').value.trim();
+        var email = document.getElementById('contactEmail').value.trim();
+        var message = document.getElementById('contactMessage').value.trim();
+        
+        // Validation
+        if (!name || !phone || !email || !message) {
+            showMessage('Vui lòng điền đầy đủ thông tin', 'error');
+            return;
+        }
+        
+        // Disable button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Đang gửi... <span class="icon icon-arrow-right2"></span>';
+        
+        // Send AJAX request
+        fetch('/Property/SendMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                propertyId: propertyId,
+                name: name,
+                phone: phone,
+                email: email,
+                message: message
+            })
+        })
+        .then(response => {
+            // Kiểm tra xem response có phải JSON không
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                return response.json();
+            } else {
+                // Nếu không phải JSON, đọc text để xem lỗi
+                return response.text().then(text => {
+                    console.error('Server response (not JSON):', text);
+                    throw new Error('Server returned non-JSON response: ' + text.substring(0, 200));
+                });
+            }
+        })
+        .then(data => {
+            if (data && data.success) {
+                showMessage(data.message, 'success');
+                form.reset();
+                // Xóa thông tin form đã lưu
+                clearPendingMessage();
+            } else {
+                if (data && data.isLoggedIn === false) {
+                    // Lưu thông tin form để gửi lại sau khi đăng nhập
+                    savePendingMessage(propertyId, name, phone, email, message);
+                    // Hiển thị popup đăng nhập
+                    showLoginModal();
+                } else {
+                    showMessage(data && data.message ? data.message : 'Có lỗi xảy ra khi gửi tin nhắn', 'error');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error details:', error);
+            showMessage('Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại. Chi tiết: ' + error.message, 'error');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Gửi tin nhắn <span class="icon icon-arrow-right2"></span>';
+        });
     });
+    
+    function showMessage(message, type) {
+        var messageDiv = document.getElementById('contactFormMessage');
+        messageDiv.textContent = message;
+        messageDiv.style.display = 'block';
+        
+        if (type === 'success') {
+            messageDiv.style.backgroundColor = '#d4edda';
+            messageDiv.style.color = '#155724';
+            messageDiv.style.border = '1px solid #c3e6cb';
+        } else {
+            messageDiv.style.backgroundColor = '#f8d7da';
+            messageDiv.style.color = '#721c24';
+            messageDiv.style.border = '1px solid #f5c6cb';
+        }
+        
+        // Auto hide after 5 seconds
+        setTimeout(function() {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+    
+    // Hàm hiển thị popup đăng nhập
+    function showLoginModal() {
+        var loginModal = document.getElementById('modalLogin');
+        if (loginModal) {
+            // Sử dụng Bootstrap modal
+            if (typeof bootstrap !== 'undefined') {
+                var modal = new bootstrap.Modal(loginModal);
+                modal.show();
+                
+                // Lắng nghe sự kiện đăng nhập thành công
+                loginModal.addEventListener('hidden.bs.modal', function onModalHidden() {
+                    // Kiểm tra xem đã đăng nhập chưa và có tin nhắn đang chờ không
+                    checkAndSendPendingMessage();
+                    // Xóa event listener sau khi dùng
+                    loginModal.removeEventListener('hidden.bs.modal', onModalHidden);
+                });
+            }
+        }
+    }
+    
+    // Lưu thông tin form vào sessionStorage
+    function savePendingMessage(propertyId, name, phone, email, message) {
+        var pendingData = {
+            propertyId: propertyId,
+            name: name,
+            phone: phone,
+            email: email,
+            message: message,
+            timestamp: Date.now()
+        };
+        sessionStorage.setItem('pendingMessage', JSON.stringify(pendingData));
+    }
+    
+    // Xóa thông tin form đã lưu
+    function clearPendingMessage() {
+        sessionStorage.removeItem('pendingMessage');
+        sessionStorage.removeItem('shouldSendPendingMessage');
+    }
+    
+    // Kiểm tra và gửi tin nhắn đang chờ sau khi đăng nhập
+    function checkAndSendPendingMessage() {
+        // Kiểm tra flag từ _Layout.cshtml
+        var shouldSend = sessionStorage.getItem('shouldSendPendingMessage');
+        var pendingData = sessionStorage.getItem('pendingMessage');
+        
+        if (shouldSend === 'true' && pendingData) {
+            try {
+                var data = JSON.parse(pendingData);
+                // Kiểm tra xem data có còn hợp lệ không (không quá 10 phút)
+                if (Date.now() - data.timestamp < 600000) {
+                    // Điền lại form
+                    var nameField = document.getElementById('contactName');
+                    var phoneField = document.getElementById('contactPhone');
+                    var emailField = document.getElementById('contactEmail');
+                    var messageField = document.getElementById('contactMessage');
+                    
+                    if (nameField && phoneField && emailField && messageField) {
+                        nameField.value = data.name;
+                        phoneField.value = data.phone;
+                        emailField.value = data.email;
+                        messageField.value = data.message;
+                        
+                        // Tự động submit form sau 1 giây để đảm bảo session đã được cập nhật
+                        setTimeout(function() {
+                            var form = document.getElementById('contactForm');
+                            if (form) {
+                                form.dispatchEvent(new Event('submit'));
+                            }
+                        }, 1000);
+                    }
+                } else {
+                    // Xóa data cũ
+                    clearPendingMessage();
+                    sessionStorage.removeItem('shouldSendPendingMessage');
+                }
+            } catch (e) {
+                console.error('Error parsing pending message:', e);
+                clearPendingMessage();
+                sessionStorage.removeItem('shouldSendPendingMessage');
+            }
+        }
+    }
     
     // Review Form Handler
     document.getElementById('reviewForm')?.addEventListener('submit', function(e) {

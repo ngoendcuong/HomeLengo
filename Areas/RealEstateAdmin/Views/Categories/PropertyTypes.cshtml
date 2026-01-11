@@ -1,0 +1,167 @@
+﻿@* Areas/RealEstateAdmin/Views/Categories/PropertyTypes.cshtml *@
+@model IEnumerable<dynamic>
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Loại Bất động sản";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Loại Bất động sản</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
+                    <li class="breadcrumb-item">Danh mục</li>
+                    <li class="breadcrumb-item active">Loại BĐS</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Quản lý Loại Bất động sản</h3>
+                <div class="card-tools">
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal">
+                        <i class="fas fa-plus"></i> Thêm mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead class="bg-light">
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th width="8%">Icon</th>
+                            <th width="25%">Tên loại</th>
+                            <th width="20%">Slug</th>
+                            <th width="10%">Thứ tự</th>
+                            <th width="12%">Trạng thái</th>
+                            <th width="20%">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var type in Model)
+                        {
+                            <tr>
+                                <td>@type.Id</td>
+                                <td class="text-center">
+                                    <i class="fas @type.Icon fa-2x text-primary"></i>
+                                </td>
+                                <td><strong>@type.Name</strong></td>
+                                <td><code>@type.Slug</code></td>
+                                <td class="text-center">@type.Order</td>
+                                <td>
+                                    @if (type.IsActive)
+                                    {
+                                        <span class="badge badge-success">Kích hoạt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Ẩn</span>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning btn-edit-type" 
+                                            data-id="@type.Id" 
+                                            data-name="@type.Name" 
+                                            data-icon="@type.Icon"
+                                            data-toggle="modal" 
+                                            data-target="#editModal">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form asp-action="DeletePropertyType" asp-route-id="@type.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa loại này?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Sửa -->
+<div class="modal fade" id="editModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h4 class="modal-title">Sửa Loại Bất động sản</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editPropertyTypeForm" asp-action="EditPropertyType" method="post">
+                    <input type="hidden" name="PropertyTypeId" id="editPropertyTypeId" />
+                    <div class="form-group">
+                        <label for="editName">Tên loại <span class="text-danger">*</span></label>
+                        <input type="text" name="Name" id="editName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editIconClass">Icon (FontAwesome)</label>
+                        <input type="text" name="IconClass" id="editIconClass" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="submit" form="editPropertyTypeForm" class="btn btn-warning">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.btn-edit-type').click(function() {
+                var id = $(this).data('id');
+                var name = $(this).data('name');
+                var icon = $(this).data('icon');
+                
+                $('#editPropertyTypeId').val(id);
+                $('#editName').val(name);
+                $('#editIconClass').val(icon);
+            });
+        });
+    </script>
+}
+
+<!-- Modal Thêm mới -->
+<div class="modal fade" id="addModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h4 class="modal-title">Thêm Loại Bất động sản</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addPropertyTypeForm" asp-action="CreatePropertyType" method="post">
+                    <div class="form-group">
+                        <label for="Name">Tên loại <span class="text-danger">*</span></label>
+                        <input type="text" name="Name" id="Name" class="form-control" placeholder="VD: Căn hộ / Chung cư" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="IconClass">Icon (FontAwesome)</label>
+                        <input type="text" name="IconClass" id="IconClass" class="form-control" placeholder="fa-building">
+                        <small class="text-muted">VD: fa-building, fa-home, fa-hotel</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="submit" form="addPropertyTypeForm" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>

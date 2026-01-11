@@ -13,13 +13,31 @@ namespace HomeLengo.Hubs
 
         public async Task SendMessageToBot(string userMessage)
         {
-            // 1. Gửi tin nhắn của User lại cho giao diện User (để hiện lên khung chat)
-            await Clients.Caller.SendAsync("ReceiveMessage", "Bạn", userMessage);
+            //// 1) echo user
+            //await Clients.Caller.SendAsync("ReceiveMessage", "Bạn", userMessage);
 
-            // 2. Gọi Gemini xử lý
+            var q = (userMessage ?? "").Trim().ToLowerInvariant();
+
+            // 2) CÂU CƠ BẢN: khỏi gọi Gemini (tiết kiệm quota)
+            if ((q.Contains("hôm nay") && (q.Contains("ngày") || q.Contains("ngay")))
+                || q == "hôm nay ngày mấy" || q == "hôm nay ngày bao nhiêu")
+            {
+                var now = DateTime.Now;
+                await Clients.Caller.SendAsync("ReceiveMessage", "Trợ lý ảo", $"Hôm nay là ngày {now:dd/MM/yyyy}.");
+                return;
+            }
+
+            if (q.Contains("mấy giờ") || q.Contains("may gio") || q.Contains("bây giờ") || q.Contains("bay gio"))
+            {
+                var now = DateTime.Now;
+                await Clients.Caller.SendAsync("ReceiveMessage", "Trợ lý ảo", $"Bây giờ là {now:HH:mm}.");
+                return;
+            }
+
+            // 3) Còn lại mới gọi Gemini
             string botAnswer = await _geminiService.GetAnswer(userMessage);
 
-            // 3. Gửi câu trả lời của Bot về giao diện User
+            // 4) gửi bot reply
             await Clients.Caller.SendAsync("ReceiveMessage", "Trợ lý ảo", botAnswer);
         }
     }

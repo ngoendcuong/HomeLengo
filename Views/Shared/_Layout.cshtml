@@ -15,6 +15,7 @@
     <!-- font -->
     <link rel="stylesheet" href="~/assets/fonts/fonts.css">
     <!-- Icons -->
+    <link rel="stylesheet" href="~/css/chatbot.css" />
     <link rel="stylesheet" href="~/assets/fonts/font-icons.css">
     <link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="~/assets/css/swiper-bundle.min.css">
@@ -128,7 +129,7 @@
                             </div>
                             <div class="menu-outer"></div>
                             <div class="button-mobi-sell">
-                                <a class="tf-btn primary" href="add-property.html">Submit Property</a>
+                                <a class="tf-btn primary submit-property-btn" href="#" onclick="handleSubmitProperty(event); return false;">Submit Property</a>
                             </div>
                             <div class="mobi-icon-box">
                                 <div class="box d-flex align-items-center">
@@ -360,152 +361,35 @@
     <script type="text/javascript" src="@Url.Content("~/assets/js/shortcodes.js")"></script>
     <script type="text/javascript" src="@Url.Content("~/assets/js/lazysizes.min.js")"></script>
     <script type="text/javascript" src="@Url.Content("~/assets/js/main.js")"></script>
-    <button class="open-chat-btn" onclick="toggleChat()">💬 Hỗ trợ</button>
-    <!--HTML ChatBot-->
-    <div class="chat-popup" id="chatPopup">
-        <div class="chat-header">
-            <h4>Trợ lý AI</h4>
-            <button onclick="toggleChat()">X</button>
-        </div>
-        <div class="chat-body" id="chatBody">
-        </div>
-        <div class="chat-footer">
-            <input type="text" id="msgInput" placeholder="Hỏi về sản phẩm..." onkeypress="handleEnter(event)">
-            <button onclick="sendMessage()">Gửi</button>
-        </div>
-    </div>
-    <!--CSS ChatBot-->
-    <style>
-        .open-chat-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px;
-            border-radius: 50%;
-            background: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            z-index: 9999;
-        }
 
-        .chat-popup {
-            display: none;
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            width: 300px;
-            border: 1px solid #ccc;
-            background: white;
-            z-index: 9999;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            background: #007bff;
-            color: white;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .chat-body {
-            height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .chat-footer {
-            display: flex;
-            border-top: 1px solid #eee;
-        }
-
-            .chat-footer input {
-                flex: 1;
-                padding: 10px;
-                border: none;
-                outline: none;
-            }
-
-            .chat-footer button {
-                padding: 10px;
-                background: #007bff;
-                color: white;
-                border: none;
-                cursor: pointer;
-            }
-
-        /* Style tin nhắn */
-        .msg {
-            padding: 8px 12px;
-            border-radius: 15px;
-            max-width: 80%;
-            font-size: 14px;
-        }
-
-        .msg-user {
-            align-self: flex-end;
-            background: #e9ecef;
-            color: black;
-        }
-
-        .msg-bot {
-            align-self: flex-start;
-            background: #007bff;
-            color: white;
-        }
-    </style>
-    <!--JS ChatBot-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
-
+    <!-- ================== JS: SignalR + Render bubble ================== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
     <script>
-        // 1. Tạo kết nối
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub")
-            .build();
+        // Toggle popup
+        //          function toggleChat() {
+        //     const popup = document.getElementById("chatPopup");
+        //     const isOpen = popup.style.display === "block";
 
-        // 2. Nhận tin nhắn từ Server
-        connection.on("ReceiveMessage", (user, message) => {
-            const chatBody = document.getElementById("chatBody");
-            const div = document.createElement("div");
+        //     popup.style.display = isOpen ? "none" : "block";
+        //     popup.setAttribute("aria-hidden", isOpen ? "true" : "false");
 
-            // Style khác nhau cho Bot và User
-            div.className = user === "Bạn" ? "msg msg-user" : "msg msg-bot";
+        //     if (!isOpen) {
+        //         đảm bảo elements tồn tại
+        //         const chatBody = document.getElementById("chatBody");
+        //         const input = document.getElementById("msgInput");
+        //         if (!chatBody) return;
 
-            // Nếu là bot, render text (có thể xử lý markdown nếu cần)
-            div.innerText = message;
+        //         if (!window.__chatbotGreeted) {
+        //             appendMessage(
+        //                 false,
+        //                 "Xin chào! 👋 Tôi là Trợ lý của website HomeLengo. Tôi có thể giúp bạn tìm kiếm và gợi ý bất động sản phù hợp."
+        //             );
+        //             window.__chatbotGreeted = true;
+        //         }
 
-            chatBody.appendChild(div);
-            chatBody.scrollTop = chatBody.scrollHeight; // Tự cuộn xuống cuối
-        });
-
-        // 3. Bắt đầu kết nối
-        connection.start().catch(err => console.error(err));
-
-        // 4. Gửi tin nhắn
-        function sendMessage() {
-            const input = document.getElementById("msgInput");
-            const text = input.value;
-            if (!text) return;
-
-            // Gọi hàm SendMessageToBot bên Backend
-            connection.invoke("SendMessageToBot", text).catch(err => console.error(err));
-            input.value = "";
-        }
-
-        function toggleChat() {
-            const popup = document.getElementById("chatPopup");
-            popup.style.display = popup.style.display === "none" || popup.style.display === "" ? "block" : "none";
-        }
-
-        function handleEnter(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
+        //         setTimeout(() => input?.focus(), 50);
+        //     }
+        // }
 
         // Toggle password visibility
         function togglePassword(inputId, iconId) {
@@ -554,8 +438,18 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            // Đăng nhập thành công, reload trang
-                            window.location.reload();
+                            // Đánh dấu cần gửi lại tin nhắn sau khi reload
+                            if (sessionStorage.getItem('pendingMessage')) {
+                                sessionStorage.setItem('shouldSendPendingMessage', 'true');
+                            }
+                            // Kiểm tra xem có cần điều hướng đến trang add property không
+                            if (sessionStorage.getItem('shouldRedirectToAddProperty') === 'true') {
+                                sessionStorage.removeItem('shouldRedirectToAddProperty');
+                                window.location.href = '/Admin/Property/Create';
+                            } else {
+                                // Đăng nhập thành công, reload trang
+                                window.location.reload();
+                            }
                         } else {
                             // Hiển thị lỗi
                             errorDiv.textContent = data.message;
@@ -632,8 +526,41 @@
                 });
             }
         });
+
+        // Hàm hiển thị popup đăng nhập
+        function showLoginModal() {
+            var loginModal = document.getElementById('modalLogin');
+            if (loginModal) {
+                // Sử dụng Bootstrap modal
+                if (typeof bootstrap !== 'undefined') {
+                    var modal = new bootstrap.Modal(loginModal);
+                    modal.show();
+                }
+            }
+        }
+
+        // Hàm xử lý khi click nút Submit Property
+        function handleSubmitProperty(event) {
+            event.preventDefault();
+            
+            // Kiểm tra xem user đã đăng nhập chưa
+            var isLoggedIn = @(Context.Session.GetString("UserId") != null ? "true" : "false");
+            
+            if (isLoggedIn) {
+                // Nếu đã đăng nhập, điều hướng đến trang add property
+                window.location.href = '/Admin/Property/Create';
+            } else {
+                // Nếu chưa đăng nhập, lưu flag để điều hướng sau khi đăng nhập
+                sessionStorage.setItem('shouldRedirectToAddProperty', 'true');
+                // Hiển thị popup đăng nhập
+                showLoginModal();
+            }
+        }
     </script>
     @RenderSection("Scripts", required: false)
+    @await Html.PartialAsync("_ChatBot")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script src="~/js/chatbot.js"></script>
 </body>
 
 </html>

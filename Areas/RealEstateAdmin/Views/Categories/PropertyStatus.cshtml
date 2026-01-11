@@ -1,0 +1,129 @@
+﻿@* Areas/RealEstateAdmin/Views/Categories/PropertyStatus.cshtml *@
+@model IEnumerable<dynamic>
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Trạng thái BĐS";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Trạng thái Bất động sản</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
+                    <li class="breadcrumb-item">Danh mục</li>
+                    <li class="breadcrumb-item active">Trạng thái</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Quản lý Trạng thái</h3>
+                <div class="card-tools">
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addStatusModal">
+                        <i class="fas fa-plus"></i> Thêm mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead class="bg-light">
+                        <tr>
+                            <th width="8%">ID</th>
+                            <th width="25%">Tên trạng thái</th>
+                            <th width="20%">Slug</th>
+                            <th width="15%">Màu hiển thị</th>
+                            <th width="12%">Trạng thái</th>
+                            <th width="20%">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var status in Model)
+                        {
+                            <tr>
+                                <td>@status.Id</td>
+                                <td><strong>@status.Name</strong></td>
+                                <td><code>@status.Slug</code></td>
+                                <td>
+                                    <span class="badge badge-@status.Color">@status.Name</span>
+                                </td>
+                                <td>
+                                    @if (status.IsActive)
+                                    {
+                                        <span class="badge badge-success">Kích hoạt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Ẩn</span>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Thêm -->
+<div class="modal fade" id="addStatusModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h4 class="modal-title">Thêm Trạng thái</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>Tên trạng thái <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" placeholder="VD: Đang bán">
+                    </div>
+                    <div class="form-group">
+                        <label>Slug</label>
+                        <input type="text" class="form-control" placeholder="dang-ban">
+                    </div>
+                    <div class="form-group">
+                        <label>Màu hiển thị</label>
+                        <select class="form-control">
+                            <option value="primary">Primary (Xanh dương)</option>
+                            <option value="success">Success (Xanh lá)</option>
+                            <option value="info">Info (Xanh nhạt)</option>
+                            <option value="warning">Warning (Vàng)</option>
+                            <option value="danger">Danger (Đỏ)</option>
+                            <option value="secondary">Secondary (Xám)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="statusActive" checked>
+                            <label class="custom-control-label" for="statusActive">Kích hoạt</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -292,6 +292,18 @@ namespace HomeLengo.Controllers
                 return NotFound();
             }
 
+            // Đảm bảo PropertyPhotos được load đầy đủ từ database
+            // Load lại để đảm bảo có tất cả ảnh, không phụ thuộc vào lazy loading
+            var allPhotos = await _context.PropertyPhotos
+                .Where(pp => pp.PropertyId == id.Value)
+                .OrderByDescending(pp => pp.IsPrimary == true)
+                .ThenBy(pp => pp.SortOrder ?? 0)
+                .ThenBy(pp => pp.PhotoId)
+                .ToListAsync();
+            
+            // Gán lại PropertyPhotos để đảm bảo có tất cả ảnh
+            property.PropertyPhotos = allPhotos;
+
             // Tăng số lượt xem
             if (property.Views.HasValue)
             {
@@ -383,6 +395,7 @@ namespace HomeLengo.Controllers
         }
 
         [HttpPost]
+        [Route("Property/SubmitReview")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitReview(int propertyId, string name, string email, byte rating, string? title, string body)
         {
@@ -425,6 +438,102 @@ namespace HomeLengo.Controllers
 
             TempData["SuccessMessage"] = "Cảm ơn đánh giá của bạn! Đánh giá của bạn đang chờ phê duyệt và sẽ được công bố sớm.";
             return RedirectToAction("Details", new { id = propertyId });
+        }
+
+        [HttpPost]
+        [Route("Property/SendMessage")]
+        [IgnoreAntiforgeryToken]
+        [Produces("application/json")]
+        [Consumes("application/x-www-form-urlencoded")]
+        public async Task<IActionResult> SendMessage([FromForm] int propertyId, [FromForm] string name, [FromForm] string phone, [FromForm] string email, [FromForm] string message)
+        {
+            // Đảm bảo response luôn là JSON
+            Response.ContentType = "application/json";
+            
+            try
+            {
+                // Kiểm tra đăng nhập
+                var userIdStr = HttpContext.Session.GetString("UserId");
+                if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để gửi tin nhắn", isLoggedIn = false });
+                }
+
+                // Validation
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(phone) || 
+                    string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(message))
+                {
+                    return Json(new { success = false, message = "Vui lòng điền đầy đủ thông tin" });
+                }
+
+                // Kiểm tra property có tồn tại không
+                var property = await _context.Properties
+                    .Include(p => p.Agent)
+                        .ThenInclude(a => a.User)
+                    .FirstOrDefaultAsync(p => p.PropertyId == propertyId);
+
+                if (property == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bất động sản" });
+                }
+
+                // Kiểm tra property có agent không
+                if (property.Agent == null || property.Agent.User == null)
+                {
+                    return Json(new { success = false, message = "Bất động sản này chưa có người bán/thuê được chỉ định" });
+                }
+
+                // Kiểm tra Agent có UserId không
+                if (!property.Agent.UserId.HasValue)
+                {
+                    return Json(new { success = false, message = "Người bán/thuê chưa có thông tin tài khoản" });
+                }
+
+                // Lấy thông tin user hiện tại
+                var currentUser = await _context.Users.FindAsync(userId);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy thông tin người dùng" });
+                }
+
+                // Kiểm tra không được gửi tin nhắn cho chính mình
+                if (userId == property.Agent.UserId.Value)
+                {
+                    return Json(new { success = false, message = "Bạn không thể gửi tin nhắn cho chính mình" });
+                }
+
+                // Tạo tin nhắn mới
+                var newMessage = new Message
+                {
+                    FromUserId = userId,
+                    ToUserId = property.Agent.UserId.Value,
+                    PropertyId = propertyId,
+                    Subject = $"Tin nhắn về bất động sản: {property.Title}",
+                    Body = $"Tên: {name}\nSố điện thoại: {phone}\nEmail: {email}\n\nNội dung:\n{message}",
+                    IsRead = false,
+                    SentAt = DateTime.UtcNow
+                };
+
+                _context.Messages.Add(newMessage);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Gửi tin nhắn thành công! Người bán/thuê sẽ nhận được tin nhắn của bạn." });
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi chi tiết (trong production nên dùng ILogger)
+                System.Diagnostics.Debug.WriteLine($"SendMessage Error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+                
+                // Trả về thông báo lỗi an toàn (không tiết lộ thông tin nhạy cảm)
+                var errorMessage = "Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.";
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"InnerException: {ex.InnerException.Message}");
+                }
+                
+                return Json(new { success = false, message = errorMessage });
+            }
         }
     }
 }

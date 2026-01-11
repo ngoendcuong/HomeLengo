@@ -1,0 +1,214 @@
+﻿@* Views/Admin/Agents/Detail.cshtml *@
+@model dynamic
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Chi tiết Môi giới";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Hồ sơ Môi giới</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/agents">Môi giới</a></li>
+                    <li class="breadcrumb-item active">Chi tiết</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Profile Card -->
+                <div class="card card-primary card-outline">
+                    <div class="card-body box-profile">
+                        <div class="text-center">
+                            <img class="profile-user-img img-fluid img-circle" src="@Model.Avatar" alt="User profile picture">
+                        </div>
+                        <h3 class=" profile-username text-center">@Model.Name</h3>
+                        <p class="text-muted text-center">Môi giới bất động sản</p>
+                        <div class="text-center mb-3">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= (int)Model.Rating)
+                                {
+                                    <i class="fas fa-star text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star text-warning"></i>
+                                }
+                            }
+                            <br>
+                            <strong>@Model.Rating/5</strong> (@Model.Reviews đánh giá)
+                        </div>
+
+                        <ul class="list-group list-group-unbordered mb-3">
+                            <li class="list-group-item">
+                                <b>Tin đăng</b> <a class="float-right">@Model.TotalProperties</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Lượt xem</b> <a class="float-right">@Model.TotalViews</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Lead nhận được</b> <a class="float-right">@Model.TotalLeads</a>
+                            </li>
+                        </ul>
+
+                        <button class="btn btn-primary btn-block"><i class="fas fa-envelope"></i> Gửi tin nhắn</button>
+                        <button class="btn btn-success btn-block"><i class="fas fa-list"></i> Xem tin đăng</button>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin liên hệ</h3>
+                    </div>
+                    <div class="card-body">
+                        <strong><i class="fas fa-phone mr-1"></i> Điện thoại</strong>
+                        <p class="text-muted">@Model.Phone</p>
+                        <hr>
+                        <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
+                        <p class="text-muted">@Model.Email</p>
+                        <hr>
+                        <strong><i class="fas fa-map-marker-alt mr-1"></i> Địa chỉ</strong>
+                        <p class="text-muted">@Model.Address</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <!-- About -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Giới thiệu</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>@Model.Bio</p>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-info"><i class="fas fa-building"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Tin đăng</span>
+                                <span class="info-box-number">@Model.TotalProperties</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-success"><i class="fas fa-eye"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Lượt xem</span>
+                                <span class="info-box-number">@Model.TotalViews</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-warning"><i class="fas fa-phone"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Lead</span>
+                                <span class="info-box-number">@Model.TotalLeads</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-danger"><i class="fas fa-star"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Rating</span>
+                                <span class="info-box-number">@Model.Rating/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Properties -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tin đăng gần đây</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tiêu đề</th>
+                                    <th>Giá</th>
+                                    <th>Lượt xem</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Căn hộ cao cấp Q7...</td>
+                                    <td>3.2 tỷ</td>
+                                    <td>245</td>
+                                    <td><span class="badge badge-success">Đang bán</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Nhà phố mặt tiền...</td>
+                                    <td>15 tỷ</td>
+                                    <td>189</td>
+                                    <td><span class="badge badge-success">Đang bán</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Reviews -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Đánh giá từ khách hàng</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="post">
+                            <div class="user-block">
+                                <img class="img-circle img-bordered-sm" src="https://via.placeholder.com/50" alt="user">
+                                <span class="username">Nguyễn Văn A</span>
+                                <span class="description">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    - 12/12/2024
+                                </span>
+                            </div>
+                            <p>Môi giới rất nhiệt tình, tư vấn chi tiết và chuyên nghiệp. Rất hài lòng với dịch vụ!</p>
+                        </div>
+                        <div class="post">
+                            <div class="user-block">
+                                <img class="img-circle img-bordered-sm" src="https://via.placeholder.com/50" alt="user">
+                                <span class="username">Trần Thị B</span>
+                                <span class="description">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="far fa-star text-warning"></i>
+                                    - 10/12/2024
+                                </span>
+                            </div>
+                            <p>Hỗ trợ tốt, giải đáp thắc mắc nhanh chóng. Recommend!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

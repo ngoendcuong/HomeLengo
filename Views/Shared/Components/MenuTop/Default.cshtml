@@ -25,7 +25,25 @@
                         <ul>
                             @foreach (var child in childs)
                             {
-                                <li><a href="@child.Url">@child.Title</a></li>
+                                // Xử lý đặc biệt cho "Hồ Sơ Của Tôi" - cần kiểm tra agentId
+                                var url = child.Url;
+                                if ((child.Title.Equals("Hồ Sơ Của Tôi", StringComparison.OrdinalIgnoreCase) || 
+                                     child.Title.Equals("My Profile", StringComparison.OrdinalIgnoreCase) ||
+                                     child.Title.Equals("Profile", StringComparison.OrdinalIgnoreCase)) &&
+                                    parent.Title.Contains("Bảng Điều Khiển", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    var agentIdStr = Context.Session.GetString("AgentId");
+                                    int agentId = 0;
+                                    if (int.TryParse(agentIdStr, out agentId) && agentId > 0)
+                                    {
+                                        url = $"/Agent/Profile/{agentId}";
+                                    }
+                                    else
+                                    {
+                                        url = "/Admin/User/Profile";
+                                    }
+                                }
+                                <li><a href="@url">@child.Title</a></li>
                             }
                         </ul>
                     }

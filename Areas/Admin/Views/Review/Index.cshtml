@@ -1,20 +1,20 @@
 @model IEnumerable<HomeLengo.Models.Review>
 @{
-    ViewData["Title"] = "Reviews";
+    ViewData["Title"] = "Đánh giá";
 }
 
 <div class="main-content">
     <div class="main-content-inner">
         <div class="button-show-hide show-mb">
-            <span class="body-1">Show Dashboard</span>
+            <span class="body-1">Hiển thị Bảng điều khiển</span>
         </div>
         
         <div class="widget-box-2 mess-box">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="title">Recent Reviews</h5>
+                <h5 class="title">Đánh giá gần đây</h5>
                 <div class="d-flex gap-2 align-items-center">
                     <span class="text-primary fw-7">@ViewBag.TotalCount</span>
-                    <span class="fw-6">Reviews</span>
+                    <span class="fw-6">đánh giá</span>
                 </div>
             </div>
 
@@ -23,21 +23,21 @@
                 <div class="row g-3">
                     <div class="col-md-8">
                         <div class="ip-group icon-left">
-                            <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Search reviews...">
+                            <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm đánh giá...">
                             <span class="icon icon-search"></span>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="ip-group">
                             <select name="isApproved" class="form-select">
-                                <option value="">All Status</option>
-                                <option value="true" selected="@(ViewBag.IsApproved == true)">Approved</option>
-                                <option value="false" selected="@(ViewBag.IsApproved == false)">Pending</option>
+                                <option value="">Tất cả Trạng thái</option>
+                                <option value="true" selected="@(ViewBag.IsApproved == true)">Đã duyệt</option>
+                                <option value="false" selected="@(ViewBag.IsApproved == false)">Chờ duyệt</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="tf-btn primary w-100">Search</button>
+                        <button type="submit" class="tf-btn primary w-100">Tìm kiếm</button>
                     </div>
                 </div>
             </form>
@@ -50,31 +50,31 @@
                     {
                         var userAvatar = !string.IsNullOrEmpty(review.User?.Avatar) ? review.User.Avatar : "avatarMacDinh.jpg";
                         var avatarPath = $"~/assets/images/avatar/{userAvatar}";
-                        var userName = review.User?.FullName ?? review.User?.Username ?? "Unknown User";
+                        var userName = review.User?.FullName ?? review.User?.Username ?? "Người dùng không xác định";
                         var timeAgo = "";
                         if (review.CreatedAt.HasValue)
                         {
                             var timeSpan = DateTime.UtcNow - review.CreatedAt.Value;
                             if (timeSpan.TotalDays >= 1)
                             {
-                                timeAgo = $"{(int)timeSpan.TotalDays} day{((int)timeSpan.TotalDays > 1 ? "s" : "")} ago";
+                                timeAgo = $"{(int)timeSpan.TotalDays} ngày trước";
                             }
                             else if (timeSpan.TotalHours >= 1)
                             {
-                                timeAgo = $"{(int)timeSpan.TotalHours} hour{((int)timeSpan.TotalHours > 1 ? "s" : "")} ago";
+                                timeAgo = $"{(int)timeSpan.TotalHours} giờ trước";
                             }
                             else if (timeSpan.TotalMinutes >= 1)
                             {
-                                timeAgo = $"{(int)timeSpan.TotalMinutes} minute{((int)timeSpan.TotalMinutes > 1 ? "s" : "")} ago";
+                                timeAgo = $"{(int)timeSpan.TotalMinutes} phút trước";
                             }
                             else
                             {
-                                timeAgo = "Just now";
+                                timeAgo = "Vừa xong";
                             }
                         }
                         else
                         {
-                            timeAgo = "Unknown";
+                            timeAgo = "Không xác định";
                         }
 
                         <li class="mess-item">
@@ -90,7 +90,7 @@
                                 </div>
                                 <div class="d-flex gap-2 align-items-center">
                                     <span class="btn-status @(review.IsApproved == true ? "" : "status-pending")" style="font-size: 12px; padding: 4px 8px;">
-                                        @(review.IsApproved == true ? "Approved" : "Pending")
+                                        @(review.IsApproved == true ? "Đã duyệt" : "Chờ duyệt")
                                     </span>
                                     <div class="dropdown">
                                         <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: none; border: none; padding: 4px;">
@@ -107,7 +107,7 @@
                                                         <path d="M8 3C4.667 3 2 5.667 2 9C2 12.333 4.667 15 8 15C11.333 15 14 12.333 14 9C14 5.667 11.333 3 8 3ZM8 13.5C5.5 13.5 3.5 11.5 3.5 9C3.5 6.5 5.5 4.5 8 4.5C10.5 4.5 12.5 6.5 12.5 9C12.5 11.5 10.5 13.5 8 13.5Z" fill="#A3ABB0"/>
                                                         <path d="M8 6.5C6.9 6.5 6 7.4 6 8.5C6 9.6 6.9 10.5 8 10.5C9.1 10.5 10 9.6 10 8.5C10 7.4 9.1 6.5 8 6.5Z" fill="#A3ABB0"/>
                                                     </svg>
-                                                    View Details
+                                                    Xem chi tiết
                                                 </a>
                                             </li>
                                             <li>
@@ -117,7 +117,7 @@
                                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
                                                             <path d="M13.5 4L6 11.5L2.5 8" stroke="#A3ABB0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                                         </svg>
-                                                        @(review.IsApproved == true ? "Unapprove" : "Approve")
+                                                        @(review.IsApproved == true ? "Hủy duyệt" : "Duyệt")
                                                     </button>
                                                 </form>
                                             </li>
@@ -125,11 +125,11 @@
                                             <li>
                                                 <form method="post" action="/Admin/Review/Delete/@review.ReviewId" style="display:inline;">
                                                     @Html.AntiForgeryToken()
-                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure you want to delete this review?');" style="background:none; border:none; width:100%; text-align:left;">
+                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');" style="background:none; border:none; width:100%; text-align:left;">
                                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
                                                             <path d="M9.82667 6.00035L9.596 12.0003M6.404 12.0003L6.17333 6.00035M12.8187 3.86035C13.0467 3.89501 13.2733 3.93168 13.5 3.97101M12.8187 3.86035L12.1067 13.1157C12.0776 13.4925 11.9074 13.8445 11.63 14.1012C11.3527 14.3579 10.9886 14.5005 10.6107 14.5003H5.38933C5.0114 14.5005 4.64735 14.3579 4.36999 14.1012C4.09262 13.8445 3.92239 13.4925 3.89333 13.1157L3.18133 3.86035M12.8187 3.86035C12.0492 3.74403 11.2758 3.65574 10.5 3.59568M3.18133 3.86035C2.95333 3.89435 2.72667 3.93101 2.5 3.97035M3.18133 3.86035C3.95076 3.74403 4.72416 3.65575 5.5 3.59568M10.5 3.59568V2.98501C10.5 2.19835 9.89333 1.54235 9.10667 1.51768C8.36908 1.49411 7.63092 1.49411 6.89333 1.51768C6.10667 1.54235 5.5 2.19901 5.5 2.98501V3.59568M10.5 3.59568C8.83581 3.46707 7.16419 3.46707 5.5 3.59568" stroke="#A3ABB0" stroke-linecap="round" stroke-linejoin="round" />
                                                         </svg>
-                                                        Delete
+                                                        Xóa
                                                     </button>
                                                 </form>
                                             </li>
@@ -139,7 +139,7 @@
                             </div>
                             
                             <div class="mb-2">
-                                <div class="fw-6 mb-1">@(review.Title ?? "No title")</div>
+                                <div class="fw-6 mb-1">@(review.Title ?? "Không có tiêu đề")</div>
                                 @if (review.Property != null)
                                 {
                                     <a href="/Property/Details/@review.Property.PropertyId" class="caption-2 text-primary" style="text-decoration: none;">
@@ -149,7 +149,7 @@
                                 }
                             </div>
                             
-                            <p class="mb-2">@(review.Body ?? "No review content")</p>
+                            <p class="mb-2">@(review.Body ?? "Không có nội dung đánh giá")</p>
                             
                             <ul class="list-star">
                                 @for (int i = 0; i < 5; i++)
@@ -164,7 +164,7 @@
                 {
                     <li class="mess-item">
                         <div class="text-center py-5">
-                            <p class="text-muted">No reviews found</p>
+                            <p class="text-muted">Không tìm thấy đánh giá nào</p>
                         </div>
                     </li>
                 }

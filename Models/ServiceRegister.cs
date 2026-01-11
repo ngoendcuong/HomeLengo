@@ -17,7 +17,7 @@ public partial class ServiceRegister
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual ICollection<AgentProfile> AgentProfiles { get; set; } = new List<AgentProfile>();
-
     public virtual ServicePlan Plan { get; set; } = null!;
+
+    public virtual ICollection<AgentProfile> AgentProfiles { get; set; } = new List<AgentProfile>();
 }

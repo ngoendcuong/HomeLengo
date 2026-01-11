@@ -188,13 +188,7 @@
                         <input type="number" asp-for="LotSize" class="form-control" placeholder="Enter lot size" step="0.01" min="0">
                         <span asp-validation-for="LotSize" class="text-danger"></span>
                     </fieldset>
-                    <fieldset class="box-fieldset">
-                        <label>
-                            Views:
-                        </label>
-                        <input type="number" asp-for="Views" class="form-control" placeholder="Enter views count" min="0" value="0">
-                        <span asp-validation-for="Views" class="text-danger"></span>
-                    </fieldset>
+
                 </div>
                 <div class="box grid-3 gap-30">
                     <fieldset class="box-fieldset">
@@ -268,21 +262,6 @@
                         }
                     }
                 </div>
-            </div>
-
-            <div class="widget-box-2 mb-20">
-                <h5 class="title">Videos</h5>
-                <div id="videoContainer">
-                    <div class="video-item mb-3">
-                        <fieldset class="box-fieldset">
-                            <label class="text-btn">Video URL:</label>
-                            <input type="text" name="videoUrls" class="form-control" placeholder="Youtube, vimeo url">
-                        </fieldset>
-                    </div>
-                </div>
-                <button type="button" class="tf-btn btn-line" id="addVideoBtn">
-                    <span class="icon icon-plus"></span> Add Another Video
-                </button>
             </div>
 
             <div class="widget-box-2 mb-20">
@@ -747,6 +726,14 @@
         });
     </script>
 }
+
+
+
+
+
+
+
+
 
 
 

@@ -15,11 +15,11 @@
 <!-- Section Blog Grid -->
 <section class="flat-section">
     <div class="container">
-        <div class="row">
+        <div class="row blog-grid-equal-height">
             @foreach (var item in Model)
             {
-                <div class="col-lg-4 col-md-6">
-                    <a href="/blog/detail/@item.BlogId" class="flat-blog-item hover-img">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <a href="/blog/detail/@item.BlogId" class="flat-blog-item hover-img d-flex flex-column h-100">
                         <div class="img-style">
                             <img class="lazyload"
                                  src="~/assets/images/blog/@item.Thumbnail"
@@ -77,3 +77,88 @@
     </div>
 </section>
 <!-- End Section Blog Grid -->
+
+<style>
+    .blog-grid-equal-height {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .blog-grid-equal-height > div {
+        display: flex;
+    }
+    
+    .blog-grid-equal-height .flat-blog-item {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .blog-grid-equal-height .flat-blog-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    
+    .blog-grid-equal-height .img-style {
+        width: 100%;
+        height: 250px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .blog-grid-equal-height .img-style img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .blog-grid-equal-height .flat-blog-item:hover .img-style img {
+        transform: scale(1.05);
+    }
+    
+    .blog-grid-equal-height .content-box {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+    }
+    
+    .blog-grid-equal-height .content-box .title {
+        margin-top: 10px;
+        margin-bottom: 12px;
+        line-height: 1.4;
+        min-height: 3.2em;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .blog-grid-equal-height .content-box .description {
+        flex: 1;
+        margin-top: 0;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: #5c6368;
+    }
+    
+    .blog-grid-equal-height .post-author {
+        font-size: 14px;
+        color: #64666c;
+    }
+    
+    .blog-grid-equal-height .post-author span.fw-6 {
+        font-weight: 600;
+        margin-right: 8px;
+    }
+</style>

@@ -21,8 +21,6 @@ public partial class Review
 
     public bool? IsApproved { get; set; }
 
-    public string? AvatarUrl { get; set; }
-
     public virtual Property Property { get; set; } = null!;
 
     public virtual User? User { get; set; }

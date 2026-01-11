@@ -1,0 +1,262 @@
+﻿@* Areas/RealEstateAdmin/Views/Contacts/Index.cshtml *@
+@model IEnumerable<dynamic>
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Yêu cầu tư vấn";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Quản lý Yêu cầu tư vấn</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Trang chủ</a></li>
+                    <li class="breadcrumb-item">Liên hệ</li>
+                    <li class="breadcrumb-item active">Yêu cầu tư vấn</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Danh sách Yêu cầu tư vấn</h3>
+            </div>
+
+            <div class="card-body">
+                <!-- Filter -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control">
+                            <option>Tất cả trạng thái</option>
+                            <option>Mới</option>
+                            <option>Đang xử lý</option>
+                            <option>Đã liên hệ</option>
+                            <option>Thành công</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-info"><i class="fas fa-search"></i> Tìm</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="bg-light">
+                            <tr>
+                                <th width="5%">ID</th>
+                                <th width="15%">Khách hàng</th>
+                                <th width="12%">Liên hệ</th>
+                                <th width="20%">BĐS quan tâm</th>
+                                <th width="10%">Trạng thái</th>
+                                <th width="13%">Thời gian</th>
+                                <th width="12%">Môi giới</th>
+                                <th width="13%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var contact in Model)
+                            {
+                                <tr>
+                                    <td>@contact.Id</td>
+                                    <td><strong>@contact.Name</strong></td>
+                                    <td>
+                                        <small>
+                                            <i class="fas fa-phone text-primary"></i> @contact.Phone<br>
+                                            <i class="fas fa-envelope text-info"></i> @contact.Email
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="text-primary">@contact.Property</a>
+                                    </td>
+                                    <td>
+                                        @if (contact.Status == "Mới")
+                                        {
+                                            <span class="badge badge-warning">@contact.Status</span>
+                                        }
+                                        else if (contact.Status == "Đang xử lý")
+                                        {
+                                            <span class="badge badge-info">@contact.Status</span>
+                                        }
+                                        else if (contact.Status == "Đã liên hệ")
+                                        {
+                                            <span class="badge badge-primary">@contact.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-success">@contact.Status</span>
+                                        }
+                                    </td>
+                                    <td><small>@contact.CreatedDate</small></td>
+                                    <td>
+                                        @if (contact.Agent == "Chưa phân")
+                                        {
+                                            <span class="text-muted">Chưa phân</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success">@contact.Agent</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info"
+                                                data-toggle="modal"
+                                                data-target="#contactDetailModal"
+                                                title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" title="Cập nhật trạng thái">
+                                                <i class="fas fa-sync"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="#" onclick="updateStatus(@contact.Id, 'new'); return false;">Mới</a>
+                                                <a class="dropdown-item" href="#" onclick="updateStatus(@contact.Id, 'processing'); return false;">Đang xử lý</a>
+                                                <a class="dropdown-item" href="#" onclick="updateStatus(@contact.Id, 'contacted'); return false;">Đã liên hệ</a>
+                                                <a class="dropdown-item" href="#" onclick="updateStatus(@contact.Id, 'success'); return false;">Thành công</a>
+                                            </div>
+                                        </div>
+                                        <form asp-action="DeleteInquiry" asp-route-id="@contact.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa yêu cầu này?');">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function updateStatus(id, status) {
+            if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái?')) {
+                $.ajax({
+                    url: '/RealEstateAdmin/Contacts/UpdateInquiryStatus',
+                    type: 'POST',
+                    data: { id: id, status: status },
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra!');
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+<!-- Modal Chi tiết -->
+<div class="modal fade" id="contactDetailModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h4 class="modal-title">Chi tiết Yêu cầu tư vấn</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Thông tin khách hàng</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td width="40%"><strong>Họ tên:</strong></td>
+                                <td>Nguyễn Văn A</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Số điện thoại:</strong></td>
+                                <td>0912345678</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>nguyenvana@email.com</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Thời gian gửi:</strong></td>
+                                <td>15/01/2025 14:30</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Thông tin BĐS</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td width="40%"><strong>Bất động sản:</strong></td>
+                                <td><a href="#">Căn hộ Vinhomes Q7</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Trạng thái:</strong></td>
+                                <td><span class="badge badge-warning">Mới</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phân cho:</strong></td>
+                                <td>
+                                    <select class="form-control form-control-sm">
+                                        <option>-- Chọn môi giới --</option>
+                                        <option>Môi giới A</option>
+                                        <option>Môi giới B</option>
+                                        <option>Môi giới C</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h5>Nội dung yêu cầu</h5>
+                        <div class="callout callout-info">
+                            <p>Tôi muốn xem nhà vào cuối tuần này. Xin vui lòng liên hệ với tôi để sắp xếp lịch.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h5>Ghi chú xử lý</h5>
+                        <textarea class="form-control" rows="3" placeholder="Nhập ghi chú..."></textarea>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label>Cập nhật trạng thái:</label>
+                        <select class="form-control">
+                            <option>Mới</option>
+                            <option>Đang xử lý</option>
+                            <option>Đã liên hệ</option>
+                            <option>Thành công</option>
+                            <option>Không thành công</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success">
+                    <i class="fas fa-save"></i> Lưu thay đổi
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>

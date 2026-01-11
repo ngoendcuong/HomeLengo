@@ -1,0 +1,35 @@
+﻿@* Areas/RealEstateAdmin/Views/Blog/Edit.cshtml *@
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Sửa bài viết";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Sửa Bài viết #@ViewBag.PostId</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/blog">Blog</a></li>
+                    <li class="breadcrumb-item active">Sửa bài viết</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Bài viết này đã được xuất bản vào <strong>10/01/2025</strong> và có <strong>1,245 lượt xem</strong>
+        </div>
+
+        <!-- Nội dung giống Create.cshtml, chỉ thay đổi tiêu đề và có dữ liệu sẵn -->
+        <p class="text-center text-muted">
+            <em>Nội dung form giống Create.cshtml, có dữ liệu đã điền sẵn</em>
+        </p>
+    </div>
+</section>

@@ -71,6 +71,13 @@ public class AccountController : Controller
                 HttpContext.Session.SetString("RoleName", userRole.Role.RoleName);
             }
 
+            // Lấy AgentId nếu user là agent
+            var agent = await _context.Agents.FirstOrDefaultAsync(a => a.UserId == user.UserId);
+            if (agent != null)
+            {
+                HttpContext.Session.SetString("AgentId", agent.AgentId.ToString());
+            }
+
             return Json(new { success = true, message = "Đăng nhập thành công" });
         }
         catch (Exception ex)

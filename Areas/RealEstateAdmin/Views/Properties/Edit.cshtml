@@ -1,0 +1,161 @@
+@* Areas/RealEstateAdmin/Views/Properties/Edit.cshtml *@
+@model HomeLengo.Models.Property
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Sửa Bất động sản";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Sửa Bất động sản</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/properties">Bất động sản</a></li>
+                    <li class="breadcrumb-item active">Sửa</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Thông tin Bất động sản #@Model.PropertyId</h3>
+            </div>
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="PropertyId" />
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Title">Tiêu đề <span class="text-danger">*</span></label>
+                                <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bất động sản" />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PropertyTypeId">Loại BĐS <span class="text-danger">*</span></label>
+                                <select asp-for="PropertyTypeId" class="form-control" asp-items="ViewBag.PropertyTypes">
+                                    <option value="">-- Chọn loại --</option>
+                                </select>
+                                <span asp-validation-for="PropertyTypeId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Price">Giá <span class="text-danger">*</span></label>
+                                <input asp-for="Price" class="form-control" type="number" step="0.01" placeholder="0" />
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Currency">Đơn vị tiền tệ</label>
+                                <select asp-for="Currency" class="form-control">
+                                    <option value="VND">VNĐ</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Area">Diện tích (m²)</label>
+                                <input asp-for="Area" class="form-control" type="number" step="0.01" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Bedrooms">Số phòng ngủ</label>
+                                <input asp-for="Bedrooms" class="form-control" type="number" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Bathrooms">Số phòng tắm</label>
+                                <input asp-for="Bathrooms" class="form-control" type="number" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="StatusId">Trạng thái <span class="text-danger">*</span></label>
+                                <select asp-for="StatusId" class="form-control" asp-items="ViewBag.PropertyStatuses">
+                                    <option value="">-- Chọn trạng thái --</option>
+                                </select>
+                                <span asp-validation-for="StatusId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="AgentId">Môi giới</label>
+                                <select asp-for="AgentId" class="form-control" asp-items="ViewBag.Agents">
+                                    <option value="">-- Chọn môi giới --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="CityId">Thành phố</label>
+                                <select asp-for="CityId" class="form-control" asp-items="ViewBag.Cities">
+                                    <option value="">-- Chọn thành phố --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Address">Địa chỉ</label>
+                                <input asp-for="Address" class="form-control" placeholder="Nhập địa chỉ chi tiết" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Description">Mô tả</label>
+                        <textarea asp-for="Description" class="form-control" rows="5" placeholder="Nhập mô tả chi tiết về bất động sản"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" asp-for="IsFeatured" class="custom-control-input" id="isFeatured" />
+                            <label class="custom-control-label" for="isFeatured">Tin nổi bật (VIP)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Cập nhật
+                    </button>
+                    <a href="/RealEstateAdmin/properties" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

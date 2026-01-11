@@ -55,15 +55,23 @@ namespace HomeLengo.ViewComponents
                 {
                     item.Url = "/Property";
                 }
+                // Nếu menu item là "Bảng Điều Khiển" (parent), set URL = /Admin/Home
+                else if (item.ParentId == null && (item.Title.Equals("Bảng Điều Khiển", StringComparison.OrdinalIgnoreCase) || 
+                    item.Title.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ||
+                    item.Title.Contains("Bảng Điều Khiển", StringComparison.OrdinalIgnoreCase) ||
+                    item.Title.Contains("Dashboard", StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.Url = "/Admin/Home";
+                }
                 // Nếu là menu con (có ParentId), tìm PropertyType tương ứng và set URL
                 else if (item.ParentId != null)
                 {
                     // Kiểm tra xem parent có phải là "Danh sách" không
-                    var parent = items.FirstOrDefault(m => m.MenuId == item.ParentId);
-                    bool isDanhSachChild = parent != null && 
-                        (parent.Title.Equals("Danh sách", StringComparison.OrdinalIgnoreCase) || 
-                         parent.Title.Equals("Danh Sách", StringComparison.OrdinalIgnoreCase) ||
-                         parent.Title.Contains("Danh sách", StringComparison.OrdinalIgnoreCase));
+                    var parentMenu = items.FirstOrDefault(m => m.MenuId == item.ParentId);
+                    bool isDanhSachChild = parentMenu != null && 
+                        (parentMenu.Title.Equals("Danh sách", StringComparison.OrdinalIgnoreCase) || 
+                         parentMenu.Title.Equals("Danh Sách", StringComparison.OrdinalIgnoreCase) ||
+                         parentMenu.Title.Contains("Danh sách", StringComparison.OrdinalIgnoreCase));
 
                     if (isDanhSachChild)
                     {
@@ -102,6 +110,120 @@ namespace HomeLengo.ViewComponents
                         {
                             // Luôn override URL để đảm bảo dùng format mới
                             item.Url = $"/Property?propertyTypeId={matchingPropertyType.PropertyTypeId}";
+                        }
+                    }
+                    // Xử lý menu con của "Bảng Điều Khiển" (Dashboard)
+                    else
+                    {
+                        var dashboardParent = items.FirstOrDefault(m => m.MenuId == item.ParentId);
+                        bool isDashboardChild = dashboardParent != null && 
+                            (dashboardParent.Title.Equals("Bảng Điều Khiển", StringComparison.OrdinalIgnoreCase) || 
+                             dashboardParent.Title.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ||
+                             dashboardParent.Title.Contains("Bảng Điều Khiển", StringComparison.OrdinalIgnoreCase) ||
+                             dashboardParent.Title.Contains("Dashboard", StringComparison.OrdinalIgnoreCase));
+
+                        // Nếu URL hiện tại bắt đầu bằng /dashboard/, cũng coi là menu con của Dashboard
+                        bool hasDashboardUrl = !string.IsNullOrEmpty(item.Url) && 
+                            (item.Url.StartsWith("/dashboard/", StringComparison.OrdinalIgnoreCase) ||
+                             item.Url.StartsWith("dashboard/", StringComparison.OrdinalIgnoreCase));
+
+                        if (isDashboardChild || hasDashboardUrl)
+                        {
+                            // Map các menu con của Dashboard với URL tương ứng
+                            var dashboardMenuMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                            {
+                                { "Bất Động Sản Của Tôi", "/Admin/Property/MyProperties" },
+                                { "My Properties", "/Admin/Property/MyProperties" },
+                                { "bds-cua-toi", "/Admin/Property/MyProperties" },
+                                { "Tin Nhắn", "/Admin/Message" },
+                                { "Message", "/Admin/Message" },
+                                { "Messages", "/Admin/Message" },
+                                { "tin-nhan", "/Admin/Message" },
+                                { "Yêu Thích", "/Admin/Favorite" },
+                                { "My Favorites", "/Admin/Favorite" },
+                                { "Favorites", "/Admin/Favorite" },
+                                { "yeu-thich", "/Admin/Favorite" },
+                                { "Đánh Giá Gần Đây", "/Admin/Review" },
+                                { "Recent Reviews", "/Admin/Review" },
+                                { "Reviews", "/Admin/Review" },
+                                { "danh-gia-gan-day", "/Admin/Review" },
+                                { "Hồ Sơ Của Tôi", "/Admin/User/Profile" },
+                                { "My Profile", "/Admin/User/Profile" },
+                                { "Profile", "/Admin/User/Profile" },
+                                { "ho-so-cua-toi", "/Admin/User/Profile" },
+                                { "Thêm Bất Động Sản Mới", "/Admin/Property/Create" },
+                                { "Add New Property", "/Admin/Property/Create" },
+                                { "Add Property", "/Admin/Property/Create" },
+                                { "them-bds-moi", "/Admin/Property/Create" }
+                            };
+
+                            // Thử tìm theo Title trước
+                            bool mapped = false;
+                            if (dashboardMenuMap.TryGetValue(item.Title, out var dashboardUrl))
+                            {
+                                item.Url = dashboardUrl;
+                                mapped = true;
+                                System.Diagnostics.Debug.WriteLine($"Dashboard menu mapped by title: '{item.Title}' -> '{dashboardUrl}'");
+                            }
+                            // Nếu không tìm thấy theo Title, thử tìm theo URL slug
+                            if (!mapped && hasDashboardUrl && !string.IsNullOrEmpty(item.Url))
+                            {
+                                var urlSlug = item.Url.Replace("/dashboard/", "").Replace("dashboard/", "").Trim('/');
+                                if (dashboardMenuMap.TryGetValue(urlSlug, out var urlFromSlug))
+                                {
+                                    item.Url = urlFromSlug;
+                                    mapped = true;
+                                    System.Diagnostics.Debug.WriteLine($"Dashboard menu mapped by slug: '{urlSlug}' -> '{urlFromSlug}'");
+                                }
+                            }
+                            
+                            // Fallback: Map trực tiếp dựa trên slug pattern
+                            if (!mapped && hasDashboardUrl && !string.IsNullOrEmpty(item.Url))
+                            {
+                                var urlSlug = item.Url.Replace("/dashboard/", "").Replace("dashboard/", "").Trim('/').ToLower();
+                                
+                                // Map các slug phổ biến
+                                if (urlSlug.Contains("bds-cua-toi") || urlSlug.Contains("my-properties") || urlSlug.Contains("property"))
+                                {
+                                    item.Url = "/Admin/Property/MyProperties";
+                                    mapped = true;
+                                }
+                                else if (urlSlug.Contains("tin-nhan") || urlSlug.Contains("message"))
+                                {
+                                    item.Url = "/Admin/Message";
+                                    mapped = true;
+                                }
+                                else if (urlSlug.Contains("yeu-thich") || urlSlug.Contains("favorite"))
+                                {
+                                    item.Url = "/Admin/Favorite";
+                                    mapped = true;
+                                }
+                                else if (urlSlug.Contains("danh-gia") || urlSlug.Contains("review"))
+                                {
+                                    item.Url = "/Admin/Review";
+                                    mapped = true;
+                                }
+                                else if (urlSlug.Contains("ho-so") || urlSlug.Contains("profile"))
+                                {
+                                    item.Url = "/Admin/User/Profile";
+                                    mapped = true;
+                                }
+                                else if (urlSlug.Contains("them-bds") || urlSlug.Contains("add-property"))
+                                {
+                                    item.Url = "/Admin/Property/Create";
+                                    mapped = true;
+                                }
+                                
+                                if (mapped)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Dashboard menu mapped by pattern: '{urlSlug}' -> '{item.Url}'");
+                                }
+                            }
+                            
+                            if (!mapped)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Dashboard menu NOT mapped: Title='{item.Title}', Parent='{dashboardParent?.Title}', URL='{item.Url}'");
+                            }
                         }
                     }
                 }

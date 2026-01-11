@@ -1,0 +1,208 @@
+﻿@* Areas/RealEstateAdmin/Views/Shared/_Sidebar.cshtml *@
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a href="/RealEstateAdmin/dashboard" class="brand-link">
+        <i class="fas fa-building brand-image ml-3"></i>
+        <span class="brand-text font-weight-light">Real Estate Admin</span>
+    </a>
+
+    <div class="sidebar">
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img src="https://via.placeholder.com/160x160" class="img-circle elevation-2" alt="User">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block">Admin User</a>
+            </div>
+        </div>
+
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="/RealEstateAdmin/dashboard" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+
+                <!-- Quản lý BĐS -->
+                <li class="nav-item">
+                    <a href="/RealEstateAdmin/properties" class="nav-link">
+                        <i class="nav-icon fas fa-building"></i>
+                        <p>Quản lý BĐS</p>
+                    </a>
+                </li>
+
+                <!-- Danh mục & Thuộc tính -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-folder"></i>
+                        <p>
+                            Danh mục & Thuộc tính
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/categories/propertytypes" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Loại BĐS</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/categories/propertystatus" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Trạng thái</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/categories/amenities" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Tiện ích</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Môi giới -->
+                <li class="nav-item">
+                    <a href="/RealEstateAdmin/agents" class="nav-link">
+                        <i class="nav-icon fas fa-user-tie"></i>
+                        <p>Môi giới</p>
+                    </a>
+                </li>
+
+                <!-- Người dùng -->
+                <li class="nav-item">
+                    <a href="/RealEstateAdmin/users" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Người dùng</p>
+                    </a>
+                </li>
+
+                <!-- Gói dịch vụ -->
+                <li class="nav-item">
+                    <a href="/RealEstateAdmin/packages" class="nav-link">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>Gói dịch vụ</p>
+                    </a>
+                </li>
+
+                <!-- Liên hệ & Khách hàng -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-phone"></i>
+                        <p>
+                            Liên hệ & Khách hàng
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/contacts" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Yêu cầu tư vấn</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/contacts/formcontacts" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Form liên hệ</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/contacts/feedbacks" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Phản hồi KH</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Blog / Tin tức -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-newspaper"></i>
+                        <p>
+                            Blog / Tin tức
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/blog/categories" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Danh mục bài viết</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/blog" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Quản lý bài viết</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/blog/create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Thêm bài viết</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Đánh giá - Bình luận -->
+                <li class="nav-item">
+                    <a href="/RealEstateAdmin/reviews" class="nav-link">
+                        <i class="nav-icon fas fa-star"></i>
+                        <p>Đánh giá - Bình luận</p>
+                    </a>
+                </li>
+
+                <!-- Cấu hình hệ thống -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-cog"></i>
+                        <p>
+                            Cấu hình hệ thống
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/settings/general" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Cấu hình chung</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/settings/media" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Logo & Hình ảnh</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/settings/email" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Email & SMTP</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/settings/banners" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Banner & Slider</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/RealEstateAdmin/settings/notifications" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Thông báo hệ thống</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</aside>

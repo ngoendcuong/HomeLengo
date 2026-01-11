@@ -1,0 +1,392 @@
+@model HomeLengo.Models.Agent
+@{
+    ViewData["Title"] = $"Hồ sơ - {Model.User?.FullName ?? Model.User?.Username ?? "Agent"}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="flat-section-v3 flat-property-detail">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-8 col-lg-7">
+                @* Agent Basic Information *@
+                <div class="single-property-element single-property-desc">
+                    <div class="d-flex align-items-start gap-4 mb-4">
+                        <div class="avatar avt-120 round" style="flex-shrink: 0;">
+                            <img src="@Url.Content($"~/assets/images/avatar/{(Model.User?.Avatar ?? "avatarMacDinh.jpg")}")" 
+                                 alt="@(Model.User?.FullName ?? "Agent")"
+                                 onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/avatar/avatarMacDinh.jpg")'">
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 class="title fw-8 mb-2">@(Model.User?.FullName ?? Model.User?.Username ?? "Agent")</h3>
+                            @if (!string.IsNullOrEmpty(Model.AgencyName))
+                            {
+                                <p class="text-variant-1 mb-2">
+                                    <i class="icon icon-building"></i> @Model.AgencyName
+                                </p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.LicenseNumber))
+                            {
+                                <p class="text-variant-1 mb-2">
+                                    <i class="icon icon-certificate"></i> Giấy phép: @Model.LicenseNumber
+                                </p>
+                            }
+                            <div class="d-flex flex-wrap gap-4 mt-3">
+                                @if (!string.IsNullOrEmpty(Model.User?.Phone))
+                                {
+                                    <p class="text-variant-1 mb-0">
+                                        <i class="icon icon-phone"></i> @Model.User.Phone
+                                    </p>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.User?.Email))
+                                {
+                                    <p class="text-variant-1 mb-0">
+                                        <i class="icon icon-mail"></i> @Model.User.Email
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Bio))
+                    {
+                        <div class="mt-4">
+                            <h5 class="fw-6 mb-3">Giới thiệu</h5>
+                            <p class="text-variant-1">@Model.Bio</p>
+                        </div>
+                    }
+                </div>
+
+                @* Statistics *@
+                <div class="single-property-element">
+                    <h5 class="title fw-6 mb-4">Thống kê</h5>
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center p-3" style="background: #f8f9fa; border-radius: 8px;">
+                                <h4 class="fw-8 text-primary mb-1">@ViewBag.TotalProperties</h4>
+                                <p class="text-variant-1 mb-0">Tin đã đăng</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center p-3" style="background: #f8f9fa; border-radius: 8px;">
+                                <h4 class="fw-8 text-primary mb-1">@ViewBag.TotalViews</h4>
+                                <p class="text-variant-1 mb-0">Lượt xem</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center p-3" style="background: #f8f9fa; border-radius: 8px;">
+                                <h4 class="fw-8 text-primary mb-1">@ViewBag.TotalReviews</h4>
+                                <p class="text-variant-1 mb-0">Đánh giá</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center p-3" style="background: #f8f9fa; border-radius: 8px;">
+                                <h4 class="fw-8 text-primary mb-1">
+                                    @if (ViewBag.AverageRating > 0)
+                                    {
+                                        @ViewBag.AverageRating.ToString("F1")
+                                    }
+                                    else
+                                    {
+                                        <text>0.0</text>
+                                    }
+                                </h4>
+                                <p class="text-variant-1 mb-0">
+                                    <ul class="list-star d-inline-flex" style="list-style: none; padding: 0; margin: 0;">
+                                        @for (int i = 0; i < 5; i++)
+                                        {
+                                            <li class="icon icon-star @(i < Math.Round((double)ViewBag.AverageRating) ? "" : "empty")"></li>
+                                        }
+                                    </ul>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* Reviews Section *@
+                @if (ViewBag.Reviews != null && ((List<Review>)ViewBag.Reviews).Any())
+                {
+                    <div class="single-property-element single-wrapper-review">
+                        <h5 class="title fw-6 mb-4">Đánh giá (@ViewBag.TotalReviews)</h5>
+                        
+                        @* Rating Distribution *@
+                        @if (ViewBag.RatingDistribution != null)
+                        {
+                            var ratingDist = (Dictionary<int, int>)ViewBag.RatingDistribution;
+                            var totalRev = (int)ViewBag.TotalReviews;
+                            <div class="mb-4">
+                                @for (int rating = 5; rating >= 1; rating--)
+                                {
+                                    var count = ratingDist.ContainsKey(rating) ? ratingDist[rating] : 0;
+                                    var percentage = totalRev > 0 ? (count * 100.0 / totalRev) : 0;
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <span class="text-variant-1" style="min-width: 60px;">@rating sao</span>
+                                        <div class="flex-grow-1" style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                                            <div style="background: #ffc107; height: 100%; width: @percentage%; transition: width 0.3s;"></div>
+                                        </div>
+                                        <span class="text-variant-1" style="min-width: 60px; text-align: right;">@count</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        
+                        <ul class="box-review">
+                            @foreach (var review in ((List<Review>)ViewBag.Reviews).Take(10))
+                            {
+                                <li class="list-review-item">
+                                    <div class="avatar avt-60">
+                                        <img src="@Url.Content($"~/assets/images/avatar/{(review.User?.Avatar ?? "avatarMacDinh.jpg")}")" 
+                                             alt="@(review.User?.FullName ?? "User")"
+                                             onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/avatar/avatarMacDinh.jpg")'">
+                                    </div>
+                                    <div class="content">
+                                        <div class="box-head">
+                                            <div class="d-flex align-items-center flex-wrap justify-content-between gap-8">
+                                                <h6>@(review.User?.FullName ?? "Ẩn danh")</h6>
+                                                <ul class="list-star">
+                                                    @for (int i = 0; i < 5; i++)
+                                                    {
+                                                        <li class="icon icon-star @(i < review.Rating ? "" : "empty")"></li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                            <p class="mt-2 caption-2 text-variant-2">
+                                                @(review.CreatedAt?.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("vi-VN")) ?? "N/A")
+                                                @if (review.Property != null)
+                                                {
+                                                    <text> - </text>
+                                                    <a href="@Url.Action("Details", "Property", new { id = review.Property.PropertyId })" class="link">
+                                                        @review.Property.Title
+                                                    </a>
+                                                }
+                                            </p>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(review.Title))
+                                        {
+                                            <h6 class="fw-6 mb-2">@review.Title</h6>
+                                        }
+                                        <p>@(review.Body ?? "Không có bình luận")</p>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="single-property-element">
+                        <h5 class="title fw-6 mb-4">Đánh giá</h5>
+                        <p class="text-variant-2">Chưa có đánh giá nào.</p>
+                    </div>
+                }
+
+                @* Properties Listings *@
+                @if (ViewBag.Properties != null && ((List<Property>)ViewBag.Properties).Any())
+                {
+                    <div class="single-property-element">
+                        <h5 class="title fw-6 mb-4">Các tin đã đăng (@ViewBag.TotalProperties)</h5>
+                        <div class="row">
+                            @{
+                                var properties = (List<Property>)ViewBag.Properties;
+                                string GetPropertyImagePath(Property prop)
+                                {
+                                    var photo = prop.PropertyPhotos?
+                                        .OrderByDescending(p => p.IsPrimary == true)
+                                        .ThenBy(p => p.SortOrder ?? 0)
+                                        .FirstOrDefault();
+                                    
+                                    if (photo != null && !string.IsNullOrEmpty(photo.FilePath))
+                                    {
+                                        var filePath = photo.FilePath.Trim();
+                                        if (filePath.StartsWith("~/"))
+                                            return filePath;
+                                        if (filePath.StartsWith("/"))
+                                            return "~" + filePath;
+                                        if (filePath.Contains("assets/images/property/"))
+                                            // Tin mới: assets/images/property/xxx.jpg
+                                            return "~/" + filePath.TrimStart('/');
+                                        if (filePath.Contains("assets/images/home/"))
+                                            // Tin cũ: assets/images/home/xxx.jpg
+                                            return "~/" + filePath.TrimStart('/');
+                                        if (filePath.Contains("assets/"))
+                                            return "~/" + filePath.TrimStart('/');
+                                        // Chỉ là tên file, mặc định là tin cũ (home)
+                                        return "~/assets/images/home/" + filePath.TrimStart('/');
+                                    }
+                                    return "~/assets/images/banner/banner-property-12.jpg";
+                                }
+                            }
+                            @foreach (var property in properties)
+                            {
+                                var imagePath = GetPropertyImagePath(property);
+                                <div class="col-md-6 mb-4">
+                                    <div class="homelengo-box">
+                                        <div class="archive-top">
+                                            <a href="@Url.Action("Details", "Property", new { id = property.PropertyId })" class="images-group">
+                                                <div class="images-style">
+                                                    <img src="@Url.Content(imagePath)" 
+                                                         alt="@property.Title"
+                                                         onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/banner/banner-property-12.jpg")'">
+                                                </div>
+                                                <div class="top">
+                                                    <ul class="d-flex gap-6">
+                                                        @if (property.IsFeatured == true)
+                                                        {
+                                                            <li class="flag-tag primary">Nổi bật</li>
+                                                        }
+                                                        <li class="flag-tag style-1">@property.Status?.Name</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="bottom">
+                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M10 7C10 7.53043 9.78929 8.03914 9.41421 8.41421C9.03914 8.78929 8.53043 9 8 9C7.46957 9 6.96086 8.78929 6.58579 8.41421C6.21071 8.03914 6 7.53043 6 7C6 6.46957 6.21071 5.96086 6.58579 5.58579C6.96086 5.21071 7.46957 5 8 5C8.53043 5 9.03914 5.21071 9.41421 5.58579C9.78929 5.96086 10 6.46957 10 7Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M13 7C13 11.7613 8 14.5 8 14.5C8 14.5 3 11.7613 3 7C3 5.67392 3.52678 4.40215 4.46447 3.46447C5.40215 2.52678 6.67392 2 8 2C9.32608 2 10.5979 2.52678 11.5355 3.46447C12.4732 4.40215 13 5.67392 13 7Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    @property.Address
+                                                    @if (!string.IsNullOrEmpty(property.Neighborhood?.Name))
+                                                    {
+                                                        <text>, @property.Neighborhood.Name</text>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(property.District?.Name))
+                                                    {
+                                                        <text>, @property.District.Name</text>
+                                                    }
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="archive-bottom">
+                                            <h5 class="title">
+                                                <a href="@Url.Action("Details", "Property", new { id = property.PropertyId })" class="link">
+                                                    @property.Title
+                                                </a>
+                                            </h5>
+                                            <ul class="meta-list">
+                                                @if (property.Bedrooms.HasValue)
+                                                {
+                                                    <li class="item">
+                                                        <i class="icon icon-bed"></i>
+                                                        <span class="text-variant-1">Phòng ngủ:</span>
+                                                        <span class="fw-6">@property.Bedrooms</span>
+                                                    </li>
+                                                }
+                                                @if (property.Bathrooms.HasValue)
+                                                {
+                                                    <li class="item">
+                                                        <i class="icon icon-bath"></i>
+                                                        <span class="text-variant-1">Phòng tắm:</span>
+                                                        <span class="fw-6">@property.Bathrooms</span>
+                                                    </li>
+                                                }
+                                                @if (property.Area.HasValue)
+                                                {
+                                                    <li class="item">
+                                                        <i class="icon icon-sqft"></i>
+                                                        <span class="text-variant-1">Diện tích:</span>
+                                                        <span class="fw-6">@property.Area m²</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                            <div class="box-price d-flex align-items-center justify-content-between mt-3">
+                                                <div>
+                                                    <h6 class="fw-8">@property.Price.ToString("N0")</h6>
+                                                    <span class="body-1 text-variant-1">@(property.Currency ?? "VND")</span>
+                                                </div>
+                                                @if (property.Views.HasValue)
+                                                {
+                                                    <div class="text-variant-1">
+                                                        <i class="icon icon-eye"></i> @property.Views lượt xem
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="single-property-element">
+                        <h5 class="title fw-6 mb-4">Các tin đã đăng</h5>
+                        <p class="text-variant-2">Chưa có tin đăng nào.</p>
+                    </div>
+                }
+            </div>
+            
+            @* Sidebar *@
+            <div class="col-xl-4 col-lg-5">
+                <div class="single-sidebar fixed-sidebar">
+                    @* Contact Agent *@
+                    <div class="widget-box single-property-contact">
+                        <h5 class="title fw-6">Liên hệ</h5>
+                        <div class="box-avatar">
+                            <div class="avatar avt-100 round">
+                                <img src="@Url.Content($"~/assets/images/avatar/{(Model.User?.Avatar ?? "avatarMacDinh.jpg")}")" 
+                                     alt="@(Model.User?.FullName ?? "Agent")"
+                                     onerror="this.onerror=null; this.src='@Url.Content("~/assets/images/avatar/avatarMacDinh.jpg")'">
+                            </div>
+                            <div class="info">
+                                <h6 class="name">@(Model.User?.FullName ?? Model.User?.Username ?? "Agent")</h6>
+                                <ul class="list">
+                                    @if (!string.IsNullOrEmpty(Model.User?.Phone))
+                                    {
+                                        <li class="d-flex align-items-center gap-4 text-variant-1">
+                                            <i class="icon icon-phone"></i>@Model.User.Phone
+                                        </li>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.User?.Email))
+                                    {
+                                        <li class="d-flex align-items-center gap-4 text-variant-1">
+                                            <i class="icon icon-mail"></i>@Model.User.Email
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                        <form action="#" class="contact-form" id="contactForm">
+                            <div class="ip-group">
+                                <input type="text" name="name" placeholder="Tên của bạn" class="form-control" required>
+                            </div>
+                            <div class="ip-group">
+                                <input type="tel" name="phone" placeholder="vd 0123456789" class="form-control" required>
+                            </div>
+                            <div class="ip-group">
+                                <input type="email" name="email" placeholder="email@example.com" class="form-control" required>
+                            </div>
+                            <div class="ip-group">
+                                <textarea name="message" rows="4" tabindex="4" placeholder="Tin nhắn" aria-required="true" required></textarea>
+                            </div>
+                            <button type="submit" class="tf-btn btn-view primary hover-btn-view w-100">
+                                Gửi tin nhắn <span class="icon icon-arrow-right2"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .avatar.avt-120 {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .avatar.avt-120 img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+<script>
+    // Contact Form Handler
+    document.getElementById('contactForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Cảm ơn tin nhắn của bạn! Chúng tôi sẽ liên hệ sớm.');
+        this.reset();
+    });
+</script>
+

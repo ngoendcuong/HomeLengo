@@ -420,16 +420,43 @@
                                 var latestPhoto = latest.PropertyPhotos?.OrderByDescending(p => p.IsPrimary == true).ThenBy(p => p.SortOrder ?? 0).FirstOrDefault();
                                 <li class="latest-property-item">
                                     <a href="/Property/Details/@latest.PropertyId" class="images-style">
-                                        @if (latestPhoto != null)
+                                        @if (latestPhoto != null && !string.IsNullOrEmpty(latestPhoto.FilePath))
                                         {
-                                            var photoPath = latestPhoto.FilePath?.StartsWith("~/") == true 
-                                                ? latestPhoto.FilePath 
-                                                : $"~/assets/images/home/{latestPhoto.FilePath}";
-                                            <img src="@Url.Content(photoPath)" alt="@latest.Title">
+                                            var filePath = latestPhoto.FilePath.Trim();
+                                            string photoPath;
+                                            if (filePath.StartsWith("~/"))
+                                            {
+                                                photoPath = filePath;
+                                            }
+                                            else if (filePath.StartsWith("/"))
+                                            {
+                                                photoPath = "~" + filePath;
+                                            }
+                                            else if (filePath.Contains("assets/images/property/"))
+                                            {
+                                                // Tin mới: assets/images/property/xxx.jpg
+                                                photoPath = "~/" + filePath.TrimStart('/');
+                                            }
+                                            else if (filePath.Contains("assets/images/home/"))
+                                            {
+                                                // Tin cũ: assets/images/home/xxx.jpg
+                                                photoPath = "~/" + filePath.TrimStart('/');
+                                            }
+                                            else if (filePath.Contains("assets/"))
+                                            {
+                                                // Có assets/ nhưng không rõ, giữ nguyên
+                                                photoPath = "~/" + filePath.TrimStart('/');
+                                            }
+                                            else
+                                            {
+                                                // Chỉ là tên file, mặc định là tin cũ (home)
+                                                photoPath = $"~/assets/images/home/{filePath.TrimStart('/')}";
+                                            }
+                                            <img src="@Url.Content(photoPath)" alt="@latest.Title" onerror="this.onerror=null; this.src='@(Url.Content("~/assets/images/banner/banner-property-12.jpg"))'">
                                         }
                                         else
                                         {
-                                            <img src="@Url.Content("~/assets/images/home/default.jpg")" alt="@latest.Title">
+                                            <img src="@Url.Content("~/assets/images/banner/banner-property-12.jpg")" alt="@latest.Title">
                                         }
                                     </a>
                                     <div class="content">
@@ -488,21 +515,49 @@
                                             <div class="archive-top">
                                                 <a href="/Property/Details/@item.PropertyId" class="images-group">
                                                     <div class="images-style">
-                                                        @if (primaryPhoto != null)
+                                                        @if (primaryPhoto != null && !string.IsNullOrEmpty(primaryPhoto.FilePath))
                                                         {
-                                                            var photoPath = primaryPhoto.FilePath?.StartsWith("~/") == true 
-                                                                ? primaryPhoto.FilePath 
-                                                                : $"~/assets/images/home/{primaryPhoto.FilePath}";
+                                                            var filePath = primaryPhoto.FilePath.Trim();
+                                                            string photoPath;
+                                                            if (filePath.StartsWith("~/"))
+                                                            {
+                                                                photoPath = filePath;
+                                                            }
+                                                            else if (filePath.StartsWith("/"))
+                                                            {
+                                                                photoPath = "~" + filePath;
+                                                            }
+                                                            else if (filePath.Contains("assets/images/property/"))
+                                                            {
+                                                                // Tin mới: assets/images/property/xxx.jpg
+                                                                photoPath = "~/" + filePath.TrimStart('/');
+                                                            }
+                                                            else if (filePath.Contains("assets/images/home/"))
+                                                            {
+                                                                // Tin cũ: assets/images/home/xxx.jpg
+                                                                photoPath = "~/" + filePath.TrimStart('/');
+                                                            }
+                                                            else if (filePath.Contains("assets/"))
+                                                            {
+                                                                // Có assets/ nhưng không rõ, giữ nguyên
+                                                                photoPath = "~/" + filePath.TrimStart('/');
+                                                            }
+                                                            else
+                                                            {
+                                                                // Chỉ là tên file, mặc định là tin cũ (home)
+                                                                photoPath = $"~/assets/images/home/{filePath.TrimStart('/')}";
+                                                            }
                                                             <img class="lazyload"
                                                                  data-src="@Url.Content(photoPath)"
                                                                  src="@Url.Content(photoPath)"
-                                                                 alt="@item.Title" />
+                                                                 alt="@item.Title"
+                                                                 onerror="this.onerror=null; this.src='@(Url.Content("~/assets/images/banner/banner-property-12.jpg"))'" />
                                                         }
                                                         else
                                                         {
                                                             <img class="lazyload"
-                                                                 data-src="@Url.Content("~/assets/images/home/default.jpg")"
-                                                                 src="@Url.Content("~/assets/images/home/default.jpg")"
+                                                                 data-src="@Url.Content("~/assets/images/banner/banner-property-12.jpg")"
+                                                                 src="@Url.Content("~/assets/images/banner/banner-property-12.jpg")"
                                                                  alt="@item.Title" />
                                                         }
                                                     </div>

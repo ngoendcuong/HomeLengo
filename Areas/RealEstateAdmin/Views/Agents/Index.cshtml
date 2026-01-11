@@ -1,0 +1,139 @@
+﻿@* Views/Admin/Agents/Index.cshtml *@
+@model IEnumerable<dynamic>
+@{
+    Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Quản lý Môi giới";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Quản lý Môi giới</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+                    <li class="breadcrumb-item active">Môi giới</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Danh sách Môi giới</h3>
+                <div class="card-tools">
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-user-plus"></i> Thêm môi giới
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" placeholder="Tìm kiếm môi giới...">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control">
+                            <option>Tất cả trạng thái</option>
+                            <option>Active</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control">
+                            <option>Sắp xếp theo</option>
+                            <option>Nhiều tin nhất</option>
+                            <option>Rating cao nhất</option>
+                            <option>Mới nhất</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    @foreach (var agent in Model)
+                    {
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 text-center">
+                                            <img src="@agent.Avatar" alt="Avatar" class="img-circle" style="width: 80px; height: 80px;">
+                                        </div>
+                                        <div class="col-md-9">
+                                            <h5><strong>@agent.Name</strong></h5>
+                                            <p class="mb-1">
+                                                <i class="fas fa-phone text-primary"></i> @agent.Phone<br>
+                                                <i class="fas fa-envelope text-info"></i> @agent.Email
+                                            </p>
+                                            <div class="mb-2">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= (int)agent.Rating)
+                                                    {
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    }
+                                                    else if (i - 0.5 <= agent.Rating)
+                                                    {
+                                                        <i class="fas fa-star-half-alt text-warning"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="far fa-star text-warning"></i>
+                                                    }
+                                                }
+                                                <span>@agent.Rating (@agent.Reviews đánh giá)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="description-block">
+                                                <h5 class="description-header text-primary">@agent.TotalProperties</h5>
+                                                <span class="description-text">Tin đăng</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="description-block">
+                                                <h5 class="description-header text-success">@agent.TotalViews</h5>
+                                                <span class="description-text">Lượt xem</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="description-block">
+                                                <span class="badge badge-success">@agent.Status</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-12">
+                                            <div class="btn-group btn-block">
+                                                <a href="/RealEstateAdmin/agents/detail/@agent.Id" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                                </a>
+                                                <button class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-edit"></i> Sửa
+                                                </button>
+                                                <form asp-action="Delete" asp-route-id="@agent.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa môi giới này?');">
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,62 @@
+﻿<button class="hl-open-chat" id="openChatBtn" onclick="toggleChat()" aria-label="Mở chat">
+    <!-- icon -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M7 18v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2" stroke="white" stroke-width="2" stroke-linecap="round" />
+        <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="white" stroke-width="2" />
+        <path d="M4 20a8 8 0 1 1 16 0" stroke="white" stroke-width="2" stroke-linecap="round" />
+    </svg>
+</button>
+
+<div class="hl-chat" id="chatPopup" aria-hidden="true">
+    <!-- Header -->
+    <div class="hl-chat__header">
+        <div class="hl-chat__brand">
+            <div class="hl-chat__logo" aria-hidden="true">
+                <img src="/assets/images/logo/Logo Homelengo.jpg" alt="HomeLengo Logo">
+            </div>
+            <div class="hl-chat__title">
+                <div class="hl-chat__name">HomeLengo ChatBot</div>
+            </div>
+        </div>
+
+        <div class="hl-chat__actions">
+            <!-- Close -->
+            <button class="hl-chat__iconbtn" type="button" onclick="toggleChat()" aria-label="Đóng">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 6l12 12M18 6 6 18" stroke="white" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="hl-chat__body" id="chatBody">
+        <div class="hl-msg hl-msg--bot">
+            Xin chào! 👋 Tôi là Trợ lý của website HomeLengo. Tôi có thể giúp bạn tìm kiếm và gợi ý bất động sản phù hợp.
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="hl-chat__footer">
+        <div class="hl-chat__inputwrap">
+            <input type="text"
+                   id="msgInput"
+                   class="hl-chat__input"
+                   placeholder="Viết tin nhắn của bạn..."
+                   onkeypress="handleEnter(event)"
+                   autocomplete="off" />
+            <button class="hl-chat__send" type="button" onclick="sendMessage()" aria-label="Gửi">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12h12" stroke="white" stroke-width="2" stroke-linecap="round" />
+                    <path d="M13 6l6 6-6 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="hl-chat__disclaimer">
+            Đây là trợ lý ảo được hỗ trợ bởi AI. Phản hồi được tự động hóa và có thể
+            không phải lúc nào cũng chính xác hoặc đầy đủ. Để biết thông tin chính xác,
+            vui lòng liên hệ bộ phận hỗ trợ.
+        </div>
+    </div>
+</div>
