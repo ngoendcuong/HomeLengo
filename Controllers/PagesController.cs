@@ -38,10 +38,19 @@ namespace HomeLengo.Controllers
             return View();
         }
 
-        public IActionResult FAQs()
+        public async Task<IActionResult> FAQs()
         {
-            return View();
+            var faqs = await _context.Faqs
+                .Where(f => f.IsActive)
+                .OrderBy(f => f.SortOrder)
+                .ToListAsync();
+
+            // Nhóm theo Category
+            var groupedFaqs = faqs.GroupBy(f => f.Category);
+
+            return View(groupedFaqs);
         }
+
 
         public IActionResult PrivacyPolicy()
         {
