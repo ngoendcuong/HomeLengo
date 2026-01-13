@@ -1,7 +1,9 @@
-﻿// Areas/Admin/Controllers/DashboardController.cs
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeLengo.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 {
@@ -17,97 +19,79 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 
         public IActionResult Index()
         {
-            // Tổng số bất động sản
-            var totalProperties = _context.Properties.Count();
-
-            // Tổng số agents
-            var totalAgents = _context.Agents.Count();
-
-            // Tổng số users
-            var totalUsers = _context.Users.Count();
-
-            // Doanh thu tháng hiện tại
+            // --- 1. XỬ LÝ THỜI GIAN ---
             var now = DateTime.Now;
-            var startOfMonth = new DateTime(now.Year, now.Month, 1);
-            var startOfNextMonth = startOfMonth.AddMonths(1);
+            var startOfCurrentMonth = new DateTime(now.Year, now.Month, 1);
+            var startOfNextMonth = startOfCurrentMonth.AddMonths(1);
+            var startOfLastMonth = startOfCurrentMonth.AddMonths(-1);
 
-            var monthRevenue =
-                (_context.UserServicePackages
-                    .Include(u => u.Plan)
-                    .Where(u =>
-                        u.CreatedAt >= startOfMonth &&
-                        u.CreatedAt < startOfNextMonth)
-                    .Sum(u => (decimal?)u.Plan.Price) ?? 0)
-                +
-                (_context.Properties
-                    .Where(p =>
-                        (p.StatusId == 3 || p.StatusId == 4) &&
-                        p.CreatedAt >= startOfMonth &&
-                        p.CreatedAt < startOfNextMonth)
-                    .Sum(p => (decimal?)p.Price * 0.03m) ?? 0);
+            // --- 2. TÍNH DOANH THU & TĂNG TRƯỞNG (Ô THỐNG KÊ) ---
+            decimal currentMonthRevenue = CalculateRevenue(startOfCurrentMonth, startOfNextMonth);
+            decimal lastMonthRevenue = CalculateRevenue(startOfLastMonth, startOfCurrentMonth);
 
-            ViewBag.MonthRevenue = monthRevenue;
-
-
-            // Bất động sản chờ duyệt (giả sử StatusId = 5)
-            var pendingProperties = _context.Properties.Count(p => p.StatusId == 5);
-
-            // Bất động sản đang bán (giả sử StatusId = 1)
-            var activeProperties = _context.Properties.Count(p => p.StatusId == 1);
-
-            // Bất động sản cho thuê (StatusId = 2)
-            var rentProperties = _context.Properties.Count(p => p.StatusId == 2);
-
-            ViewBag.TotalProperties = totalProperties;
-            ViewBag.TotalAgents = totalAgents;
-            ViewBag.TotalUsers = totalUsers;
-            ViewBag.MonthRevenue = monthRevenue;
-            ViewBag.PendingProperties = pendingProperties;
-            ViewBag.ActiveProperties = activeProperties;
-            ViewBag.RentProperties = rentProperties;
-
-             // Tổng số bài viết blog
-    var totalBlogs = _context.Blogs.Count();
-
-    ViewBag.TotalProperties = totalProperties;
-    ViewBag.ActiveProperties = activeProperties;
-    ViewBag.PendingProperties = pendingProperties;
-    ViewBag.RentProperties = rentProperties;
-    ViewBag.TotalAgents = totalAgents;
-    ViewBag.TotalUsers = totalUsers;
-    ViewBag.MonthRevenue = monthRevenue;
-    ViewBag.TotalBlogs = totalBlogs; // <-- đây là dòng bạn cần
-
-            // ===== Biểu đồ Tin đăng theo loại hình =====
-            var propertyTypes = new[]
+            double growthPercent = 0;
+            if (lastMonthRevenue > 0)
             {
-    new { Id = 1, Name = "Căn hộ" },
-    new { Id = 2, Name = "Nhà phố" },
-    new { Id = 3, Name = "Biệt thự" },
-    new { Id = 5, Name = "Văn phòng" },
-    new { Id = 8, Name = "Kinh doanh" },
-    new { Id = 9, Name = "Chung cư" }
-};
+                growthPercent = (double)((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+            }
+            else if (currentMonthRevenue > 0) growthPercent = 100;
 
-            var propertyTypeStats = propertyTypes
-                .GroupJoin(
-                    _context.Properties,
-                    t => t.Id,
-                    p => p.PropertyTypeId,
-                    (t, p) => new
-                    {
-                        TypeName = t.Name,
-                        Total = p.Count()
-                    }
-                )
-                .ToList();
+            ViewBag.MonthRevenue = currentMonthRevenue;
+            ViewBag.GrowthPercent = Math.Round(growthPercent, 1);
+            ViewBag.IsGrowthPositive = growthPercent >= 0;
 
-            // Đẩy sang View
+            // --- 3. CÁC CHỈ SỐ COUNT (BOXES) ---
+            ViewBag.TotalProperties = _context.Properties.Count();
+            ViewBag.TotalAgents = _context.Agents.Count();
+            ViewBag.TotalUsers = _context.Users.Count();
+            ViewBag.TotalBlogs = _context.Blogs.Count();
+
+            ViewBag.ActiveProperties = _context.Properties.Count(p => p.StatusId == 1);
+            ViewBag.RentProperties = _context.Properties.Count(p => p.StatusId == 2);
+            ViewBag.PendingProperties = _context.Properties.Count(p => p.StatusId == 5);
+
+            // --- 4. DỮ LIỆU BIỂU ĐỒ 6 THÁNG (LINE CHART) ---
+            var revenueLabels = new List<string>();
+            var revenueData = new List<decimal>();
+
+            for (int i = 5; i >= 0; i--)
+            {
+                var monthDate = now.AddMonths(-i);
+                var start = new DateTime(monthDate.Year, monthDate.Month, 1);
+                var end = start.AddMonths(1);
+
+                revenueLabels.Add($"Tháng {monthDate.Month}/{monthDate.Year}");
+                revenueData.Add(CalculateRevenue(start, end));
+            }
+            ViewBag.RevenueLabels = revenueLabels;
+            ViewBag.RevenueData = revenueData;
+
+            // --- 5. BIỂU ĐỒ TIN ĐĂNG THEO LOẠI (DOUGHNUT) ---
+            var propertyTypeStats = _context.PropertyTypes
+                .Select(t => new {
+                    TypeName = t.Name,
+                    Total = _context.Properties.Count(p => p.PropertyTypeId == t.PropertyTypeId)
+                }).ToList();
+
             ViewBag.PropertyTypeLabels = propertyTypeStats.Select(x => x.TypeName).ToList();
             ViewBag.PropertyTypeData = propertyTypeStats.Select(x => x.Total).ToList();
 
             return View();
         }
 
+        private decimal CalculateRevenue(DateTime start, DateTime end)
+        {
+            var serviceRevenue = _context.UserServicePackages
+                .Include(u => u.Plan)
+                .Where(u => u.CreatedAt >= start && u.CreatedAt < end)
+                .Sum(u => (decimal?)u.Plan.Price) ?? 0;
+
+            var commissionRevenue = _context.Properties
+                .Where(p => (p.StatusId == 3 || p.StatusId == 4) &&
+                            p.CreatedAt >= start && p.CreatedAt < end)
+                .Sum(p => (decimal?)p.Price * 0.03m) ?? 0;
+
+            return serviceRevenue + commissionRevenue;
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Areas/Admin/Controllers/PropertiesController.cs
+﻿// Areas/RealEstateAdmin/Controllers/PropertiesController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +16,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string searchString, int? propertyTypeId, int? statusId)
+        public async Task<IActionResult> Index(string searchString, int? propertyTypeId, int? statusId)
         {
             // Chỉ Admin mới được truy cập
             if (!IsAdmin())
@@ -24,25 +24,38 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
 
-            // Tìm trạng thái "Chờ duyệt"
-            var pendingStatus = _context.PropertyStatuses
-                .ToList()
-                .FirstOrDefault(s => s.Name.Contains("Chờ duyệt") || s.Name.Contains("Pending") || s.Name.Contains("Chờ") || s.Name.ToLower().Contains("pending"));
-            
+            // ✅ Tìm trạng thái "Chờ duyệt" (Pending) 1 lần
+            var pendingStatus = await _context.PropertyStatuses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s =>
+                    s.Name != null &&
+                    (
+                        s.Name.ToLower().Contains("chờ duyệt") ||
+                        s.Name.ToLower().Contains("pending") ||
+                        s.Name.ToLower().Contains("chờ")
+                    )
+                );
+
+            var pendingStatusId = pendingStatus?.StatusId ?? 0;
+            ViewBag.PendingStatusId = pendingStatusId;
+
+            // Query properties
             var query = _context.Properties
                 .Include(p => p.PropertyType)
                 .Include(p => p.Status)
                 .Include(p => p.PropertyPhotos)
                 .AsQueryable();
 
-            // Tìm kiếm theo tiêu đề
-            if (!string.IsNullOrEmpty(searchString))
+            // Tìm kiếm theo tiêu đề / mô tả
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
-                query = query.Where(p => p.Title.Contains(searchString) || 
-                                        (p.Description != null && p.Description.Contains(searchString)));
+                query = query.Where(p =>
+                    (p.Title != null && p.Title.Contains(searchString)) ||
+                    (p.Description != null && p.Description.Contains(searchString))
+                );
             }
 
-            // Lọc theo loại bất động sản
+            // Lọc theo loại BĐS
             if (propertyTypeId.HasValue && propertyTypeId.Value > 0)
             {
                 query = query.Where(p => p.PropertyTypeId == propertyTypeId.Value);
@@ -55,59 +68,45 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             }
             else
             {
-                // Mặc định chỉ hiển thị những tin đã được duyệt (không phải "Chờ duyệt")
-                // Chỉ khi không có filter statusId nào được chọn
-                if (pendingStatus != null)
+                // ✅ Mặc định ẩn tin "Chờ duyệt" nếu không filter statusId
+                if (pendingStatusId > 0)
                 {
-                    query = query.Where(p => p.StatusId != pendingStatus.StatusId);
+                    query = query.Where(p => p.StatusId != pendingStatusId);
                 }
             }
 
-            // Materialize query và tạo PropertyViewModel
-            var properties = query
-                .ToList()
-                .Select(p => 
-                {
-                    var primaryPhoto = p.PropertyPhotos?.Where(pp => pp.IsPrimary == true).FirstOrDefault();
-                    return new PropertyViewModel
-                    {
-                        Id = p.PropertyId,
-                        Title = p.Title ?? "N/A",
-                        Type = p.PropertyType?.Name ?? "N/A",
-                        Price = p.Price,
-                        Currency = p.Currency ?? "VNĐ",
-                        Status = p.Status?.Name ?? "N/A",
-                        IsVip = p.IsFeatured ?? false,
-                        Image = primaryPhoto?.FilePath ?? "/assets/images/banner/banner-property-12.jpg"
-                    };
-                })
-                .ToList();
+            // ✅ Lấy dữ liệu async
+            var list = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
 
-            // Lấy danh sách PropertyTypes và Statuses cho dropdown
-            ViewBag.PropertyTypes = new SelectList(_context.PropertyTypes, "PropertyTypeId", "Name", propertyTypeId);
-            var allStatuses = _context.PropertyStatuses.ToList();
-            ViewBag.PropertyStatuses = new SelectList(allStatuses, "StatusId", "Name", statusId);
-            ViewBag.SearchString = searchString;
-            
-            // Lưu StatusId của "Chờ duyệt" để hiển thị nút
-            // Tìm với nhiều cách khác nhau
-            var foundPendingStatus = allStatuses.FirstOrDefault(s => 
-                !string.IsNullOrEmpty(s.Name) && (
-                    s.Name.Contains("Chờ duyệt") || 
-                    s.Name.Contains("Pending") || 
-                    s.Name.ToLower().Contains("pending") ||
-                    s.Name.ToLower().Contains("waiting") ||
-                    s.Name.ToLower().Contains("chờ duyệt")
-                ));
-            
-            // Nếu vẫn không tìm thấy, tìm bất kỳ status nào có chứa "chờ"
-            if (foundPendingStatus == null)
+            // Map sang PropertyViewModel
+            var properties = list.Select(p =>
             {
-                foundPendingStatus = allStatuses.FirstOrDefault(s => 
-                    !string.IsNullOrEmpty(s.Name) && s.Name.ToLower().Contains("chờ"));
-            }
-            
-            ViewBag.PendingStatusId = foundPendingStatus?.StatusId;
+                var primaryPhoto = p.PropertyPhotos?
+                    .FirstOrDefault(pp => pp.IsPrimary == true);
+
+                return new PropertyViewModel
+                {
+                    Id = p.PropertyId,
+                    Title = p.Title ?? "N/A",
+                    Type = p.PropertyType?.Name ?? "N/A",
+                    Price = p.Price,
+                    Currency = p.Currency ?? "VNĐ",
+                    Status = p.Status?.Name ?? "N/A",
+                    IsVip = p.IsFeatured ?? false,
+                    Image = primaryPhoto?.FilePath ?? "/assets/images/banner/banner-property-12.jpg"
+                };
+            }).ToList();
+
+            // Dropdown filters
+            var propertyTypes = await _context.PropertyTypes.AsNoTracking().ToListAsync();
+            ViewBag.PropertyTypes = new SelectList(propertyTypes, "PropertyTypeId", "Name", propertyTypeId);
+
+            var allStatuses = await _context.PropertyStatuses.AsNoTracking().ToListAsync();
+            ViewBag.PropertyStatuses = new SelectList(allStatuses, "StatusId", "Name", statusId);
+
+            ViewBag.SearchString = searchString;
 
             return View(properties);
         }
@@ -116,10 +115,16 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         {
             ViewBag.PropertyTypes = new SelectList(_context.PropertyTypes, "PropertyTypeId", "Name");
             ViewBag.PropertyStatuses = new SelectList(_context.PropertyStatuses, "StatusId", "Name");
-            ViewBag.Agents = new SelectList(_context.Agents.Include(a => a.User).Select(a => new { 
-                AgentId = a.AgentId, 
-                Name = a.User != null ? (a.User.FullName ?? a.User.Username) : "N/A" 
-            }), "AgentId", "Name");
+            ViewBag.Agents = new SelectList(
+                _context.Agents
+                    .Include(a => a.User)
+                    .Select(a => new
+                    {
+                        AgentId = a.AgentId,
+                        Name = a.User != null ? (a.User.FullName ?? a.User.Username) : "N/A"
+                    }),
+                "AgentId", "Name"
+            );
             ViewBag.Cities = new SelectList(_context.Cities, "CityId", "Name");
             return View();
         }
@@ -136,13 +141,21 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewBag.PropertyTypes = new SelectList(_context.PropertyTypes, "PropertyTypeId", "Name", property.PropertyTypeId);
             ViewBag.PropertyStatuses = new SelectList(_context.PropertyStatuses, "StatusId", "Name", property.StatusId);
-            ViewBag.Agents = new SelectList(_context.Agents.Include(a => a.User).Select(a => new { 
-                AgentId = a.AgentId, 
-                Name = a.User != null ? (a.User.FullName ?? a.User.Username) : "N/A" 
-            }), "AgentId", "Name", property.AgentId);
+            ViewBag.Agents = new SelectList(
+                _context.Agents
+                    .Include(a => a.User)
+                    .Select(a => new
+                    {
+                        AgentId = a.AgentId,
+                        Name = a.User != null ? (a.User.FullName ?? a.User.Username) : "N/A"
+                    }),
+                "AgentId", "Name", property.AgentId
+            );
             ViewBag.Cities = new SelectList(_context.Cities, "CityId", "Name", property.CityId);
+
             return View(property);
         }
 
@@ -152,21 +165,24 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 .Include(p => p.PropertyType)
                 .Include(p => p.Status)
                 .FirstOrDefaultAsync(p => p.PropertyId == id);
-            
-            if (property == null)
-            {
-                return NotFound();
-            }
+
+            if (property == null) return NotFound();
 
             ViewBag.PropertyTypes = new SelectList(_context.PropertyTypes, "PropertyTypeId", "Name", property.PropertyTypeId);
             ViewBag.PropertyStatuses = new SelectList(_context.PropertyStatuses, "StatusId", "Name", property.StatusId);
-            ViewBag.Agents = new SelectList(_context.Agents.Include(a => a.User).Select(a => new { 
-                AgentId = a.AgentId, 
-                Name = a.User != null ? (a.User.FullName ?? a.User.Username) : "N/A" 
-            }), "AgentId", "Name", property.AgentId);
+            ViewBag.Agents = new SelectList(
+                _context.Agents
+                    .Include(a => a.User)
+                    .Select(a => new
+                    {
+                        AgentId = a.AgentId,
+                        Name = a.User != null ? (a.User.FullName ?? a.User.Username) : "N/A"
+                    }),
+                "AgentId", "Name", property.AgentId
+            );
             ViewBag.Cities = new SelectList(_context.Cities, "CityId", "Name", property.CityId);
             ViewBag.PropertyId = id;
-            
+
             return View(property);
         }
 
@@ -174,10 +190,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Property property)
         {
-            if (id != property.PropertyId)
-            {
-                return NotFound();
-            }
+            if (id != property.PropertyId) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -189,24 +202,27 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PropertyExists(property.PropertyId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!PropertyExists(property.PropertyId)) return NotFound();
+                    throw;
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             ViewBag.PropertyTypes = new SelectList(_context.PropertyTypes, "PropertyTypeId", "Name", property.PropertyTypeId);
             ViewBag.PropertyStatuses = new SelectList(_context.PropertyStatuses, "StatusId", "Name", property.StatusId);
-            ViewBag.Agents = new SelectList(_context.Agents.Include(a => a.User).Select(a => new { 
-                AgentId = a.AgentId, 
-                Name = a.User != null ? (a.User.FullName ?? a.User.Username) : "N/A" 
-            }), "AgentId", "Name", property.AgentId);
+            ViewBag.Agents = new SelectList(
+                _context.Agents
+                    .Include(a => a.User)
+                    .Select(a => new
+                    {
+                        AgentId = a.AgentId,
+                        Name = a.User != null ? (a.User.FullName ?? a.User.Username) : "N/A"
+                    }),
+                "AgentId", "Name", property.AgentId
+            );
             ViewBag.Cities = new SelectList(_context.Cities, "CityId", "Name", property.CityId);
+
             return View(property);
         }
 
@@ -219,15 +235,13 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 .Include(p => p.City)
                 .Include(p => p.District)
                 .Include(p => p.Neighborhood)
-                .Include(p => p.Agent)
-                    .ThenInclude(a => a.User)
-                .Include(p => p.PropertyPhotos.Where(pp => pp.IsPrimary == true))
+                .Include(p => p.Agent).ThenInclude(a => a.User)
+                .Include(p => p.PropertyPhotos)
                 .FirstOrDefaultAsync(p => p.PropertyId == id);
 
-            if (property == null)
-            {
-                return NotFound();
-            }
+            if (property == null) return NotFound();
+
+            var primary = property.PropertyPhotos?.FirstOrDefault(pp => pp.IsPrimary == true);
 
             var propertyDetails = new
             {
@@ -246,14 +260,12 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 City = property.City?.Name ?? "N/A",
                 District = property.District?.Name ?? "N/A",
                 Neighborhood = property.Neighborhood?.Name ?? "N/A",
-                AgentName = property.Agent?.User != null 
-                    ? (property.Agent.User.FullName ?? property.Agent.User.Username) 
+                AgentName = property.Agent?.User != null
+                    ? (property.Agent.User.FullName ?? property.Agent.User.Username)
                     : "N/A",
                 IsVip = property.IsFeatured ?? false,
                 Views = property.Views ?? 0,
-                Image = property.PropertyPhotos.Where(pp => pp.IsPrimary == true).FirstOrDefault() != null
-                    ? property.PropertyPhotos.Where(pp => pp.IsPrimary == true).First().FilePath
-                    : "/assets/images/banner/banner-property-12.jpg",
+                Image = primary?.FilePath ?? "/assets/images/banner/banner-property-12.jpg",
                 CreatedAt = property.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A"
             };
 
@@ -264,43 +276,48 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Approve(int id)
         {
-            var property = await _context.Properties
-                .Include(p => p.Status)
-                .FirstOrDefaultAsync(p => p.PropertyId == id);
-            
-            if (property == null)
-            {
-                return NotFound();
-            }
+            var property = await _context.Properties.FirstOrDefaultAsync(p => p.PropertyId == id);
+            if (property == null) return NotFound();
 
-            // Kiểm tra xem property có đang ở trạng thái "Chờ duyệt" không
+            // Tìm status "Chờ duyệt"
             var pendingStatus = await _context.PropertyStatuses
-                .FirstOrDefaultAsync(s => s.Name.Contains("Chờ duyệt") || s.Name.Contains("Pending") || s.Name.Contains("Chờ"));
-            
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s =>
+                    s.Name != null &&
+                    (s.Name.ToLower().Contains("chờ duyệt") || s.Name.ToLower().Contains("pending") || s.Name.ToLower().Contains("chờ"))
+                );
+
             if (pendingStatus != null && property.StatusId == pendingStatus.StatusId)
             {
-                // Tìm trạng thái "Đang bán" hoặc "Cho thuê" để chuyển sang
-                // Ưu tiên tìm "Đang bán" (StatusId = 1), nếu không có thì tìm "Cho thuê" (StatusId = 2)
+                // ✅ Ưu tiên chuyển sang "Đang bán/Rao bán" -> nếu không có thì "Cho thuê"
                 var activeStatus = await _context.PropertyStatuses
-                    .FirstOrDefaultAsync(s => s.StatusId == 1 || s.Name.Contains("Đang bán") || s.Name.Contains("Rao bán"));
-                
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(s =>
+                        s.Name != null &&
+                        (s.Name.ToLower().Contains("đang bán") || s.Name.ToLower().Contains("rao bán") || s.Name.ToLower().Contains("for sale"))
+                    );
+
                 if (activeStatus == null)
                 {
                     activeStatus = await _context.PropertyStatuses
-                        .FirstOrDefaultAsync(s => s.StatusId == 2 || s.Name.Contains("Cho thuê") || s.Name.Contains("For rent"));
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(s =>
+                            s.Name != null &&
+                            (s.Name.ToLower().Contains("cho thuê") || s.Name.ToLower().Contains("for rent"))
+                        );
                 }
-                
+
                 if (activeStatus != null)
                 {
                     property.StatusId = activeStatus.StatusId;
-                    // Sau khi duyệt, set IsFeatured = true
                     property.IsFeatured = true;
                     property.ModifiedAt = DateTime.UtcNow;
+
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Đã duyệt bất động sản thành công!";
                 }
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -313,6 +330,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             {
                 _context.Properties.Remove(property);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã xóa bất động sản!";
             }
             return RedirectToAction(nameof(Index));
         }

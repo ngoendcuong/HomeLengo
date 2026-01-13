@@ -27,9 +27,14 @@
             <div class="card-header">
                 <h3 class="card-title">Danh sách Bất động sản</h3>
                 <div class="card-tools">
-                    @if (ViewBag.PendingStatusId != null)
+                    @{
+                        int pendingId = 0;
+                        try { pendingId = (int)(ViewBag.PendingStatusId ?? 0); } catch { pendingId = 0; }
+                    }
+
+                    @if (pendingId > 0)
                     {
-                        <a href="@Url.Action("Index", "Properties", new { area = "RealEstateAdmin", statusId = ViewBag.PendingStatusId })" class="btn btn-warning btn-sm">
+                        <a href="@Url.Action("Index", "Properties", new { area = "RealEstateAdmin", statusId = pendingId })" class="btn btn-warning btn-sm">
                             <i class="fas fa-clock"></i> Tin chờ duyệt
                         </a>
                     }

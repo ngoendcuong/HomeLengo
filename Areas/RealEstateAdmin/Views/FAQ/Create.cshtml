@@ -3,6 +3,9 @@
     Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Thêm Câu hỏi thường gặp";
 }
+@{
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+}
 
 <div class="content-header">
     <div class="container-fluid">
@@ -12,8 +15,12 @@
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/Dashboard">Home</a></li>
-                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/FAQ">Câu hỏi thường gặp</a></li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Dashboard" asp-action="Index">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="FAQ" asp-action="Index">Câu hỏi thường gặp</a>
+                    </li>
                     <li class="breadcrumb-item active">Thêm mới</li>
                 </ol>
             </div>
@@ -27,18 +34,28 @@
             <div class="card-header">
                 <h3 class="card-title">Thông tin câu hỏi</h3>
             </div>
-            <form asp-action="Create" method="post">
+
+            <form asp-area="RealEstateAdmin"
+                  asp-controller="FAQ"
+                  asp-action="Create"
+                  method="post">
+                @Html.AntiForgeryToken()
+
                 <div class="card-body">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    
+
                     <div class="form-group">
-                        <label asp-for="Question" class="control-label">Câu hỏi <span class="text-danger">*</span></label>
+                        <label asp-for="Question" class="control-label">
+                            Câu hỏi <span class="text-danger">*</span>
+                        </label>
                         <input asp-for="Question" class="form-control" placeholder="Nhập câu hỏi..." />
                         <span asp-validation-for="Question" class="text-danger"></span>
                     </div>
 
                     <div class="form-group">
-                        <label asp-for="Answer" class="control-label">Câu trả lời <span class="text-danger">*</span></label>
+                        <label asp-for="Answer" class="control-label">
+                            Câu trả lời <span class="text-danger">*</span>
+                        </label>
                         <textarea asp-for="Answer" class="form-control" rows="5" placeholder="Nhập câu trả lời..."></textarea>
                         <span asp-validation-for="Answer" class="text-danger"></span>
                     </div>
@@ -47,11 +64,19 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="Category" class="control-label">Danh mục</label>
-                                <input asp-for="Category" class="form-control" placeholder="Ví dụ: Tổng quan, Chi phí, An toàn..." />
-                                <small class="form-text text-muted">Phân loại câu hỏi để dễ quản lý</small>
+
+                                <input asp-for="Category" class="form-control" list="faqCategoryList" placeholder="Nhập hoặc chọn danh mục..." />
+
+                                <datalist id="faqCategoryList">
+                                    <option value="An toàn và Bảo mật"></option>
+                                    <option value="Tổng quan"></option>
+                                    <option value="Chi phí và Thanh toán"></option>
+                                </datalist>
+
                                 <span asp-validation-for="Category" class="text-danger"></span>
                             </div>
                         </div>
+
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="SortOrder" class="control-label">Thứ tự hiển thị</label>
@@ -69,21 +94,27 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Lưu
                     </button>
-                    <a href="/RealEstateAdmin/FAQ" class="btn btn-secondary">
+
+                    <a asp-area="RealEstateAdmin"
+                       asp-controller="FAQ"
+                       asp-action="Index"
+                       class="btn btn-secondary">
                         <i class="fas fa-times"></i> Hủy
                     </a>
                 </div>
             </form>
+
         </div>
     </div>
 </section>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
-
-

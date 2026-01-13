@@ -24,10 +24,10 @@
                     <div class="col-md-8">
                         <div class="ip-group icon-left">
                             <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="Tìm kiếm đánh giá...">
-                            <span class="icon icon-search"></span>
+                            @* <span class="icon icon-search"></span> *@
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    @* <div class="col-md-2">
                         <div class="ip-group">
                             <select name="isApproved" class="form-select">
                                 <option value="">Tất cả Trạng thái</option>
@@ -35,7 +35,7 @@
                                 <option value="false" selected="@(ViewBag.IsApproved == false)">Chờ duyệt</option>
                             </select>
                         </div>
-                    </div>
+                    </div> *@
                     <div class="col-md-2">
                         <button type="submit" class="tf-btn primary w-100">Tìm kiếm</button>
                     </div>
@@ -89,9 +89,9 @@
                                     </div>
                                 </div>
                                 <div class="d-flex gap-2 align-items-center">
-                                    <span class="btn-status @(review.IsApproved == true ? "" : "status-pending")" style="font-size: 12px; padding: 4px 8px;">
+                                    @* <span class="btn-status @(review.IsApproved == true ? "" : "status-pending")" style="font-size: 12px; padding: 4px 8px;">
                                         @(review.IsApproved == true ? "Đã duyệt" : "Chờ duyệt")
-                                    </span>
+                                    </span> *@
                                     <div class="dropdown">
                                         <button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: none; border: none; padding: 4px;">
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">

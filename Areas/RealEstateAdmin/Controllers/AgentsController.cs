@@ -14,7 +14,33 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         {
             _context = context;
         }
+        public async Task<IActionResult> Details(int id)
+        {
+            var agent = await _context.Agents
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.AgentId == id);
 
+            if (agent == null) return NotFound();
+
+            var propertyIds = await _context.Properties
+                .AsNoTracking()
+                .Where(p => p.AgentId == id)
+                .Select(p => p.PropertyId)
+                .ToListAsync();
+
+            var reviews = await _context.Reviews
+                .AsNoTracking()
+                .Include(r => r.User)
+                //.Include(r => r.Property) // nếu bạn cần hiện tên BĐS thì bật lên
+                .Where(r => propertyIds.Contains(r.PropertyId))
+                .Where(r => r.IsApproved == true) // nếu muốn chỉ hiện đã duyệt
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.Reviews = reviews;
+
+            return View(agent);
+        }
         public IActionResult Index(string searchString, string status, string sortBy)
         {
             // Chỉ Admin mới được truy cập
@@ -129,49 +155,54 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         {
             var agent = await _context.Agents
                 .Include(a => a.User)
-                .Include(a => a.Properties)
-                    .ThenInclude(p => p.Status)
-                .Include(a => a.Properties)
-                    .ThenInclude(p => p.PropertyVisits)
+                .Include(a => a.Properties).ThenInclude(p => p.Status)
+                .Include(a => a.Properties).ThenInclude(p => p.PropertyVisits)
                 .Include(a => a.Bookings)
                 .FirstOrDefaultAsync(a => a.AgentId == id);
 
-            if (agent == null)
-            {
-                return NotFound();
-            }
+            if (agent == null) return NotFound();
 
             var totalProperties = agent.Properties?.Count ?? 0;
             var totalViews = agent.Properties?.Sum(p => p.Views ?? 0) ?? 0;
             var totalLeads = agent.Bookings?.Count ?? 0;
 
-            // Tính rating và reviews từ properties của agent
+            // Lấy PropertyIds của agent
             var propertyIds = agent.Properties?.Select(p => p.PropertyId).ToList() ?? new List<int>();
-            var reviews = _context.Reviews
+
+            // ✅ Lấy danh sách đánh giá để HIỂN THỊ (Include User)
+            var reviews = await _context.Reviews
+                .AsNoTracking()
+                .Include(r => r.User)
+                //.Include(r => r.Property) // bật nếu muốn hiện tên BĐS
                 .Where(r => propertyIds.Contains(r.PropertyId))
-                .ToList();
-            
-            var avgRating = reviews.Any() ? reviews.Average(r => (double)r.Rating) : 0.0;
+                .Where(r => r.IsApproved == true)   // nếu trang detail chỉ muốn hiện đánh giá đã duyệt
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            // ✅ Avg/rating dựa trên reviews đã lọc (đúng với UI hiển thị)
+            var avgRating = reviews.Any()
+                ? reviews.Average(r => (double)r.Rating)
+                : 0.0;
+
             var reviewCount = reviews.Count;
 
             // Xử lý avatar path
             string avatarPath;
             if (agent.User == null || string.IsNullOrEmpty(agent.User.Avatar))
-            {
                 avatarPath = "/assets/images/avatar/avatarMacDinh.jpg";
-            }
             else if (agent.User.Avatar.StartsWith("http://") || agent.User.Avatar.StartsWith("https://"))
-            {
                 avatarPath = agent.User.Avatar;
-            }
             else if (agent.User.Avatar.StartsWith("/"))
-            {
                 avatarPath = agent.User.Avatar;
-            }
             else
-            {
                 avatarPath = "/assets/images/avatar/" + agent.User.Avatar.TrimStart('/');
-            }
+
+            // ✅ Cách 1 (nhanh nhất): đẩy reviews qua ViewBag để View dùng giống trang Details()
+            ViewBag.Reviews = reviews;
+
+            // ✅ (tuỳ chọn) thêm ViewBag.RatingCount nếu cần
+            ViewBag.AvgRating = Math.Round(avgRating, 1);
+            ViewBag.ReviewCount = reviewCount;
 
             var result = new
             {
@@ -179,7 +210,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 Name = agent.User != null ? (agent.User.FullName ?? agent.User.Username) : "N/A",
                 Phone = agent.User != null ? agent.User.Phone ?? "" : "",
                 Email = agent.User != null ? agent.User.Email : "",
-                Address = "", // Có thể thêm vào Agent model nếu cần
+                Address = "",
                 TotalProperties = totalProperties,
                 TotalViews = totalViews,
                 TotalLeads = totalLeads,
@@ -203,6 +234,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 
             return View(result);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Lock(int id)

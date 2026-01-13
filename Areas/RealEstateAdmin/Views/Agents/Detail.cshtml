@@ -4,7 +4,9 @@
     Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Chi tiết Môi giới";
 }
-
+@{
+    var reviews = ViewBag.Reviews as List<HomeLengo.Models.Review> ?? new();
+}
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -198,45 +200,81 @@
                     </div>
                 </div>
 
-                <!-- Reviews -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Đánh giá từ khách hàng</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="post">
-                            <div class="user-block">
-                                <img class="img-circle img-bordered-sm" src="https://via.placeholder.com/50" alt="user">
-                                <span class="username">Nguyễn Văn A</span>
-                                <span class="description">
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    - 12/12/2024
-                                </span>
-                            </div>
-                            <p>Môi giới rất nhiệt tình, tư vấn chi tiết và chuyên nghiệp. Rất hài lòng với dịch vụ!</p>
+            </div>
+        </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <!-- Reviews -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Đánh giá từ khách hàng</h3>
                         </div>
-                        <div class="post">
-                            <div class="user-block">
-                                <img class="img-circle img-bordered-sm" src="https://via.placeholder.com/50" alt="user">
-                                <span class="username">Trần Thị B</span>
-                                <span class="description">
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="far fa-star text-warning"></i>
-                                    - 10/12/2024
-                                </span>
-                            </div>
-                            <p>Hỗ trợ tốt, giải đáp thắc mắc nhanh chóng. Recommend!</p>
+                        <div class="card-body">
+
+                            @if (reviews.Any())
+                            {
+                                foreach (var review in reviews)
+                                {
+                                    var avatarRaw = review.User?.Avatar;
+                                    var avatar =
+                                    string.IsNullOrWhiteSpace(avatarRaw) ? "https://via.placeholder.com/50" :
+                                    (avatarRaw.StartsWith("http://") || avatarRaw.StartsWith("https://")) ? avatarRaw :
+                                    avatarRaw.StartsWith("/") ? avatarRaw :
+                                    Url.Content("~/assets/images/avatar/" + avatarRaw.TrimStart('/'));
+
+                                    var userName = review.User?.FullName
+                                    ?? review.User?.Username
+                                    ?? "Người dùng";
+
+                                    // ✅ Rating là byte (không nullable)
+                                    var rating = (int)review.Rating;
+                                    if (rating < 0) rating = 0;
+                                    if (rating > 5) rating = 5;
+
+                                    var createdDate = review.CreatedAt?.ToString("dd/MM/yyyy") ?? "";
+
+                                    <div class="post">
+                                        <div class="user-block">
+                                            <img class="img-circle img-bordered-sm"
+                                                 src="@avatar"
+                                                 alt="@userName"
+                                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/50';">
+
+                                            <span class="username">@userName</span>
+
+                                            <span class="description">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= rating)
+                                                    {
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="far fa-star text-warning"></i>
+                                                    }
+                                                }
+                                                @if (!string.IsNullOrEmpty(createdDate))
+                                                {
+                                                    <text> - @createdDate</text>
+                                                }
+                                            </span>
+                                        </div>
+
+                                        <p>@(string.IsNullOrWhiteSpace(review.Body) ? "Không có nội dung đánh giá" : review.Body)</p>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-center text-muted py-4">
+                                    Chưa có đánh giá nào cho môi giới này
+                                </div>
+                            }
+
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 </section>

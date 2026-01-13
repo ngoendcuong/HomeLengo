@@ -1,14 +1,22 @@
 ﻿@* Areas/RealEstateAdmin/Views/Blog/Edit.cshtml *@
+@model HomeLengo.Models.Blog
+
 @{
     Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Sửa bài viết";
+
+    var thumb = string.IsNullOrWhiteSpace(Model.Thumbnail)
+        ? "/assets/images/default-blog.jpg"
+        : (Model.Thumbnail.StartsWith("http") || Model.Thumbnail.StartsWith("/")
+            ? Model.Thumbnail
+            : "/uploads/blog/" + Model.Thumbnail); // phòng trường hợp DB còn lưu tên file cũ
 }
 
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">Sửa Bài viết #@ViewBag.PostId</h1>
+                <h1 class="m-0">Sửa Bài viết #@Model.BlogId</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
@@ -23,13 +31,177 @@
 
 <section class="content">
     <div class="container-fluid">
+
         <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> Bài viết này đã được xuất bản vào <strong>10/01/2025</strong> và có <strong>1,245 lượt xem</strong>
+            <i class="fas fa-info-circle"></i>
+            @if (Model.IsPublished == true && Model.PublishedAt.HasValue)
+            {
+                <span>Đã xuất bản: <strong>@Model.PublishedAt.Value.ToString("dd/MM/yyyy")</strong></span>
+            }
+            else
+            {
+                <span>Trạng thái: <strong>Nháp</strong></span>
+            }
+            <span class="ml-2">| Lượt xem: <strong>@(Model.ViewCount ?? 0)</strong></span>
         </div>
 
-        <!-- Nội dung giống Create.cshtml, chỉ thay đổi tiêu đề và có dữ liệu sẵn -->
-        <p class="text-center text-muted">
-            <em>Nội dung form giống Create.cshtml, có dữ liệu đã điền sẵn</em>
-        </p>
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Vui lòng kiểm tra lại dữ liệu.
+                <div asp-validation-summary="All" class="mt-2"></div>
+            </div>
+        }
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Thông tin bài viết</h3>
+            </div>
+
+            <form asp-area="RealEstateAdmin"
+                  asp-controller="Blog"
+                  asp-action="Edit"
+                  asp-route-id="@Model.BlogId"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                <div class="card-body">
+
+                    <input type="hidden" asp-for="BlogId" />
+                    <input type="hidden" name="oldThumbnail" value="@Model.Thumbnail" />
+
+                    <div class="row">
+                        <div class="col-lg-8">
+
+                            <div class="form-group">
+                                <label asp-for="Title">Tiêu đề</label>
+                                <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề..." />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Slug">Slug</label>
+                                <input asp-for="Slug" class="form-control" placeholder="tieu-de-bai-viet" />
+                                <span asp-validation-for="Slug" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Content">Nội dung</label>
+                                <textarea asp-for="Content" class="form-control" rows="12" placeholder="Nhập nội dung..."></textarea>
+                                <span asp-validation-for="Content" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Tags">Tags</label>
+                                <input asp-for="Tags" class="form-control" placeholder="Ví dụ: tin-tuc, thi-truong, bds" />
+                                <span asp-validation-for="Tags" class="text-danger"></span>
+                                <small class="text-muted">Các tag cách nhau bởi dấu phẩy</small>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-4">
+
+                            <div class="form-group">
+                                <label>Danh mục</label>
+                                <select asp-for="CategoryId" class="form-control"
+                                        asp-items="@(ViewBag.Categories as SelectList)">
+                                    <option value="">-- Chọn danh mục --</option>
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Tác giả</label>
+                                <select asp-for="AuthorId" class="form-control"
+                                        asp-items="@(ViewBag.Authors as SelectList)">
+                                    <option value="">-- Chọn tác giả --</option>
+                                </select>
+                                <span asp-validation-for="AuthorId" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                @* IsPublished là bool? => dùng select *@
+                                <select name="IsPublished" class="form-control">
+                                    <option value="true" selected="@(Model.IsPublished == true)">Công khai</option>
+                                    <option value="false" selected="@(Model.IsPublished != true)">Nháp</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ảnh đại diện (Thumbnail)</label>
+
+                                <div class="mb-2 text-center">
+                                    <img id="preview"
+                                         src="@thumb"
+                                         style="width: 100%; max-width: 260px; height: 160px; object-fit: cover; border:1px solid #dee2e6; border-radius:8px;"
+                                         onerror="this.onerror=null;this.src='/assets/images/default-blog.jpg';" />
+                                </div>
+
+                                <div class="custom-file">
+                                    <input type="file"
+                                           class="custom-file-input"
+                                           id="thumbnailFile"
+                                           name="thumbnailFile"
+                                           accept="image/*" />
+                                    <label class="custom-file-label" for="thumbnailFile">Chọn ảnh mới...</label>
+                                </div>
+
+                                <small class="text-muted d-block mt-1">
+                                    Không chọn ảnh mới thì hệ thống giữ ảnh cũ.
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ngày tạo</label>
+                                <input class="form-control"
+                                       value="@(Model.CreatedAt.HasValue? Model.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : "")"
+                                       disabled />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ngày cập nhật</label>
+                                <input class="form-control"
+                                       value="@(Model.ModifiedAt.HasValue? Model.ModifiedAt.Value.ToString("dd/MM/yyyy HH:mm") : "")"
+                                       disabled />
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer d-flex justify-content-between">
+                    <a asp-area="RealEstateAdmin" asp-controller="Blog" asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Preview ảnh + đổi label file
+        $('#thumbnailFile').on('change', function () {
+            const file = this.files && this.files[0];
+            if (!file) return;
+
+            $('.custom-file-label[for="thumbnailFile"]').text(file.name);
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                $('#preview').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+}

@@ -13,8 +13,12 @@
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
-                    <li class="breadcrumb-item">Danh mục</li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Dashboard" asp-action="Index">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Categories" asp-action="Index">Danh mục</a>
+                    </li>
                     <li class="breadcrumb-item active">Tiện ích</li>
                 </ol>
             </div>
@@ -24,6 +28,27 @@
 
 <section class="content">
     <div class="container-fluid">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Danh sách Tiện ích</h3>
@@ -43,6 +68,7 @@
                                 <span class="info-box-icon bg-info">
                                     <i class="fas @amenity.Icon"></i>
                                 </span>
+
                                 <div class="info-box-content">
                                     <span class="info-box-text">@amenity.Name</span>
                                     <span class="info-box-number">
@@ -56,25 +82,45 @@
                                         }
                                     </span>
                                 </div>
+
                                 <div class="info-box-footer">
-                                    <button class="btn btn-xs btn-warning mr-1 btn-edit-amenity" 
-                                            data-id="@amenity.Id" 
+                                    <button type="button"
+                                            class="btn btn-xs btn-warning mr-1 btn-edit-amenity"
+                                            data-id="@amenity.Id"
                                             data-name="@amenity.Name"
-                                            data-toggle="modal" 
-                                            data-target="#editAmenityModal">
+                                            data-toggle="modal"
+                                            data-target="#editAmenityModal"
+                                            title="Sửa">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form asp-action="DeleteAmenity" asp-route-id="@amenity.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tiện ích này?');">
-                                        <button type="submit" class="btn btn-xs btn-danger">
+
+                                    <form asp-area="RealEstateAdmin"
+                                          asp-controller="Categories"
+                                          asp-action="DeleteAmenity"
+                                          asp-route-id="@amenity.Id"
+                                          method="post"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa tiện ích này?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-xs btn-danger" title="Xóa">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
                                 </div>
+
                             </div>
+                        </div>
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <div class="col-12">
+                            <p class="text-center text-muted mb-0">Chưa có tiện ích nào</p>
                         </div>
                     }
                 </div>
             </div>
+
         </div>
     </div>
 </section>
@@ -87,19 +133,85 @@
                 <h4 class="modal-title">Thêm Tiện ích</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
+
             <div class="modal-body">
-                <form asp-action="CreateAmenity" method="post">
+                <form id="addAmenityForm"
+                      asp-area="RealEstateAdmin"
+                      asp-controller="Categories"
+                      asp-action="CreateAmenity"
+                      method="post">
                     @Html.AntiForgeryToken()
+
                     <div class="form-group">
                         <label>Tên tiện ích <span class="text-danger">*</span></label>
                         <input type="text" name="Name" class="form-control" placeholder="VD: Hồ bơi" required>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                        <button type="submit" class="btn btn-primary">Lưu</button>
-                    </div>
                 </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="submit" form="addAmenityForm" class="btn btn-primary">Lưu</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal Sửa -->
+<div class="modal fade" id="editAmenityModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h4 class="modal-title">Sửa Tiện ích</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="editAmenityForm"
+                      asp-area="RealEstateAdmin"
+                      asp-controller="Categories"
+                      asp-action="EditAmenity"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="AmenityId" id="editAmenityId" />
+
+                    <div class="form-group">
+                        <label>Tên tiện ích <span class="text-danger">*</span></label>
+                        <input type="text" name="Name" id="editAmenityName" class="form-control" required>
+                    </div>
+
+                    @* Nếu DB của bạn có IconClass cho Amenity thì thêm input ở đây.
+                       Hiện controller EditAmenity đang Update toàn entity, nên chỉ gửi đúng field có trong model. *@
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="submit" form="editAmenityForm" class="btn btn-warning">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            // Fill dữ liệu vào modal sửa
+            $('.btn-edit-amenity').click(function () {
+                var id = $(this).data('id');
+                var name = $(this).data('name');
+
+                $('#editAmenityId').val(id);
+                $('#editAmenityName').val(name);
+
+                // Quan trọng: EditAmenity action có tham số id, nên set action route-id cho form
+                var actionUrl = '@Url.Action("EditAmenity", "Categories", new { area = "RealEstateAdmin", id = "__id__" })';
+                actionUrl = actionUrl.replace('__id__', id);
+                $('#editAmenityForm').attr('action', actionUrl);
+            });
+
+        });
+    </script>
+}

@@ -13,8 +13,12 @@
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
-                    <li class="breadcrumb-item">Danh mục</li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Dashboard" asp-action="Index">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Categories" asp-action="Index">Danh mục</a>
+                    </li>
                     <li class="breadcrumb-item active">Loại BĐS</li>
                 </ol>
             </div>
@@ -24,6 +28,27 @@
 
 <section class="content">
     <div class="container-fluid">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Quản lý Loại Bất động sản</h3>
@@ -69,16 +94,26 @@
                                     }
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning btn-edit-type" 
-                                            data-id="@type.Id" 
-                                            data-name="@type.Name" 
+                                    <button type="button"
+                                            class="btn btn-sm btn-warning btn-edit-type"
+                                            data-id="@type.Id"
+                                            data-name="@type.Name"
                                             data-icon="@type.Icon"
-                                            data-toggle="modal" 
-                                            data-target="#editModal">
+                                            data-toggle="modal"
+                                            data-target="#editModal"
+                                            title="Sửa">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form asp-action="DeletePropertyType" asp-route-id="@type.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa loại này?');">
-                                        <button type="submit" class="btn btn-sm btn-danger">
+
+                                    <form asp-area="RealEstateAdmin"
+                                          asp-controller="Categories"
+                                          asp-action="DeletePropertyType"
+                                          asp-route-id="@type.Id"
+                                          method="post"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa loại này?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -88,6 +123,7 @@
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 </section>
@@ -100,19 +136,29 @@
                 <h4 class="modal-title">Sửa Loại Bất động sản</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
+
             <div class="modal-body">
-                <form id="editPropertyTypeForm" asp-action="EditPropertyType" method="post">
+                <form id="editPropertyTypeForm"
+                      asp-area="RealEstateAdmin"
+                      asp-controller="Categories"
+                      asp-action="EditPropertyType"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
                     <input type="hidden" name="PropertyTypeId" id="editPropertyTypeId" />
+
                     <div class="form-group">
                         <label for="editName">Tên loại <span class="text-danger">*</span></label>
                         <input type="text" name="Name" id="editName" class="form-control" required>
                     </div>
+
                     <div class="form-group">
                         <label for="editIconClass">Icon (FontAwesome)</label>
                         <input type="text" name="IconClass" id="editIconClass" class="form-control">
                     </div>
                 </form>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                 <button type="submit" form="editPropertyTypeForm" class="btn btn-warning">Cập nhật</button>
@@ -120,22 +166,6 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function() {
-            $('.btn-edit-type').click(function() {
-                var id = $(this).data('id');
-                var name = $(this).data('name');
-                var icon = $(this).data('icon');
-                
-                $('#editPropertyTypeId').val(id);
-                $('#editName').val(name);
-                $('#editIconClass').val(icon);
-            });
-        });
-    </script>
-}
 
 <!-- Modal Thêm mới -->
 <div class="modal fade" id="addModal">
@@ -145,12 +175,20 @@
                 <h4 class="modal-title">Thêm Loại Bất động sản</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
+
             <div class="modal-body">
-                <form id="addPropertyTypeForm" asp-action="CreatePropertyType" method="post">
+                <form id="addPropertyTypeForm"
+                      asp-area="RealEstateAdmin"
+                      asp-controller="Categories"
+                      asp-action="CreatePropertyType"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
                     <div class="form-group">
                         <label for="Name">Tên loại <span class="text-danger">*</span></label>
                         <input type="text" name="Name" id="Name" class="form-control" placeholder="VD: Căn hộ / Chung cư" required>
                     </div>
+
                     <div class="form-group">
                         <label for="IconClass">Icon (FontAwesome)</label>
                         <input type="text" name="IconClass" id="IconClass" class="form-control" placeholder="fa-building">
@@ -158,6 +196,7 @@
                     </div>
                 </form>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                 <button type="submit" form="addPropertyTypeForm" class="btn btn-primary">Lưu</button>
@@ -165,3 +204,19 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.btn-edit-type').click(function () {
+                var id = $(this).data('id');
+                var name = $(this).data('name');
+                var icon = $(this).data('icon');
+
+                $('#editPropertyTypeId').val(id);
+                $('#editName').val(name);
+                $('#editIconClass').val(icon);
+            });
+        });
+    </script>
+}

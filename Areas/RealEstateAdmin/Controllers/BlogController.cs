@@ -9,22 +9,66 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
     public class BlogController : BaseController
     {
         private readonly HomeLengoContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public BlogController(HomeLengoContext context)
+        public BlogController(HomeLengoContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
+        // ===== ViewModels (nên tách ra file riêng sau) =====
+        public class BlogCategoryRowVM
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = "";
+            public string Slug { get; set; } = "";
+            public int PostCount { get; set; }
+            public int Order { get; set; }
+            public bool IsActive { get; set; }
+        }
+
+        public class BlogRowVM
+        {
+            public int Id { get; set; }
+            public string Title { get; set; } = "";
+            public string Category { get; set; } = "";
+            public string Author { get; set; } = "";
+            public int Views { get; set; }
+            public string Status { get; set; } = "";
+            public DateTime CreatedAt { get; set; }
+            public string CreatedDateText { get; set; } = "";
+            public string Image { get; set; } = "";
+        }
+
+        // ===== Helpers =====
+        private IActionResult RedirectToAdminHome()
+            => RedirectToAction("Index", "Home", new { area = "" });
+
+        private IActionResult RedirectToBlogIndex()
+            => RedirectToAction("Index", "Blog", new { area = "RealEstateAdmin" });
+
+        private IActionResult RedirectToBlogCategories()
+            => RedirectToAction("Categories", "Blog", new { area = "RealEstateAdmin" });
+
+        private bool EnsureAdmin() => IsAdmin();
+
+        // =========================
         // Danh mục bài viết
+        // GET: /RealEstateAdmin/Blog/Categories
+        // =========================
         public IActionResult Categories()
         {
+            if (!EnsureAdmin()) return RedirectToAdminHome();
+
             var categories = _context.BlogCategories
+                .AsNoTracking()
                 .Include(c => c.Blogs)
-                .Select(c => new
+                .Select(c => new BlogCategoryRowVM
                 {
                     Id = c.CategoryId,
-                    Name = c.Name,
-                    Slug = c.Slug ?? c.Name.ToLower().Replace(" ", "-"),
+                    Name = c.Name ?? "",
+                    Slug = c.Slug ?? (c.Name ?? "").ToLower().Replace(" ", "-"),
                     PostCount = c.Blogs != null ? c.Blogs.Count : 0,
                     Order = c.CategoryId,
                     IsActive = true
@@ -36,25 +80,31 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCategory(BlogCategory category)
         {
+            if (!EnsureAdmin()) return RedirectToAdminHome();
+
             if (ModelState.IsValid)
             {
                 category.CreatedAt = DateTime.UtcNow;
                 _context.Add(category);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Categories));
+                TempData["SuccessMessage"] = "Đã tạo danh mục bài viết!";
+                return RedirectToBlogCategories();
             }
-            return View(category);
+
+            TempData["ErrorMessage"] = "Dữ liệu không hợp lệ!";
+            return RedirectToBlogCategories();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditCategory(int id, BlogCategory category)
         {
-            if (id != category.CategoryId)
-            {
-                return NotFound();
-            }
+            if (!EnsureAdmin()) return RedirectToAdminHome();
+
+            if (id != category.CategoryId) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -62,211 +112,328 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 {
                     _context.Update(category);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Đã cập nhật danh mục!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BlogCategoryExists(category.CategoryId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!BlogCategoryExists(category.CategoryId)) return NotFound();
+                    throw;
                 }
-                return RedirectToAction(nameof(Categories));
+
+                return RedirectToBlogCategories();
             }
-            return View(category);
+
+            TempData["ErrorMessage"] = "Dữ liệu cập nhật không hợp lệ!";
+            return RedirectToBlogCategories();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteCategory(int id)
         {
+            if (!EnsureAdmin()) return RedirectToAdminHome();
+
             var category = await _context.BlogCategories.FindAsync(id);
             if (category != null)
             {
                 _context.BlogCategories.Remove(category);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Đã xóa danh mục!";
             }
-            return RedirectToAction(nameof(Categories));
+            else
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy danh mục để xóa!";
+            }
+
+            return RedirectToBlogCategories();
         }
 
+        // =========================
         // Danh sách bài viết
-        public IActionResult Index(string searchString, int? categoryId, string status)
+        // GET: /RealEstateAdmin/Blog
+        // =========================
+        public IActionResult Index(string? searchString, int? categoryId, string? status)
         {
+            if (!EnsureAdmin()) return RedirectToAdminHome();
+
             var query = _context.Blogs
+                .AsNoTracking()
                 .Include(b => b.Category)
                 .Include(b => b.Author)
                 .AsQueryable();
 
-            // Tìm kiếm
-            if (!string.IsNullOrEmpty(searchString))
+            // Search
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
-                query = query.Where(b => 
-                    (b.Title != null && b.Title.Contains(searchString)) ||
-                    (b.Content != null && b.Content.Contains(searchString)) ||
-                    (b.Author != null && ((b.Author.FullName != null && b.Author.FullName.Contains(searchString)) ||
-                                         (b.Author.Username != null && b.Author.Username.Contains(searchString)))));
+                var s = searchString.Trim();
+                query = query.Where(b =>
+                    (b.Title != null && b.Title.Contains(s)) ||
+                    (b.Content != null && b.Content.Contains(s)) ||
+                    (b.Author != null && (
+                        (b.Author.FullName != null && b.Author.FullName.Contains(s)) ||
+                        (b.Author.Username != null && b.Author.Username.Contains(s))
+                    ))
+                );
             }
 
-            // Filter theo category
+            // Filter category
             if (categoryId.HasValue && categoryId.Value > 0)
             {
                 query = query.Where(b => b.CategoryId == categoryId.Value);
             }
 
-            // Filter theo trạng thái
-            if (!string.IsNullOrEmpty(status))
+            // Filter status
+            if (!string.IsNullOrWhiteSpace(status))
             {
                 if (status == "published")
-                {
                     query = query.Where(b => b.IsPublished == true);
-                }
                 else if (status == "draft")
-                {
                     query = query.Where(b => b.IsPublished != true);
-                }
             }
 
+            // Project -> ViewModel (cứng)
             var posts = query
-                .ToList()
-                .Select(b => new
+                .OrderByDescending(b => b.CreatedAt) // sort đúng theo DateTime, không sort theo string
+                .Select(b => new BlogRowVM
                 {
                     Id = b.BlogId,
-                    Title = b.Title,
-                    Category = b.Category != null ? b.Category.Name : "Chưa phân loại",
-                    Author = b.Author != null ? (b.Author.FullName ?? b.Author.Username) : "Admin",
+                    Title = b.Title ?? "",
+                    Category = b.Category != null ? (b.Category.Name ?? "Chưa phân loại") : "Chưa phân loại",
+                    Author = b.Author != null ? (b.Author.FullName ?? b.Author.Username ?? "Admin") : "Admin",
                     Views = b.ViewCount ?? 0,
                     Status = b.IsPublished == true ? "Công khai" : "Nháp",
-                    CreatedDate = b.CreatedAt.HasValue 
-                        ? b.CreatedAt.Value.ToString("dd/MM/yyyy") 
-                        : "",
+                    CreatedAt = b.CreatedAt ?? DateTime.MinValue,
+                    CreatedDateText = (b.CreatedAt.HasValue ? b.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm") : ""),
                     Image = b.Thumbnail ?? "/assets/images/default-blog.jpg"
                 })
-                .OrderByDescending(b => b.CreatedDate)
                 .ToList();
 
             ViewBag.SearchString = searchString;
             ViewBag.CategoryId = categoryId;
             ViewBag.Status = status;
-            ViewBag.Categories = _context.BlogCategories.Select(c => new { c.CategoryId, c.Name }).ToList();
+            ViewBag.Categories = _context.BlogCategories
+                .AsNoTracking()
+                .Select(c => new { c.CategoryId, c.Name })
+                .ToList();
 
             return View(posts);
         }
 
-        // Tạo bài viết mới
+        // =========================
+        // Create bài viết
+        // =========================
         public IActionResult Create()
         {
-            ViewBag.Categories = new SelectList(_context.BlogCategories, "CategoryId", "Name");
-            ViewBag.Authors = new SelectList(_context.Users.Select(u => new { 
-                UserId = u.UserId, 
-                Name = u.FullName ?? u.Username 
-            }), "UserId", "Name");
-            return View();
+            if (!IsAdmin())
+                return RedirectToAction("Index", "Home", new { area = "" });
+
+            ViewBag.Categories = new SelectList(
+                _context.BlogCategories,
+                "CategoryId",
+                "Name"
+            );
+
+            ViewBag.Authors = new SelectList(
+                _context.Users.Select(u => new
+                {
+                    UserId = u.UserId,
+                    Name = u.FullName ?? u.Username
+                }),
+                "UserId",
+                "Name"
+            );
+
+            return View(new Blog());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Blog blog)
+        public async Task<IActionResult> Create(Blog blog, IFormFile? thumbnailFile)
         {
-            if (ModelState.IsValid)
+            if (!IsAdmin())
+                return RedirectToAction("Index", "Home", new { area = "" });
+
+            if (!ModelState.IsValid)
             {
-                blog.CreatedAt = DateTime.UtcNow;
-                blog.ModifiedAt = DateTime.UtcNow;
-                if (blog.IsPublished == true)
-                {
-                    blog.PublishedAt = DateTime.UtcNow;
-                }
-                _context.Add(blog);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ViewBag.Categories = new SelectList(
+                    _context.BlogCategories,
+                    "CategoryId",
+                    "Name",
+                    blog.CategoryId
+                );
+
+                ViewBag.Authors = new SelectList(
+                    _context.Users.Select(u => new
+                    {
+                        UserId = u.UserId,
+                        Name = u.FullName ?? u.Username
+                    }),
+                    "UserId",
+                    "Name",
+                    blog.AuthorId
+                );
+
+                return View(blog);
             }
-            ViewBag.Categories = new SelectList(_context.BlogCategories, "CategoryId", "Name", blog.CategoryId);
-            ViewBag.Authors = new SelectList(_context.Users.Select(u => new { 
-                UserId = u.UserId, 
-                Name = u.FullName ?? u.Username 
-            }), "UserId", "Name", blog.AuthorId);
-            return View(blog);
+
+            blog.CreatedAt = DateTime.UtcNow;
+            blog.ModifiedAt = DateTime.UtcNow;
+
+            // Upload thumbnail nếu có
+            if (thumbnailFile != null && thumbnailFile.Length > 0)
+            {
+                blog.Thumbnail = await SaveBlogThumbnailAsync(thumbnailFile);
+            }
+            else
+            {
+                blog.Thumbnail ??= "/assets/images/default-blog.jpg";
+            }
+
+            if (blog.IsPublished == true)
+                blog.PublishedAt ??= DateTime.UtcNow;
+
+            _context.Blogs.Add(blog);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Thêm bài viết thành công!";
+
+            // ✅ HARD-CODE AREA
+            return RedirectToAction(
+                "Index",
+                "Blog",
+                new { area = "RealEstateAdmin" }
+            );
         }
 
-        // Sửa bài viết
+        // =========================
+        // Edit bài viết
+        // =========================
         public async Task<IActionResult> Edit(int id)
         {
-            var blog = await _context.Blogs.FindAsync(id);
-            if (blog == null)
-            {
-                return NotFound();
-            }
+            var blog = await _context.Blogs.FirstOrDefaultAsync(b => b.BlogId == id);
+            if (blog == null) return NotFound();
 
-            ViewBag.Categories = _context.BlogCategories.ToList();
-            ViewBag.Authors = _context.Users.ToList();
-            ViewBag.PostId = id;
-            
+            ViewBag.Categories = new SelectList(_context.BlogCategories, "CategoryId", "Name", blog.CategoryId);
+            ViewBag.Authors = new SelectList(_context.Users.Select(u => new {
+                UserId = u.UserId,
+                Name = u.FullName ?? u.Username
+            }), "UserId", "Name", blog.AuthorId);
+
             return View(blog);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Blog blog)
+        public async Task<IActionResult> Edit(int id, Blog blog, IFormFile? thumbnailFile, string? oldThumbnail)
         {
-            if (id != blog.BlogId)
+            if (id != blog.BlogId) return NotFound();
+
+            var existing = await _context.Blogs.FirstOrDefaultAsync(b => b.BlogId == id);
+            if (existing == null) return NotFound();
+
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                ViewBag.Categories = new SelectList(_context.BlogCategories, "CategoryId", "Name", blog.CategoryId);
+                ViewBag.Authors = new SelectList(_context.Users.Select(u => new {
+                    UserId = u.UserId,
+                    Name = u.FullName ?? u.Username
+                }), "UserId", "Name", blog.AuthorId);
+                return View(blog);
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    blog.ModifiedAt = DateTime.UtcNow;
-                    if (blog.IsPublished == true && !blog.PublishedAt.HasValue)
-                    {
-                        blog.PublishedAt = DateTime.UtcNow;
-                    }
-                    _context.Update(blog);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BlogExists(blog.BlogId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.Categories = new SelectList(_context.BlogCategories, "CategoryId", "Name", blog.CategoryId);
-            ViewBag.Authors = new SelectList(_context.Users.Select(u => new { 
-                UserId = u.UserId, 
-                Name = u.FullName ?? u.Username 
-            }), "UserId", "Name", blog.AuthorId);
-            return View(blog);
-        }
+            // ✅ map các field được sửa
+            existing.Title = blog.Title;
+            existing.Slug = blog.Slug;
+            existing.Content = blog.Content;
+            existing.Tags = blog.Tags;
+            existing.CategoryId = blog.CategoryId;
+            existing.AuthorId = blog.AuthorId;
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var blog = await _context.Blogs.FindAsync(id);
-            if (blog != null)
+            existing.ModifiedAt = DateTime.UtcNow;
+
+            var wasPublished = existing.IsPublished == true;
+            var nowPublished = blog.IsPublished == true;
+            existing.IsPublished = blog.IsPublished;
+
+            if (!wasPublished && nowPublished)
+                existing.PublishedAt ??= DateTime.UtcNow;
+
+            // ✅ upload thumbnail mới nếu có
+            if (thumbnailFile != null && thumbnailFile.Length > 0)
             {
-                _context.Blogs.Remove(blog);
-                await _context.SaveChangesAsync();
+                var newPath = await SaveBlogThumbnailAsync(thumbnailFile);
+                existing.Thumbnail = newPath;
+
+                // xoá ảnh cũ nếu thuộc uploads/blog
+                if (!string.IsNullOrWhiteSpace(oldThumbnail) && oldThumbnail.StartsWith("/uploads/blog/"))
+                {
+                    var physical = Path.Combine(_env.WebRootPath, oldThumbnail.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+                    if (System.IO.File.Exists(physical)) System.IO.File.Delete(physical);
+                }
             }
+            else
+            {
+                // không upload => giữ ảnh cũ
+                if (!string.IsNullOrWhiteSpace(oldThumbnail))
+                    existing.Thumbnail = oldThumbnail;
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Cập nhật bài viết thành công!";
             return RedirectToAction(nameof(Index));
         }
 
-        private bool BlogCategoryExists(int id)
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
         {
-            return _context.BlogCategories.Any(e => e.CategoryId == id);
+            if (!EnsureAdmin())
+                return RedirectToAction("Index", "Home", new { area = "" });
+
+            var blog = await _context.Blogs.FindAsync(id);
+            if (blog == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy bài viết để xóa!";
+                return RedirectToAction(
+                    "Index",
+                    "Blog",
+                    new { area = "RealEstateAdmin" }
+                );
+            }
+
+            _context.Blogs.Remove(blog);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đã xóa bài viết!";
+            return RedirectToAction(
+                "Index",
+                "Blog",
+                new { area = "RealEstateAdmin" }
+            );
         }
 
-        private bool BlogExists(int id)
+        private bool BlogCategoryExists(int id) => _context.BlogCategories.Any(e => e.CategoryId == id);
+        private bool BlogExists(int id) => _context.Blogs.Any(e => e.BlogId == id);
+
+        private async Task<string> SaveBlogThumbnailAsync(IFormFile file)
         {
-            return _context.Blogs.Any(e => e.BlogId == id);
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            if (!allowed.Contains(ext))
+                throw new InvalidOperationException("Chỉ cho phép JPG/JPEG/PNG/WEBP.");
+
+            var folder = Path.Combine(_env.WebRootPath, "uploads", "blog");
+            Directory.CreateDirectory(folder);
+
+            var fileName = $"blog-{Guid.NewGuid():N}{ext}";
+            var savePath = Path.Combine(folder, fileName);
+
+            using var stream = new FileStream(savePath, FileMode.Create);
+            await file.CopyToAsync(stream);
+
+            return "/uploads/blog/" + fileName; // ✅ DB lưu dạng này
         }
+
     }
 }

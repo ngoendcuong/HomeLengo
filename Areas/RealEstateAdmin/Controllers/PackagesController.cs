@@ -1,4 +1,4 @@
-﻿// Areas/Admin/Controllers/PackagesController.cs
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeLengo.Models;
@@ -82,41 +82,39 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         public async Task<IActionResult> CreatePlan(ServicePlan plan)
         {
             if (!IsAdmin())
-            {
                 return RedirectToAction("Index", "Home", new { area = "" });
-            }
 
             if (ModelState.IsValid)
             {
                 plan.CreatedAt = DateTime.UtcNow;
                 _context.ServicePlans.Add(plan);
                 await _context.SaveChangesAsync();
+
                 TempData["SuccessMessage"] = "Đã tạo gói dịch vụ thành công!";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Packages", new { area = "RealEstateAdmin" });
             }
-            return View(plan);
+
+            TempData["ErrorMessage"] = "Dữ liệu không hợp lệ, vui lòng kiểm tra lại!";
+            return RedirectToAction("Index", "Packages", new { area = "RealEstateAdmin" });
         }
+
 
         // GET: Edit ServicePlan
         [HttpGet]
         public async Task<IActionResult> EditPlan(int id)
         {
             if (!IsAdmin())
-            {
                 return RedirectToAction("Index", "Home", new { area = "" });
-            }
 
             var plan = await _context.ServicePlans
                 .Include(sp => sp.ServicePlanFeatures.OrderBy(f => f.DisplayOrder))
                 .FirstOrDefaultAsync(sp => sp.PlanId == id);
 
-            if (plan == null)
-            {
-                return NotFound();
-            }
+            if (plan == null) return NotFound();
 
             return View(plan);
         }
+
 
         // POST: Edit ServicePlan
         [HttpPost]
@@ -124,41 +122,33 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         public async Task<IActionResult> EditPlan([FromForm] ServicePlan plan)
         {
             if (!IsAdmin())
-            {
                 return RedirectToAction("Index", "Home", new { area = "" });
-            }
 
             if (ModelState.IsValid)
             {
+                var existingPlan = await _context.ServicePlans.FindAsync(plan.PlanId);
+                if (existingPlan == null) return NotFound();
+
+                existingPlan.Name = plan.Name;
+                existingPlan.Price = plan.Price;
+                existingPlan.MaxListings = plan.MaxListings;
+
                 try
                 {
-                    var existingPlan = await _context.ServicePlans.FindAsync(plan.PlanId);
-                    if (existingPlan == null)
-                    {
-                        return NotFound();
-                    }
-
-                    existingPlan.Name = plan.Name;
-                    existingPlan.Price = plan.Price;
-                    existingPlan.MaxListings = plan.MaxListings;
-
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Đã cập nhật gói dịch vụ thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ServicePlanExists(plan.PlanId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!ServicePlanExists(plan.PlanId)) return NotFound();
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction("Index", "Packages", new { area = "RealEstateAdmin" });
             }
-            return RedirectToAction(nameof(Index));
+
+            TempData["ErrorMessage"] = "Dữ liệu cập nhật không hợp lệ!";
+            return RedirectToAction("Index", "Packages", new { area = "RealEstateAdmin" });
         }
 
         // POST: Delete ServicePlan
@@ -167,9 +157,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         public async Task<IActionResult> DeletePlan(int id)
         {
             if (!IsAdmin())
-            {
                 return RedirectToAction("Index", "Home", new { area = "" });
-            }
 
             var plan = await _context.ServicePlans
                 .Include(sp => sp.ServicePlanFeatures)
@@ -177,13 +165,18 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
 
             if (plan != null)
             {
-                // Xóa các features trước
                 _context.ServicePlanFeatures.RemoveRange(plan.ServicePlanFeatures);
                 _context.ServicePlans.Remove(plan);
                 await _context.SaveChangesAsync();
+
                 TempData["SuccessMessage"] = "Đã xóa gói dịch vụ thành công!";
             }
-            return RedirectToAction(nameof(Index));
+            else
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy gói dịch vụ để xóa!";
+            }
+
+            return RedirectToAction("Index", "Packages", new { area = "RealEstateAdmin" });
         }
 
         // GET: Get Plan Details for Edit Modal
@@ -286,18 +279,22 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         public async Task<IActionResult> DeleteFeature(int id)
         {
             if (!IsAdmin())
-            {
-                return RedirectToAction("Index", "Home", new { area = "" });
-            }
+                return Json(new { success = false, message = "Không có quyền truy cập" });
 
-            var feature = await _context.ServicePlanFeatures.FindAsync(id);
-            if (feature != null)
+            try
             {
+                var feature = await _context.ServicePlanFeatures.FindAsync(id);
+                if (feature == null)
+                    return Json(new { success = false, message = "Không tìm thấy tính năng" });
+
                 _context.ServicePlanFeatures.Remove(feature);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Đã xóa tính năng thành công!";
+                return Json(new { success = true, message = "Đã xóa tính năng thành công!" });
             }
-            return RedirectToAction(nameof(Index));
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
         }
 
         private bool ServicePlanExists(int id)

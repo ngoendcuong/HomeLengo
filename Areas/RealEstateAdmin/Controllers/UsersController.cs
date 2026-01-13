@@ -232,10 +232,15 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 // Xóa các bản ghi liên quan bằng raw SQL
                 await _context.Database.ExecuteSqlRawAsync(
                     "DELETE FROM PropertyVisits WHERE UserId = @UserId", userIdParam);
+                await _context.Database.ExecuteSqlRawAsync(@"
+                    DELETE t
+                    FROM Transactions t
+                    INNER JOIN Bookings b ON b.BookingId = t.BookingId
+                    WHERE b.UserId = @UserId
+                ", userIdParam);
                 await _context.Database.ExecuteSqlRawAsync(
-                    "DELETE FROM Transactions WHERE UserId = @UserId", userIdParam);
-                await _context.Database.ExecuteSqlRawAsync(
-                    "DELETE FROM Bookings WHERE UserId = @UserId", userIdParam);
+                    "DELETE FROM Bookings WHERE UserId = @UserId",
+                    userIdParam);
                 await _context.Database.ExecuteSqlRawAsync(
                     "DELETE FROM Reviews WHERE UserId = @UserId", userIdParam);
                 await _context.Database.ExecuteSqlRawAsync(
@@ -248,8 +253,8 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                     "DELETE FROM Notifications WHERE UserId = @UserId", userIdParam);
                 await _context.Database.ExecuteSqlRawAsync(
                     "DELETE FROM SearchHistory WHERE UserId = @UserId", userIdParam);
-                await _context.Database.ExecuteSqlRawAsync(
-                    "DELETE FROM ServiceRegisters WHERE UserId = @UserId", userIdParam);
+                //await _context.Database.ExecuteSqlRawAsync(
+                //    "DELETE FROM ServiceRegisters WHERE UserId = @UserId", userIdParam);
                 await _context.Database.ExecuteSqlRawAsync(
                     "DELETE FROM UserServicePackages WHERE UserId = @UserId", userIdParam);
                 await _context.Database.ExecuteSqlRawAsync(

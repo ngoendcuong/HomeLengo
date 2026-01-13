@@ -25,107 +25,118 @@ namespace HomeLengo.Areas.Admin.Controllers
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
 
-            // Lấy thông tin gói dịch vụ đang active (nếu có)
+            // 1) Gói dịch vụ đang active
             var activePackage = await _packageService.GetActivePackageAsync(userId);
             var hasPackage = activePackage != null;
+
             ViewBag.ActivePackage = activePackage;
             ViewBag.HasPackage = hasPackage;
 
-            // Lấy AgentId của user (nếu có)
-            var agent = _context.Agents.FirstOrDefault(a => a.UserId == userId);
+            // 2) AgentId của user
+            var agent = await _context.Agents.AsNoTracking().FirstOrDefaultAsync(a => a.UserId == userId);
             var agentId = agent?.AgentId;
 
-            var pendingStatus = _context.PropertyStatuses.FirstOrDefault(s => s.Name.ToLower().Contains("pending"));
-            var pendingStatusId = pendingStatus?.StatusId ?? 0;
+            // 3) Properties query: chỉ có khi có gói + là agent
+            IQueryable<Property> propertiesQuery = _context.Properties.AsQueryable();
 
-            // Filter properties theo AgentId (chỉ hiển thị nếu có gói dịch vụ)
-            var propertiesQuery = _context.Properties.AsQueryable();
             if (hasPackage && agentId.HasValue)
             {
                 propertiesQuery = propertiesQuery.Where(p => p.AgentId == agentId.Value);
             }
             else
             {
-                // Nếu không có gói dịch vụ hoặc không phải agent, không có properties
                 propertiesQuery = propertiesQuery.Where(p => false);
             }
 
-            // Filter bookings: của agent hoặc của user
-            var bookingsQuery = _context.Bookings.AsQueryable();
+            // ✅ CHỈ TÍNH TIN ĐANG HOẠT ĐỘNG: StatusId 1 (Bán) hoặc 2 (Thuê)
+            var activeListingsQuery = propertiesQuery.Where(p => p.StatusId == 1 || p.StatusId == 2);
+
+            // 4) Bookings
+            IQueryable<Booking> bookingsQuery = _context.Bookings.AsQueryable();
             if (agentId.HasValue)
-            {
                 bookingsQuery = bookingsQuery.Where(b => b.AgentId == agentId || b.UserId == userId);
-            }
             else
-            {
                 bookingsQuery = bookingsQuery.Where(b => b.UserId == userId);
-            }
 
-            // Filter inquiries: của properties thuộc agent
-            var inquiriesQuery = _context.Inquiries.AsQueryable();
+            // 5) Inquiries
+            IQueryable<Inquiry> inquiriesQuery = _context.Inquiries.AsQueryable();
             if (agentId.HasValue)
-            {
                 inquiriesQuery = inquiriesQuery.Where(i => i.Property.AgentId == agentId);
-            }
             else
-            {
                 inquiriesQuery = inquiriesQuery.Where(i => i.UserId == userId);
-            }
 
-            // Filter reviews: của properties thuộc agent (nếu có gói) hoặc reviews của user
-            var reviewsQuery = _context.Reviews.AsQueryable();
+            // 6) Reviews
+            IQueryable<Review> reviewsQuery = _context.Reviews.AsQueryable();
             if (hasPackage && agentId.HasValue)
-            {
                 reviewsQuery = reviewsQuery.Where(r => r.Property.AgentId == agentId);
-            }
             else
-            {
-                // Nếu không có gói, chỉ hiển thị reviews của chính user
                 reviewsQuery = reviewsQuery.Where(r => r.UserId == userId);
-            }
 
-            // Filter messages: từ hoặc đến user
+            // 7) Messages
             var messagesQuery = _context.Messages.Where(m => m.FromUserId == userId || m.ToUserId == userId);
 
-            // Filter blogs: của user
+            // 8) Blogs
             var blogsQuery = _context.Blogs.Where(b => b.AuthorId == userId);
 
-            // Execute queries trước
-            var recentPropertiesList = propertiesQuery
+            // ====== COUNTS (Async) ======
+            var totalPropertiesActive = await activeListingsQuery.CountAsync();     // ✅ tổng tin đang còn hiệu lực (1/2)
+            var forSaleCount = await propertiesQuery.CountAsync(p => p.StatusId == 1); // ✅ rao bán
+            var forRentCount = await propertiesQuery.CountAsync(p => p.StatusId == 2); // ✅ cho thuê
+
+            // ✅ Tin còn lại = MaxListings - totalPropertiesActive
+            int? remainingListings = null;
+            if (activePackage?.Plan?.MaxListings.HasValue == true && activePackage.Plan.MaxListings.Value > 0)
+            {
+                remainingListings = activePackage.Plan.MaxListings.Value - totalPropertiesActive;
+                if (remainingListings < 0) remainingListings = 0;
+            }
+
+            // ====== LISTS ======
+            var recentPropertiesList = await propertiesQuery
                 .Include(p => p.PropertyPhotos)
                 .Include(p => p.Status)
                 .Include(p => p.PropertyType)
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(10)
-                .ToList();
+                .ToListAsync();
 
-            var recentMessagesList = messagesQuery
+            var recentMessagesList = await messagesQuery
                 .Include(m => m.FromUser)
                 .Include(m => m.ToUser)
                 .OrderByDescending(m => m.SentAt)
                 .Take(5)
-                .ToList();
+                .ToListAsync();
 
-            var recentReviewsList = reviewsQuery
+            var recentReviewsList = await reviewsQuery
                 .Include(r => r.User)
                 .Include(r => r.Property)
                 .OrderByDescending(r => r.CreatedAt)
                 .Take(5)
-                .ToList();
+                .ToListAsync();
 
+            // ====== STATS ======
             var stats = new
             {
-                TotalProperties = propertiesQuery.Count(),
-                PendingProperties = pendingStatusId > 0 ? propertiesQuery.Count(p => p.StatusId == pendingStatusId) : 0,
-                TotalUsers = 1, // Chỉ hiển thị user hiện tại
-                TotalBookings = bookingsQuery.Count(),
-                PendingBookings = bookingsQuery.Count(b => b.Status == "pending"),
-                TotalInquiries = inquiriesQuery.Count(),
-                NewInquiries = inquiriesQuery.Count(i => i.Status == "new"),
-                TotalBlogs = blogsQuery.Count(),
-                PublishedBlogs = blogsQuery.Count(b => b.IsPublished == true),
-                TotalReviews = reviewsQuery.Count(),
-                PendingReviews = reviewsQuery.Count(r => r.IsApproved == false),
+                TotalProperties = totalPropertiesActive,   // ✅ tổng tin đang còn hiệu lực (StatusId 1/2)
+
+                // ✅ 2 ô mới bạn muốn:
+                ForSaleCount = forSaleCount,               // ✅ Rao bán
+                ForRentCount = forRentCount,               // ✅ Cho thuê
+
+                // ✅ để hiển thị "đang dùng" & "còn lại"
+                ActiveListingsCount = totalPropertiesActive,
+                RemainingListings = remainingListings,
+
+                TotalUsers = 1,
+                TotalBookings = await bookingsQuery.CountAsync(),
+                PendingBookings = await bookingsQuery.CountAsync(b => b.Status == "pending"),
+                TotalInquiries = await inquiriesQuery.CountAsync(),
+                NewInquiries = await inquiriesQuery.CountAsync(i => i.Status == "new"),
+                TotalBlogs = await blogsQuery.CountAsync(),
+                PublishedBlogs = await blogsQuery.CountAsync(b => b.IsPublished == true),
+                TotalReviews = await reviewsQuery.CountAsync(),
+                PendingReviews = await reviewsQuery.CountAsync(r => r.IsApproved == false),
+
                 RecentProperties = recentPropertiesList,
                 RecentMessages = recentMessagesList,
                 RecentReviews = recentReviewsList

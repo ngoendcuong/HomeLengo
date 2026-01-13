@@ -13,8 +13,12 @@
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
-                    <li class="breadcrumb-item">Danh mục</li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Dashboard" asp-action="Index">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Categories" asp-action="Index">Danh mục</a>
+                    </li>
                     <li class="breadcrumb-item active">Trạng thái</li>
                 </ol>
             </div>
@@ -24,6 +28,27 @@
 
 <section class="content">
     <div class="container-fluid">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Quản lý Trạng thái</h3>
@@ -67,18 +92,42 @@
                                     }
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning">
+                                    <button type="button"
+                                            class="btn btn-sm btn-warning btn-edit-status"
+                                            title="Sửa"
+                                            data-id="@status.Id"
+                                            data-name="@status.Name"
+                                            data-toggle="modal"
+                                            data-target="#editStatusModal">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+
+                                    <form asp-area="RealEstateAdmin"
+                                          asp-controller="Categories"
+                                          asp-action="DeletePropertyStatus"
+                                          asp-route-id="@status.Id"
+                                          method="post"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa trạng thái này?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
+                            </tr>
+                        }
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Chưa có trạng thái nào</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 </section>
@@ -91,39 +140,78 @@
                 <h4 class="modal-title">Thêm Trạng thái</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
+
             <div class="modal-body">
-                <form>
+                <form id="addStatusForm"
+                      asp-area="RealEstateAdmin"
+                      asp-controller="Categories"
+                      asp-action="CreatePropertyStatus"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
                     <div class="form-group">
                         <label>Tên trạng thái <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" placeholder="VD: Đang bán">
+                        <input type="text" name="Name" class="form-control" placeholder="VD: Đang bán" required>
                     </div>
-                    <div class="form-group">
-                        <label>Slug</label>
-                        <input type="text" class="form-control" placeholder="dang-ban">
-                    </div>
-                    <div class="form-group">
-                        <label>Màu hiển thị</label>
-                        <select class="form-control">
-                            <option value="primary">Primary (Xanh dương)</option>
-                            <option value="success">Success (Xanh lá)</option>
-                            <option value="info">Info (Xanh nhạt)</option>
-                            <option value="warning">Warning (Vàng)</option>
-                            <option value="danger">Danger (Đỏ)</option>
-                            <option value="secondary">Secondary (Xám)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="statusActive" checked>
-                            <label class="custom-control-label" for="statusActive">Kích hoạt</label>
-                        </div>
-                    </div>
+
+                    @* Slug/Color/IsActive đang là dữ liệu hiển thị ở View (dynamic),
+                       nhưng DB PropertyStatus của bạn thường chỉ có StatusId + Name.
+                       Nên mình KHÔNG gửi các field này để tránh lỗi bind. *@
                 </form>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary">Lưu</button>
+                <button type="submit" form="addStatusForm" class="btn btn-primary">Lưu</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal Sửa -->
+<div class="modal fade" id="editStatusModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h4 class="modal-title">Sửa Trạng thái</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="editStatusForm"
+                      asp-area="RealEstateAdmin"
+                      asp-controller="Categories"
+                      asp-action="EditPropertyStatus"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="StatusId" id="editStatusId" />
+
+                    <div class="form-group">
+                        <label>Tên trạng thái <span class="text-danger">*</span></label>
+                        <input type="text" name="Name" id="editStatusName" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="submit" form="editStatusForm" class="btn btn-warning">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.btn-edit-status').click(function () {
+                var id = $(this).data('id');
+                var name = $(this).data('name');
+
+                $('#editStatusId').val(id);
+                $('#editStatusName').val(name);
+            });
+        });
+    </script>
+}

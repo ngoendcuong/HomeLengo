@@ -46,11 +46,7 @@
                             </ul>
 
                             <a class="btn btn-primary rounded-pill mt-3 btn-buy-package"
-                               asp-area=""
-                               asp-controller="Payment"
-                               asp-action="Checkout"
-                               asp-route-planId="@plan.PlanId"
-                               data-plan-id="@plan.PlanId">
+                               href="@Url.Action("Checkout", "Payment", new { area = "", planId = plan.PlanId })">
                                 Đăng ký ngay →
                             </a>
                         </div>
@@ -70,7 +66,6 @@
         align-items: stretch;
     }
 
-    /* ĐẨY NÚT "ĐĂNG KÝ NGAY" XUỐNG CÙNG */
     .flat-pricing .box-pricing .box:last-child {
         margin-top: auto;
     }
@@ -78,13 +73,20 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             var isLoggedIn = @(isLoggedIn ? "true" : "false");
-            $('.btn-buy-package').on('click', function(e) {
+
+            $('.btn-buy-package').on('click', function (e) {
                 if (!isLoggedIn) {
                     e.preventDefault();
-                    alert('Vui lòng đăng nhập để mua gói dịch vụ!');
-                    window.location.href = '/Account/Login';
+
+                    // lưu URL checkout để login xong quay lại đúng plan
+                    localStorage.setItem("hl_return_url", $(this).attr("href"));
+
+                    // mở modal login
+                    var modalEl = document.getElementById('modalLogin');
+                    var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    modal.show();
                     return false;
                 }
             });

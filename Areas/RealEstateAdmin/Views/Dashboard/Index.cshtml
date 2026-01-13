@@ -58,13 +58,13 @@
             </div>
 
             <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
+                <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>@ViewBag.TotalBlogs</h3>
-                        <p>Bài viết</p>
+                        <h3 style="color: white;">@ViewBag.PendingProperties</h3>
+                        <p style="color: white;">Bài viết</p>
                     </div>
                     <div class="icon">
-                        <i class="fas fa-newspaper"></i>
+                        <i class="fas fa-clock"></i>
                     </div>
                     <a href="/RealEstateAdmin/blog" class="small-box-footer">
                         Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
@@ -121,16 +121,24 @@
             </div>
 
             <div class="col-lg-6 col-12">
-                <div class="info-box bg-gradient-success">
+                <div class="info-box @(ViewBag.IsGrowthPositive ? "bg-gradient-success" : "bg-gradient-danger")">
                     <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Doanh thu tháng này</span>
                         <h3 class="info-box-number">@string.Format("{0:N0}", ViewBag.MonthRevenue) VNĐ</h3>
+        
                         <div class="progress">
-                            <div class="progress-bar" style="width: 70%"></div>
+                            @* Thanh chạy hiển thị trực quan % tăng trưởng (giới hạn tối đa 100%) *@
+                            <div class="progress-bar" style="width: @(Math.Min(Math.Abs(ViewBag.GrowthPercent), 100))%"></div>
                         </div>
+        
                         <span class="progress-description">
-                            <i class="fas fa-arrow-up"></i> Tăng 12.5% so với tháng trước
+                            @if (ViewBag.IsGrowthPositive) {
+                                <i class="fas fa-arrow-up"></i> <span>Tăng </span>
+                            } else {
+                                <i class="fas fa-arrow-down"></i> <span>Giảm </span>
+                            }
+                            @Math.Abs(ViewBag.GrowthPercent)% so với tháng trước
                         </span>
                     </div>
                 </div>
@@ -167,59 +175,89 @@
                 </div>
             </div>
         </div>
-        </div>
-</section>   
+    </div>
+</section>
+
 @section Scripts {
     <script>
-        // Revenue Chart
+        // Revenue Chart - DỮ LIỆU THỰC TẾ TỪ DATABASE
         const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        
+        // Nhận dữ liệu từ ViewBag
+        const revLabels = @Html.Raw(Json.Serialize(ViewBag.RevenueLabels));
+        const revData = @Html.Raw(Json.Serialize(ViewBag.RevenueData));
+
         new Chart(revenueCtx, {
             type: 'line',
             data: {
-                labels: ['Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                labels: revLabels, // ['Tháng 8/2025', 'Tháng 9/2025', ...]
                 datasets: [{
-                    label: 'Doanh thu (triệu VNĐ)',
-                    data: [95, 102, 88, 115, 112, 125.5],
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    label: 'Doanh thu (VNĐ)',
+                    data: revData, // [15000000, 22000000, ...]
+                    borderColor: 'rgba(60,141,188,0.8)',
+                    backgroundColor: 'rgba(60,141,188,0.2)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#3c8dbc'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
+                    legend: { display: true },
+                    // Hiển thị định dạng tiền tệ khi di chuột vào điểm dữ liệu
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            // Định dạng trục Y (Ví dụ: 10.000.000đ)
+                            callback: function(value) {
+                                return value.toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
                     }
                 }
             }
         });
 
-        // Property Type Chart
                 // Property Type Chart
         const propertyTypeCtx = document.getElementById('propertyTypeChart').getContext('2d');
+
+        // Nhận dữ liệu động từ Controller
+        const dbLabels = @Html.Raw(Json.Serialize(ViewBag.PropertyTypeLabels));
+        const dbData = @Html.Raw(Json.Serialize(ViewBag.PropertyTypeData));
+
         new Chart(propertyTypeCtx, {
             type: 'doughnut',
             data: {
-                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PropertyTypeLabels)),
+                labels: dbLabels, // Tên các loại: Căn hộ, Nhà phố, Biệt thự...
                 datasets: [{
-                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PropertyTypeData)),
+                    data: dbData, // Số lượng tin tương ứng
                     backgroundColor: [
-                        '#3b82f6', // Căn hộ
-                        '#fb7185', // Nhà phố
-                        '#facc15', // Biệt thự
-                        '#2dd4bf', // Văn phòng
-                        '#a855f7', // Kinh doanh
-                        '#94a3b8'  // Chung cư
-                    ]
+                        '#3498db', // Blue
+                        '#e74c3c', // Red
+                        '#f1c40f', // Yellow
+                        '#2ecc71', // Green
+                        '#9b59b6', // Purple
+                        '#e67e22', // Orange
+                        '#1abc9c'  // Teal
+                    ],
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -227,7 +265,10 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12
+                        }
                     }
                 }
             }

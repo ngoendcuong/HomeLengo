@@ -14,6 +14,10 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             _context = context;
         }
 
+        // Helper: luôn quay về đúng area RealEstateAdmin
+        private IActionResult RedirectToFaqIndex()
+            => RedirectToAction("Index", "FAQ", new { area = "RealEstateAdmin" });
+
         // GET: RealEstateAdmin/FAQ
         public async Task<IActionResult> Index()
         {
@@ -21,7 +25,7 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 .OrderBy(f => f.SortOrder)
                 .ThenBy(f => f.FaqId)
                 .ToListAsync();
-            
+
             return View(faqs);
         }
 
@@ -40,27 +44,25 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             {
                 faq.CreatedAt = DateTime.UtcNow;
                 faq.UpdatedAt = DateTime.UtcNow;
+
                 _context.Add(faq);
                 await _context.SaveChangesAsync();
+
                 TempData["SuccessMessage"] = "Tạo câu hỏi thường gặp thành công!";
-                return RedirectToAction(nameof(Index));
+                return RedirectToFaqIndex();
             }
+
+            // Nếu bạn dùng trang Create riêng thì giữ return View(faq) là hợp lý
             return View(faq);
         }
 
         // GET: RealEstateAdmin/FAQ/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var faq = await _context.Faqs.FindAsync(id);
-            if (faq == null)
-            {
-                return NotFound();
-            }
+            if (faq == null) return NotFound();
 
             return View(faq);
         }
@@ -70,50 +72,45 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Faq faq)
         {
-            if (id != faq.FaqId)
-            {
-                return NotFound();
-            }
+            if (id != faq.FaqId) return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // Đảm bảo không đụng CreatedAt (nếu form không post field này)
+                    var existing = await _context.Faqs.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.FaqId == id);
+
+                    if (existing == null) return NotFound();
+
+                    faq.CreatedAt = existing.CreatedAt; // giữ nguyên
                     faq.UpdatedAt = DateTime.UtcNow;
+
                     _context.Update(faq);
                     await _context.SaveChangesAsync();
+
                     TempData["SuccessMessage"] = "Cập nhật câu hỏi thường gặp thành công!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!FAQExists(faq.FaqId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!FAQExists(faq.FaqId)) return NotFound();
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToFaqIndex();
             }
+
             return View(faq);
         }
 
         // GET: RealEstateAdmin/FAQ/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var faq = await _context.Faqs
-                .FirstOrDefaultAsync(m => m.FaqId == id);
-            if (faq == null)
-            {
-                return NotFound();
-            }
+            var faq = await _context.Faqs.FirstOrDefaultAsync(m => m.FaqId == id);
+            if (faq == null) return NotFound();
 
             return View(faq);
         }
@@ -130,22 +127,26 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Xóa câu hỏi thường gặp thành công!";
             }
+            else
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy câu hỏi để xóa!";
+            }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToFaqIndex();
         }
 
         // POST: RealEstateAdmin/FAQ/ToggleStatus/5
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(int id)
         {
             var faq = await _context.Faqs.FindAsync(id);
             if (faq == null)
-            {
                 return Json(new { success = false, message = "Không tìm thấy câu hỏi" });
-            }
 
             faq.IsActive = !faq.IsActive;
             faq.UpdatedAt = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, isActive = faq.IsActive });
@@ -157,4 +158,3 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         }
     }
 }
-

@@ -1,4 +1,6 @@
 ﻿@* Areas/RealEstateAdmin/Views/Blog/Create.cshtml *@
+@model HomeLengo.Models.Blog
+
 @{
     Layout = "~/Areas/RealEstateAdmin/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "Thêm bài viết";
@@ -12,8 +14,12 @@
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/dashboard">Home</a></li>
-                    <li class="breadcrumb-item"><a href="/RealEstateAdmin/blog">Blog</a></li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Dashboard" asp-action="Index">Home</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="RealEstateAdmin" asp-controller="Blog" asp-action="Index">Blog</a>
+                    </li>
                     <li class="breadcrumb-item active">Thêm bài viết</li>
                 </ol>
             </div>
@@ -23,113 +29,103 @@
 
 <section class="content">
     <div class="container-fluid">
-        <form>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Vui lòng kiểm tra lại dữ liệu.
+                <div asp-validation-summary="All" class="mt-2"></div>
+            </div>
+        }
+
+        <form asp-area="RealEstateAdmin"
+              asp-controller="Blog"
+              asp-action="Create"
+              method="post"
+              enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
             <div class="row">
                 <div class="col-md-8">
-                    <!-- Thông tin bài viết -->
+
+                    <!-- Nội dung -->
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Nội dung bài viết</h3>
                         </div>
+
                         <div class="card-body">
                             <div class="form-group">
                                 <label>Tiêu đề <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" placeholder="Nhập tiêu đề bài viết">
+                                <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bài viết">
+                                <span asp-validation-for="Title" class="text-danger"></span>
                             </div>
 
                             <div class="form-group">
                                 <label>Slug</label>
-                                <input type="text" class="form-control" placeholder="tieu-de-bai-viet">
+                                <input asp-for="Slug" class="form-control" placeholder="tieu-de-bai-viet" />
                                 <small class="text-muted">Tự động tạo từ tiêu đề nếu để trống</small>
                             </div>
 
                             <div class="form-group">
-                                <label>Mô tả ngắn</label>
-                                <textarea class="form-control" rows="3" placeholder="Mô tả ngắn gọn về bài viết (hiển thị ở danh sách)"></textarea>
-                            </div>
-
-                            <div class="form-group">
                                 <label>Nội dung <span class="text-danger">*</span></label>
-                                <textarea id="content" class="form-control" rows="15"></textarea>
+                                <textarea asp-for="Content" id="content" class="form-control" rows="15"></textarea>
+                                <span asp-validation-for="Content" class="text-danger"></span>
                                 <small class="text-muted">Sử dụng HTML hoặc editor WYSIWYG</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SEO -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-search"></i> SEO</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label>Meta Title</label>
-                                <input type="text" class="form-control" placeholder="Tiêu đề SEO (60-70 ký tự)">
-                                <small class="text-muted">Còn lại: <span id="metaTitleCount">70</span> ký tự</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Meta Description</label>
-                                <textarea class="form-control" rows="3" placeholder="Mô tả SEO (150-160 ký tự)"></textarea>
-                                <small class="text-muted">Còn lại: <span id="metaDescCount">160</span> ký tự</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Meta Keywords</label>
-                                <input type="text" class="form-control" placeholder="bất động sản, nhà đất, chung cư">
-                                <small class="text-muted">Các từ khóa cách nhau bởi dấu phẩy</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Canonical URL</label>
-                                <input type="text" class="form-control" placeholder="https://homelengo.vn/blog/bai-viet">
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="col-md-4">
+
                     <!-- Xuất bản -->
                     <div class="card">
                         <div class="card-header bg-primary">
                             <h3 class="card-title">Xuất bản</h3>
                         </div>
+
                         <div class="card-body">
                             <div class="form-group">
                                 <label>Trạng thái</label>
-                                <select class="form-control">
-                                    <option value="draft">Nháp</option>
-                                    <option value="published">Công khai</option>
-                                    <option value="scheduled">Lên lịch</option>
+
+                                @* IsPublished là bool? -> dùng asp-for để bind chắc chắn *@
+                                <select asp-for="IsPublished" class="form-control" id="publishStatus">
+                                    <option value="false">Nháp</option>
+                                    <option value="true">Công khai</option>
                                 </select>
+
+                                <small class="text-muted d-block mt-1">
+                                    Nếu chọn Công khai mà không nhập ngày xuất bản, hệ thống sẽ tự lấy thời gian hiện tại.
+                                </small>
                             </div>
 
                             <div class="form-group">
                                 <label>Ngày xuất bản</label>
-                                <input type="datetime-local" class="form-control">
+
+                                @* Bind đúng PublishedAt (datetime-local) *@
+                                <input asp-for="PublishedAt" type="datetime-local" class="form-control"
+                                       value="@(Model?.PublishedAt.HasValue == true ? Model.PublishedAt.Value.ToString("yyyy-MM-ddTHH:mm") : "")" />
+
+                                <span asp-validation-for="PublishedAt" class="text-danger"></span>
                             </div>
 
                             <div class="form-group">
                                 <label>Tác giả</label>
-                                <select class="form-control">
-                                    <option>Admin</option>
-                                    <option>Editor 1</option>
-                                    <option>Editor 2</option>
+                                <select asp-for="AuthorId" class="form-control" asp-items="ViewBag.Authors">
+                                    <option value="">-- Chọn tác giả --</option>
                                 </select>
+                                <span asp-validation-for="AuthorId" class="text-danger"></span>
                             </div>
 
-                            <hr>
+                            <hr />
 
                             <button type="submit" class="btn btn-success btn-block">
-                                <i class="fas fa-save"></i> Xuất bản
+                                <i class="fas fa-save"></i> Lưu
                             </button>
-                            <button type="button" class="btn btn-secondary btn-block">
-                                <i class="fas fa-file"></i> Lưu nháp
-                            </button>
-                            <button type="button" class="btn btn-info btn-block">
-                                <i class="fas fa-eye"></i> Xem trước
-                            </button>
-                            <a href="/RealEstateAdmin/blog" class="btn btn-warning btn-block">
+
+                            <a asp-area="RealEstateAdmin" asp-controller="Blog" asp-action="Index" class="btn btn-warning btn-block">
                                 <i class="fas fa-times"></i> Hủy
                             </a>
                         </div>
@@ -140,15 +136,13 @@
                         <div class="card-header">
                             <h3 class="card-title">Danh mục</h3>
                         </div>
+
                         <div class="card-body">
                             <div class="form-group">
-                                <select class="form-control">
-                                    <option>-- Chọn danh mục --</option>
-                                    <option>Tin thị trường</option>
-                                    <option>Kiến thức BĐS</option>
-                                    <option>Phong thủy</option>
-                                    <option>Pháp lý</option>
+                                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
+                                    <option value="">-- Chọn danh mục --</option>
                                 </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
@@ -158,59 +152,26 @@
                         <div class="card-header">
                             <h3 class="card-title">Ảnh đại diện</h3>
                         </div>
+
                         <div class="card-body">
                             <div class="form-group text-center">
-                                <img id="preview" src="https://via.placeholder.com/300x200?text=Upload+Image" class="img-fluid mb-2" style="max-height: 200px;">
-                                <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="featuredImage">
-                                    <label class="custom-file-label" for="featuredImage">Chọn ảnh...</label>
-                                </div>
-                                <small class="text-muted d-block mt-1">Khuyến nghị: 1200x800px</small>
+                                <img id="preview"
+                                     src="@(string.IsNullOrWhiteSpace(Model?.Thumbnail) ? "https://via.placeholder.com/300x200?text=Image" : Model!.Thumbnail)"
+                                     class="img-fluid mb-2"
+                                     style="max-height:200px;object-fit:cover;border:1px solid #ddd;border-radius:8px;"
+                                     onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=Image';" />
+
+                                <input asp-for="Thumbnail" class="form-control"
+                                       placeholder="VD: /uploads/blog/abc.jpg hoặc https://... hoặc blog-1.jpg" />
+                                <span asp-validation-for="Thumbnail" class="text-danger"></span>
+
+                                @* <small class="text-muted d-block mt-1">
+                                    Hiện tại đang lưu link/path vào Thumbnail. Nếu bạn muốn upload file ảnh trực tiếp, mình sẽ sửa controller để lưu vào wwwroot/uploads/blog.
+                                </small> *@
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tags -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Tags</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Thêm tag...">
-                                <small class="text-muted">Nhấn Enter để thêm tag</small>
-                            </div>
-                            <div id="tagContainer">
-                                <span class="badge badge-primary mr-1 mb-1">
-                                    Bất động sản <i class="fas fa-times ml-1" style="cursor: pointer;"></i>
-                                </span>
-                                <span class="badge badge-primary mr-1 mb-1">
-                                    Đầu tư <i class="fas fa-times ml-1" style="cursor: pointer;"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cấu hình khác -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Cấu hình</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="custom-control custom-checkbox mb-2">
-                                <input type="checkbox" class="custom-control-input" id="allowComments" checked>
-                                <label class="custom-control-label" for="allowComments">Cho phép bình luận</label>
-                            </div>
-                            <div class="custom-control custom-checkbox mb-2">
-                                <input type="checkbox" class="custom-control-input" id="featured">
-                                <label class="custom-control-label" for="featured">Bài viết nổi bật</label>
-                            </div>
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="pinTop">
-                                <label class="custom-control-label" for="pinTop">Ghim lên đầu</label>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </form>
@@ -218,26 +179,19 @@
 </section>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
     <script>
-        // Preview ảnh khi upload
-        $('#featuredImage').change(function() {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                $('#preview').attr('src', e.target.result);
-            }
-            reader.readAsDataURL(this.files[0]);
-        });
+        $(function () {
+            const $thumb = $('input[name="Thumbnail"]');
+            const $img = $('#preview');
 
-        // Đếm ký tự Meta Title
-        $('input[placeholder*="Tiêu đề SEO"]').on('input', function() {
-            var remaining = 70 - $(this).val().length;
-            $('#metaTitleCount').text(remaining);
-        });
-
-        // Đếm ký tự Meta Description
-        $('textarea[placeholder*="Mô tả SEO"]').on('input', function() {
-            var remaining = 160 - $(this).val().length;
-            $('#metaDescCount').text(remaining);
+            // update preview ngay khi nhập
+            $thumb.on('input', function () {
+                const v = $(this).val();
+                if (v && v.trim().length > 0) $img.attr('src', v.trim());
+                else $img.attr('src', 'https://via.placeholder.com/300x200?text=Image');
+            });
         });
     </script>
 }
