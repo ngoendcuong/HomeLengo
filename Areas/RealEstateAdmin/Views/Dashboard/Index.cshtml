@@ -58,15 +58,15 @@
             </div>
 
             <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning">
+                <div class="small-box bg-info">
                     <div class="inner">
-                        <h3 style="color: white;">@ViewBag.PendingProperties</h3>
-                        <p style="color: white;">Chờ duyệt</p>
+                        <h3>@ViewBag.TotalBlogs</h3>
+                        <p>Bài viết</p>
                     </div>
                     <div class="icon">
-                        <i class="fas fa-clock"></i>
+                        <i class="fas fa-newspaper"></i>
                     </div>
-                    <a href="/RealEstateAdmin/properties" class="small-box-footer">
+                    <a href="/RealEstateAdmin/blog" class="small-box-footer">
                         Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
                     </a>
                 </div>
@@ -167,87 +167,8 @@
                 </div>
             </div>
         </div>
-
-        <!-- Tables -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-warning">
-                        <h3 class="card-title">Tin chờ duyệt (5)</h3>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tiêu đề</th>
-                                    <th>Môi giới</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>145</td>
-                                    <td>Căn hộ Q7...</td>
-                                    <td>Agent A</td>
-                                    <td>
-                                        <button class="btn btn-xs btn-success"><i class="fas fa-check"></i></button>
-                                        <button class="btn btn-xs btn-danger"><i class="fas fa-times"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>146</td>
-                                    <td>Nhà phố Q2...</td>
-                                    <td>Agent B</td>
-                                    <td>
-                                        <button class="btn btn-xs btn-success"><i class="fas fa-check"></i></button>
-                                        <button class="btn btn-xs btn-danger"><i class="fas fa-times"></i></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success">
-                        <h3 class="card-title">Top 5 Môi giới hiệu quả</h3>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Môi giới</th>
-                                    <th>Tin đăng</th>
-                                    <th>Lượt xem</th>
-                                    <th>Rating</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Phạm Thị D</td>
-                                    <td>56</td>
-                                    <td>2,134</td>
-                                    <td><span class="badge badge-warning">4.9 ⭐</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Nguyễn Văn A</td>
-                                    <td>45</td>
-                                    <td>1,245</td>
-                                    <td><span class="badge badge-warning">4.8 ⭐</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
         </div>
-
-    </div>
-</section>
-
+</section>   
 @section Scripts {
     <script>
         // Revenue Chart
@@ -283,19 +204,21 @@
         });
 
         // Property Type Chart
+                // Property Type Chart
         const propertyTypeCtx = document.getElementById('propertyTypeChart').getContext('2d');
         new Chart(propertyTypeCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Chung cư', 'Nhà riêng', 'Đất nền', 'Biệt thự', 'Khác'],
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PropertyTypeLabels)),
                 datasets: [{
-                    data: [45, 25, 15, 10, 5],
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PropertyTypeData)),
                     backgroundColor: [
-                        'rgb(54, 162, 235)',
-                        'rgb(255, 99, 132)',
-                        'rgb(255, 205, 86)',
-                        'rgb(75, 192, 192)',
-                        'rgb(153, 102, 255)'
+                        '#3b82f6', // Căn hộ
+                        '#fb7185', // Nhà phố
+                        '#facc15', // Biệt thự
+                        '#2dd4bf', // Văn phòng
+                        '#a855f7', // Kinh doanh
+                        '#94a3b8'  // Chung cư
                     ]
                 }]
             },

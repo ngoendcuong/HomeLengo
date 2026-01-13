@@ -22,4 +22,5 @@ public partial class UserServicePackage
     public virtual ServicePlan Plan { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
+
 }
