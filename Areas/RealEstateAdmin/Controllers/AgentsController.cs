@@ -205,15 +205,51 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Lock(int id)
         {
-            var agent = await _context.Agents.FindAsync(id);
-            if (agent != null)
+            // Lấy agent + user
+            var agent = await _context.Agents
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.AgentId == id);
+
+            if (agent == null)
+                return NotFound();
+
+            if (agent.User != null)
             {
-                _context.Agents.Remove(agent);
-                await _context.SaveChangesAsync();
+                agent.User.IsActive = false; // 🔒 KHÓA MÔI GIỚI
             }
-            return RedirectToAction(nameof(Index));
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(
+                "Index",
+                "Agents",
+                new { area = "RealEstateAdmin" }
+            );
+        }
+        [HttpPost]
+        public async Task<IActionResult> Unlock(int id)
+        {
+            if (!IsAdmin())
+            {
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
+
+            var agent = await _context.Agents
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.AgentId == id);
+
+            if (agent == null || agent.User == null)
+            {
+                return NotFound();
+            }
+
+            agent.User.IsActive = true; // MỞ KHÓA
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Agents", new { area = "RealEstateAdmin" });
         }
     }
 }

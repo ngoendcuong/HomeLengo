@@ -129,21 +129,56 @@
                                         </div>
                                         <div class="col-4">
                                             <div class="description-block">
-                                                <span class="badge badge-success">@agent.Status</span>
+                                                    @if (agent.Status == "Active")
+                                                    {
+                                                        <span class="badge badge-success">Active</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-secondary">Inactive</span>
+                                                    }
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row mt-2">
                                         <div class="col-12">
                                             <div class="btn-group btn-block">
+
                                                 <a href="/RealEstateAdmin/agents/detail/@agent.Id" class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye"></i> Xem chi tiết
                                                 </a>
-                                                <form asp-action="Delete" asp-route-id="@agent.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa môi giới này?');">
-                                                    <button type="submit" class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-trash"></i> Xóa
-                                                    </button>
-                                                </form>
+
+                                                @if (agent.Status == "Active")
+                                                {
+                                                    <!-- KHÓA -->
+                                                    <form asp-area="RealEstateAdmin"
+                                                            asp-controller="Agents"
+                                                            asp-action="Lock"
+                                                            asp-route-id="@agent.Id"
+                                                            method="post"
+                                                            onsubmit="return confirm('Bạn có chắc chắn muốn khóa môi giới này?');">
+
+                                                        <button type="submit" class="btn btn-sm btn-warning">
+                                                            <i class="fas fa-lock"></i> Khóa
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <!-- MỞ KHÓA -->
+                                                    <form asp-area="RealEstateAdmin"
+                                                            asp-controller="Agents"
+                                                            asp-action="Unlock"
+                                                            asp-route-id="@agent.Id"
+                                                            method="post"
+                                                            onsubmit="return confirm('Bạn có chắc chắn muốn mở khóa môi giới này?');">
+
+                                                        <button type="submit" class="btn btn-sm btn-success">
+                                                            <i class="fas fa-unlock"></i> Mở khóa
+                                                        </button>
+                                                    </form>
+                                                }
+
                                             </div>
                                         </div>
                                     </div>
