@@ -171,7 +171,10 @@
                 @if (isAdmin || isModerator)
                 {
                     <li class="nav-item">
-                        <a href="/RealEstateAdmin/reviews" class="nav-link">
+                        <a asp-area="RealEstateAdmin"
+                           asp-controller="Reviews"
+                           asp-action="Index"
+                           class="nav-link">
                             <i class="nav-icon fas fa-star"></i>
                             <p>Đánh giá - Bình luận</p>
                         </a>

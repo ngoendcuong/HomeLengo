@@ -32,9 +32,14 @@ builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 
+
 // 3. Đăng ký các Service ta vừa viết
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IGeminiService, GeminiService>();
+//builder.Services.AddScoped<IGeminiService, GeminiService>();
+builder.Services.AddHttpClient<IGeminiService, GeminiService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 builder.Services.AddScoped<VNPayService>();
 builder.Services.AddScoped<ServicePackageService>();
 builder.Services.AddScoped<PackageExpirationService>();

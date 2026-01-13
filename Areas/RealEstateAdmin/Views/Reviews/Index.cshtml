@@ -36,18 +36,18 @@
             </div>
             <div class="col-md-3">
                 <div class="info-box bg-success">
-                    <span class="info-box-icon"><i class="fas fa-check"></i></span>
+                    <span class="info-box-icon"><i class="fas fa-eye"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Đã duyệt</span>
+                        <span class="info-box-text">Hiển thị</span>
                         <span class="info-box-number">@ViewBag.ApprovedReviews</span>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="info-box bg-warning">
-                    <span class="info-box-icon"><i class="fas fa-clock"></i></span>
+                <div class="info-box bg-secondary">
+                    <span class="info-box-icon"><i class="fas fa-eye-slash"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Chờ duyệt</span>
+                        <span class="info-box-text">Đã ẩn</span>
                         <span class="info-box-number">@ViewBag.PendingReviews</span>
                     </div>
                 </div>
@@ -79,6 +79,16 @@
                     </div>
                 }
 
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                }
+
                 <!-- Filter -->
                 <form method="get" action="/RealEstateAdmin/Reviews" id="filterForm">
                     <div class="row mb-3">
@@ -88,8 +98,8 @@
                         <div class="col-md-2">
                             <select name="status" class="form-control" onchange="document.getElementById('filterForm').submit();">
                                 <option value="">Tất cả trạng thái</option>
-                                <option value="approved" selected="@(ViewBag.Status == "approved")">Đã duyệt</option>
-                                <option value="pending" selected="@(ViewBag.Status == "pending")">Chờ duyệt</option>
+                                <option value="approved" selected="@(ViewBag.Status == "approved")">Hiển thị</option>
+                                <option value="pending" selected="@(ViewBag.Status == "pending")">Đã ẩn</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -135,6 +145,7 @@
                         <tbody>
                             @foreach (var review in Model)
                             {
+                                var isVisible = (review.Status == "Đã duyệt"); // đang hiển thị
                                 <tr>
                                     <td>
                                         <div class="custom-control custom-checkbox">
@@ -176,13 +187,9 @@
                                         <p class="mb-0" style="font-size: 13px;">@review.Comment</p>
                                     </td>
                                     <td>
-                                        @if (review.Status == "Đã duyệt")
+                                        @if (isVisible)
                                         {
-                                            <span class="badge badge-success">Đã duyệt</span>
-                                        }
-                                        else if (review.Status == "Chờ duyệt")
-                                        {
-                                            <span class="badge badge-warning">Chờ duyệt</span>
+                                            <span class="badge badge-success">Hiển thị</span>
                                         }
                                         else
                                         {
@@ -190,29 +197,35 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (review.Status == "Chờ duyệt")
+                                        @if (review.Status == "Đã duyệt")
                                         {
-                                            <form asp-action="Approve" asp-route-id="@review.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn duyệt đánh giá này?');">
-                                                <button type="submit" class="btn btn-sm btn-success btn-block mb-1" title="Duyệt">
-                                                    <i class="fas fa-check"></i> Duyệt
-                                                </button>
-                                            </form>
-                                            <form asp-action="Reject" asp-route-id="@review.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn từ chối đánh giá này?');">
-                                                <button type="submit" class="btn btn-sm btn-danger btn-block" title="Từ chối">
-                                                    <i class="fas fa-times"></i> Từ chối
+                                            <!-- Đang hiển thị -> Ẩn -->
+                                            <form asp-area="RealEstateAdmin"
+                                                  asp-controller="Reviews"
+                                                  asp-action="Hide"
+                                                  method="post"
+                                                  style="display:inline;"
+                                                  onsubmit="return confirm('Bạn có chắc chắn muốn ẩn đánh giá này?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@review.Id" />
+                                                <button type="submit" class="btn btn-sm btn-secondary btn-block" title="Ẩn">
+                                                    <i class="fas fa-eye-slash"></i> Ẩn
                                                 </button>
                                             </form>
                                         }
                                         else
                                         {
-                                            <form asp-action="Reject" asp-route-id="@review.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn ẩn đánh giá này?');">
-                                                <button type="submit" class="btn btn-sm btn-secondary btn-block mb-1" title="Ẩn">
-                                                    <i class="fas fa-eye-slash"></i> Ẩn
-                                                </button>
-                                            </form>
-                                            <form asp-action="Delete" asp-route-id="@review.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');">
-                                                <button type="submit" class="btn btn-sm btn-danger btn-block" title="Xóa">
-                                                    <i class="fas fa-trash"></i> Xóa
+                                            <!-- Đang ẩn -> Hiện -->
+                                            <form asp-area="RealEstateAdmin"
+                                                  asp-controller="Reviews"
+                                                  asp-action="Show"
+                                                  method="post"
+                                                  style="display:inline;"
+                                                  onsubmit="return confirm('Bạn có chắc chắn muốn hiển thị đánh giá này?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@review.Id" />
+                                                <button type="submit" class="btn btn-sm btn-success btn-block" title="Hiện">
+                                                    <i class="fas fa-eye"></i> Hiện
                                                 </button>
                                             </form>
                                         }
@@ -223,22 +236,9 @@
                     </table>
                 </div>
 
-                <!-- Bulk Actions -->
+                <!-- Pagination (UI demo) -->
                 <div class="row mt-3">
-                    <div class="col-md-6">
-                        <div class="btn-group">
-                            <button class="btn btn-success">
-                                <i class="fas fa-check"></i> Duyệt đã chọn
-                            </button>
-                            <button class="btn btn-secondary">
-                                <i class="fas fa-eye-slash"></i> Ẩn đã chọn
-                            </button>
-                            <button class="btn btn-danger">
-                                <i class="fas fa-trash"></i> Xóa đã chọn
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <ul class="pagination pagination-sm float-right">
                             <li class="page-item"><a class="page-link" href="#">«</a></li>
                             <li class="page-item active"><a class="page-link" href="#">1</a></li>
@@ -256,7 +256,7 @@
 @section Scripts {
     <script>
         // Check all
-        $('#checkAll').change(function() {
+        $('#checkAll').change(function () {
             $('input[type="checkbox"]').prop('checked', $(this).prop('checked'));
         });
     </script>

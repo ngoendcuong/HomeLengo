@@ -26,14 +26,14 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             // Tìm kiếm
             if (!string.IsNullOrEmpty(searchString))
             {
-                query = query.Where(r => 
+                query = query.Where(r =>
                     (r.User != null && ((r.User.FullName != null && r.User.FullName.Contains(searchString)) ||
                                        (r.User.Username != null && r.User.Username.Contains(searchString)))) ||
                     (r.Property != null && r.Property.Title != null && r.Property.Title.Contains(searchString)) ||
                     (r.Body != null && r.Body.Contains(searchString)));
             }
 
-            // Filter theo trạng thái
+            // Filter theo trạng thái (approved = hiển thị, pending = đã ẩn)
             if (!string.IsNullOrEmpty(status))
             {
                 if (status == "approved")
@@ -52,8 +52,12 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                 query = query.Where(r => r.Rating == rating.Value);
             }
 
-            var reviews = await query.ToListAsync();
-            
+            // ✅ sắp xếp theo DateTime trước (đừng sort string)
+            var reviews = await query
+                .OrderByDescending(r => r.CreatedAt ?? DateTime.MinValue)
+                .ThenByDescending(r => r.ReviewId)
+                .ToListAsync();
+
             var reviewsList = reviews
                 .Select(r => new
                 {
@@ -66,25 +70,24 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
                         : "N/A",
                     Rating = (int)r.Rating,
                     Comment = r.Body ?? "",
-                    Status = r.IsApproved == true ? "Đã duyệt" : "Chờ duyệt",
+                    Status = r.IsApproved == true ? "Đã duyệt" : "Đã ẩn",
                     CreatedDate = r.CreatedAt.HasValue
                         ? r.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm")
                         : ""
                 })
-                .OrderByDescending(r => r.CreatedDate)
                 .ToList();
 
             // Thống kê
             var totalReviews = await _context.Reviews.CountAsync();
             var approvedReviews = await _context.Reviews.CountAsync(r => r.IsApproved == true);
-            var pendingReviews = await _context.Reviews.CountAsync(r => r.IsApproved != true);
+            var hiddenReviews = await _context.Reviews.CountAsync(r => r.IsApproved != true);
             var avgRating = await _context.Reviews
                 .Where(r => r.IsApproved == true)
                 .AverageAsync(r => (double?)r.Rating) ?? 0.0;
 
             ViewBag.TotalReviews = totalReviews;
             ViewBag.ApprovedReviews = approvedReviews;
-            ViewBag.PendingReviews = pendingReviews;
+            ViewBag.PendingReviews = hiddenReviews; // dùng lại biến cũ cho view
             ViewBag.AvgRating = Math.Round(avgRating, 1);
             ViewBag.SearchString = searchString;
             ViewBag.Status = status;
@@ -93,43 +96,42 @@ namespace HomeLengo.Areas.RealEstateAdmin.Controllers
             return View(reviewsList);
         }
 
+        // HIỆN: IsApproved = true
         [HttpPost]
-        public async Task<IActionResult> Approve(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Show(int id)
         {
-            var review = await _context.Reviews.FindAsync(id);
-            if (review != null)
+            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == id);
+            if (review == null)
             {
-                review.IsApproved = true;
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Đã duyệt đánh giá thành công!";
+                TempData["ErrorMessage"] = "Không tìm thấy đánh giá!";
+                return Redirect("/RealEstateAdmin/Reviews");
             }
-            return RedirectToAction(nameof(Index));
+
+            review.IsApproved = true;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đã hiển thị đánh giá!";
+            return Redirect("/RealEstateAdmin/Reviews");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Reject(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Hide(int id)
         {
-            var review = await _context.Reviews.FindAsync(id);
-            if (review != null)
+            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == id);
+            if (review == null)
             {
-                review.IsApproved = false;
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Đã từ chối đánh giá!";
+                TempData["ErrorMessage"] = "Không tìm thấy đánh giá!";
+                return Redirect("/RealEstateAdmin/Reviews");
             }
-            return RedirectToAction(nameof(Index));
+
+            review.IsApproved = false;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Đã ẩn đánh giá!";
+            return Redirect("/RealEstateAdmin/Reviews");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var review = await _context.Reviews.FindAsync(id);
-            if (review != null)
-            {
-                _context.Reviews.Remove(review);
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Đã xóa đánh giá thành công!";
-            }
-            return RedirectToAction(nameof(Index));
-        }
     }
 }

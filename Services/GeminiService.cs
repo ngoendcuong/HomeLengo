@@ -33,15 +33,15 @@ public class GeminiService : IGeminiService
         if (string.IsNullOrWhiteSpace(userQuestion))
             return "Bạn muốn hỏi gì về bất động sản hoặc tính năng của HomeLengo?";
 
-        // ✅ Thời gian hiện tại (server) để trả lời đúng các câu hỏi cơ bản
-        // Nếu server chạy VN thì DateTime.Now ok. Nếu deploy khác timezone, bạn nên set timezone rõ.
         var now = DateTime.Now;
         var nowText = now.ToString("HH:mm:ss dd/MM/yyyy", CultureInfo.GetCultureInfo("vi-VN"));
 
-        // Lấy dữ liệu liên quan từ DB
-        // (Nếu câu hỏi không liên quan BĐS, service này có thể trả rỗng/nhẹ -> ok)
-        var dbContextJson = await _productService.GetRelevantProductsAsText(userQuestion);
-        dbContextJson = (dbContextJson ?? "").Trim();
+        var dbContextText = await _productService.GetRelevantProductsAsText(userQuestion);
+        dbContextText = (dbContextText ?? "").Trim();
+        if (dbContextText == "__NO_DATA__")
+        {
+            return "Hiện tại HomeLengo chưa có bất động sản phù hợp với tiêu chí bạn vừa tìm. Bạn có thể thử thay đổi mức giá hoặc loại hình khác nhé.";
+        }
 
         // ✅ Tách SYSTEM INSTRUCTION riêng, không nhét chung vào "prompt user"
         var systemInstruction = @"
@@ -54,13 +54,11 @@ QUY TẮC CHỐNG SAI:
 4) Không nhắc đến 'JSON', 'database', 'prompt', 'system'. Chỉ trả lời như một trợ lý trên website.
 ";
 
-        // ✅ User message gọn: gồm thời gian + dữ liệu + câu hỏi
-        // Mẹo: đánh nhãn rõ ràng giúp model bám đúng nguồn
         var userContent = $@"
 THỜI GIAN HIỆN TẠI (theo hệ thống): {nowText}
 
 DỮ LIỆU BẤT ĐỘNG SẢN (chỉ dùng khi câu hỏi liên quan BĐS):
-{(string.IsNullOrWhiteSpace(dbContextJson) ? "(không có dữ liệu phù hợp cho câu hỏi này)" : dbContextJson)}
+{(string.IsNullOrWhiteSpace(dbContextText) ? "(không có dữ liệu phù hợp cho câu hỏi này)" : dbContextText)}
 
 CÂU HỎI NGƯỜI DÙNG:
 {userQuestion}
@@ -99,8 +97,32 @@ CÂU HỎI NGƯỜI DÙNG:
         var json = JsonSerializer.Serialize(requestBody);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        using var response = await _httpClient.PostAsync(url, content);
-        var raw = await response.Content.ReadAsStringAsync();
+        HttpResponseMessage response;
+        string raw;
+
+        try
+        {
+            response = await _httpClient.PostAsync(url, content);
+            raw = await response.Content.ReadAsStringAsync();
+        }
+        catch (TaskCanceledException)
+        {
+            return "Kết nối tới Gemini bị timeout. Bạn thử lại sau vài giây nhé.";
+        }
+        catch (HttpRequestException ex)
+        {
+            // Lỗi mạng/SSL/DNS...
+            Console.WriteLine("=== Gemini HTTP ERROR ===");
+            Console.WriteLine(ex.ToString());
+            return "Không kết nối được tới Gemini (lỗi mạng/SSL). Bạn kiểm tra Internet/Firewall hoặc thử lại.";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("=== Gemini UNKNOWN ERROR ===");
+            Console.WriteLine(ex.ToString());
+            return "Có lỗi khi gọi Gemini. Bạn thử lại sau.";
+        }
+
 
         if (!response.IsSuccessStatusCode)
         {
@@ -136,8 +158,13 @@ CÂU HỎI NGƯỜI DÙNG:
                 }
             }
 
-            // các lỗi khác
-            return $"Lỗi Gemini: {response.StatusCode}.";
+            // các lỗi khác: trả thêm raw để biết lý do
+#if DEBUG
+            return $"Lỗi Gemini: {(int)response.StatusCode} {response.StatusCode}\n{raw}";
+#else
+return $"Lỗi Gemini: {response.StatusCode}.";
+#endif
+
         }
 
         try
